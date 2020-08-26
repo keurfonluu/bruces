@@ -1,5 +1,7 @@
 import numpy
 
+from numba import prange
+
 from .._common import jitted, proximity
 from .._catalog import Catalog
 from .._helpers import register
@@ -36,19 +38,19 @@ def declusterize(catalog, d=1.5, w=0.0, eta_0=0.1, alpha_0=0.1, M=100):
     )
 
 
-@jitted
+@jitted(parallel=True)
 def _step1(t, x, y, m, d, w):
     """Calculate nearest-neighbor proximity for each event."""
     N = len(t)
 
     eta = numpy.empty(N, dtype=numpy.float64)
-    for i in range(N):
+    for i in prange(N):
         eta[i] = proximity(t, x, y, m, t[i], x[i], y[i], d, w)
 
     return eta
 
 
-@jitted
+@jitted(parallel=True)
 def _step2(t, x, y, m, eta, d, w, eta_0, M):
     """Calculate proximity vector for each event."""
     N = len(t)
@@ -83,20 +85,20 @@ def _step2(t, x, y, m, eta, d, w, eta_0, M):
         mm[:] = m[numpy.random.permutation(N0)]
 
         # Calculate proximity vectors with respect to randomized catalog
-        for i in range(N):
+        for i in prange(N):
             kappa[i, k] = proximity(tm, xm, ym, mm, t[i], x[i], y[i], d, w)
 
     return kappa
 
 
-@jitted
+@jitted(parallel=True)
 def _step3(eta, kappa):
     """Calculate normalized nearest-neighbor proximity for each event."""
     N = len(kappa)
     M = len(kappa[0, :])
     
     alpha = numpy.empty(N, dtype=numpy.float64)
-    for i in range(N):
+    for i in prange(N):
         # Remove events without earlier events
         logk_sum = 0.0
         count = 0
