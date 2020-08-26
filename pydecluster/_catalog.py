@@ -1,5 +1,7 @@
 import numpy
 
+from ._helpers import declusterize
+
 __all__ = [
     "Catalog",
 ]
@@ -13,8 +15,8 @@ class Catalog:
         self._depths = depths
         self._magnitudes = magnitudes
 
-    def declusterize(self):
-        raise NotImplementedError()
+    def declusterize(self, algorithm="nearest-neighbor", **kwargs):
+        return declusterize(self, algorithm, **kwargs)
 
     @property
     def times(self):
