@@ -5,24 +5,24 @@ from .._catalog import Catalog
 from .._helpers import register
 
 
-def declusterize(catalog, d, w, eta_0, alpha_0, M):
+def declusterize(catalog, d=1.5, w=0.0, eta_0=0.1, alpha_0=0.1, M=100):
     t = catalog.times
     x = catalog.eastings
     y = catalog.northings
     z = catalog.depths
     m = catalog.magnitudes
-    N = len(t)
 
     # Calculate nearest-neighbor proximities
-    eta = _step1(t, x, y, m)
+    eta = _step1(t, x, y, m, d, w)
 
     # Calculate proximity vectors
-    kappa = _step2(t, x, y, m, eta, eta_0, M)
+    kappa = _step2(t, x, y, m, eta, d, w, eta_0, M)
 
     # Calculate normalized nearest-neighbor proximities
     alpha = _step3(eta, kappa)
 
     # Calculate retention probabilities and identify background events
+    N = len(t)
     P = alpha * 10.0 ** alpha_0
     U = P > numpy.random.rand(N)
     bg = numpy.nonzero(U)[0]
@@ -37,19 +37,19 @@ def declusterize(catalog, d, w, eta_0, alpha_0, M):
 
 
 @jitted
-def _step1(t, x, y, m):
+def _step1(t, x, y, m, d, w):
     """Calculate nearest-neighbor proximity for each event."""
     N = len(t)
 
     eta = numpy.empty(N, dtype=numpy.float64)
     for i in range(N):
-        eta[i] = proximity(t, x, y, m, t[i], x[i], y[i])
+        eta[i] = proximity(t, x, y, m, t[i], x[i], y[i], d, w)
 
     return eta
 
 
 @jitted
-def _step2(t, x, y, m, eta, eta_0, M):
+def _step2(t, x, y, m, eta, d, w, eta_0, M):
     """Calculate proximity vector for each event."""
     N = len(t)
 
@@ -73,7 +73,7 @@ def _step2(t, x, y, m, eta, eta_0, M):
             j += 1
 
     # Loop over catalog
-    kappa = numpy.empty((M, N), dtype=numpy.float64)
+    kappa = numpy.empty((N, M), dtype=numpy.float64)
 
     tmin = t.min()
     tmax = t.max()
@@ -84,7 +84,7 @@ def _step2(t, x, y, m, eta, eta_0, M):
 
         # Calculate proximity vectors with respect to randomized catalog
         for i in range(N):
-            kappa[k, i] = proximity(tm, xm, ym, mm, t[i], x[i], y[i])
+            kappa[i, k] = proximity(tm, xm, ym, mm, t[i], x[i], y[i], d, w)
 
     return kappa
 
@@ -92,18 +92,25 @@ def _step2(t, x, y, m, eta, eta_0, M):
 @jitted
 def _step3(eta, kappa):
     """Calculate normalized nearest-neighbor proximity for each event."""
-    N = len(eta)
+    N = len(kappa)
+    M = len(kappa[0, :])
     
     alpha = numpy.empty(N, dtype=numpy.float64)
     for i in range(N):
         # Remove events without earlier events
-        k = kappa[[kappa[:, i] < 1.0e20], i]
+        logk_sum = 0.0
+        count = 0
+        for j in range(M):
+            k = kappa[i, j]
+            if k < 1.0e20:
+                logk_sum += numpy.log10(k)
+                count += 1
 
         # First event has no earlier event
-        if k.size == 0:
+        if count == 0:
             alpha[i] = 0.0
         else:
-            alpha[i] = eta[i] * 10.0 ** (-numpy.log10(k).mean())
+            alpha[i] = eta[i] * 10.0 ** (-logk_sum / count)
 
     return alpha
 
