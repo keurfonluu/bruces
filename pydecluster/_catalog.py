@@ -15,12 +15,12 @@ def is_arraylike(arr, size):
 
 
 class Catalog:
-    def __init__(self, times, eastings, northings, depths, magnitudes):
-        if not isinstance(times, (list, tuple)):
+    def __init__(self, dates, eastings, northings, depths, magnitudes):
+        if not isinstance(dates, (list, tuple)):
             raise TypeError()
-        if any(not isinstance(time, datetime) for time in times):
+        if any(not isinstance(time, datetime) for time in dates):
             raise TypeError()
-        nev = len(times)
+        nev = len(dates)
 
         for arr in (eastings, northings, depths, magnitudes):
             if not is_arraylike(arr, nev):
@@ -28,7 +28,7 @@ class Catalog:
             if len(arr) != nev:
                 raise ValueError()
 
-        self._times = times
+        self._dates = dates
         self._eastings = eastings
         self._northings = northings
         self._depths = depths
@@ -38,8 +38,8 @@ class Catalog:
         return declusterize(self, algorithm, **kwargs)
 
     @property
-    def times(self):
-        return self._times
+    def dates(self):
+        return self._dates
 
     @property
     def eastings(self):
