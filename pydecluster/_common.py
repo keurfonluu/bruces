@@ -39,7 +39,7 @@ def proximity(t, x, y, m, ti, xi, yi, d=1.5, w=0.0):
 
             # Skip events with the same epicenter
             if r_ij > 0.0:
-                eta_ij = -t_ij * (r_ij * 1.0e-3) ** d
+                eta_ij = -t_ij * r_ij ** d
                 if w > 0.0:
                     eta_ij *= 10.0 ** (-w * m[j])
                 eta_i = min(eta_i, eta_ij)
