@@ -1,5 +1,5 @@
-from ._nearest_neighbor import declusterize
+from ._nearest_neighbor import decluster
 
 __all__ = [
-    "declusterize",
+    "decluster",
 ]

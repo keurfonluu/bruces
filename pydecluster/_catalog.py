@@ -2,7 +2,7 @@ from datetime import datetime
 
 import numpy
 
-from ._helpers import declusterize
+from ._helpers import decluster
 
 __all__ = [
     "Catalog",
@@ -51,9 +51,9 @@ class Catalog:
         self._depths = depths
         self._magnitudes = magnitudes
 
-    def declusterize(self, algorithm="nearest-neighbor", **kwargs):
+    def decluster(self, algorithm="nearest-neighbor", **kwargs):
         """
-        Declusterize earthquake catalog.
+        Decluster earthquake catalog.
 
         Parameters
         ----------
@@ -80,7 +80,7 @@ class Catalog:
             Declustered earthquake catalog.
 
         """
-        return declusterize(self, algorithm, **kwargs)
+        return decluster(self, algorithm, **kwargs)
 
     @property
     def dates(self):

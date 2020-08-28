@@ -3,7 +3,7 @@ from datetime import datetime
 import numpy
 
 __all__ = [
-    "declusterize",
+    "decluster",
     "to_decimal_year",
 ]
 
@@ -11,14 +11,14 @@ __all__ = [
 _decluster_map = {}
 
 
-def register(algorithm, declusterize):
+def register(algorithm, decluster):
     """Register a new declustering algorithm."""
-    _decluster_map[algorithm] = declusterize
+    _decluster_map[algorithm] = decluster
 
 
-def declusterize(catalog, algorithm="nearest-neighbor", **kwargs):
+def decluster(catalog, algorithm="nearest-neighbor", **kwargs):
     """
-    Declusterize earthquake catalog.
+    Decluster earthquake catalog.
 
     Parameters
     ----------
