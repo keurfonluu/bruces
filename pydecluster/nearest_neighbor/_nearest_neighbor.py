@@ -48,9 +48,8 @@ def decluster(catalog, d=1.5, w=0.0, eta_0=0.1, alpha_0=0.1, M=100):
     alpha = _step3(eta, kappa)
 
     # Calculate retention probabilities and identify background events
-    N = len(t)
     P = alpha * 10.0 ** alpha_0
-    U = P > numpy.random.rand(N)
+    U = P > numpy.random.rand(len(catalog))
     bg = numpy.nonzero(U)[0]
 
     return Catalog(

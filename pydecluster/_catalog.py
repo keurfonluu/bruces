@@ -51,6 +51,10 @@ class Catalog:
         self._depths = depths
         self._magnitudes = magnitudes
 
+    def __len__(self):
+        """Return number of earthquakes in catalog."""
+        return len(self._dates)
+
     def decluster(self, algorithm="nearest-neighbor", **kwargs):
         """
         Decluster earthquake catalog.
