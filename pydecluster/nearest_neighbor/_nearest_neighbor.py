@@ -8,6 +8,30 @@ from .._helpers import register, to_decimal_year
 
 
 def declusterize(catalog, d=1.5, w=0.0, eta_0=0.1, alpha_0=0.1, M=100):
+    """
+    Declusterize earthquake catalog (after Zaliapin and Ben-Zion, 2020).
+
+    Parameters
+    ----------
+    catalog : pydecluster.Catalog
+        Earthquake catalog.
+    d : scalar, optional, default 1.5
+        Fractal dimension of epicenter/hypocenter.
+    w : scalar, optional, default 0.0
+        Magnitude weighing factor (usually b-value).
+    eta_0 : scalar, optional, default 0.1
+        Initial cutoff threshold.
+    alpha_0 : scalar, optional, default 0.1
+        Cluster threshold.
+    M : int, optional, default 100
+        Number of reshufflings.
+
+    Returns
+    -------
+    pydecluster.Catalog
+        Declustered earthquake catalog.
+
+    """
     t = to_decimal_year(catalog.dates)  # Dates in years
     x = catalog.eastings
     y = catalog.northings

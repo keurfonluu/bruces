@@ -17,6 +17,36 @@ def register(algorithm, declusterize):
 
 
 def declusterize(catalog, algorithm="nearest-neighbor", **kwargs):
+    """
+    Declusterize earthquake catalog.
+
+    Parameters
+    ----------
+    catalog : pydecluster.Catalog
+        Earthquake catalog.
+    algorithm : str, optional, default 'nearest-neighbor'
+        Declustering algorithm:
+         - 'nearest-neighbor': nearest-neighbor algorithm (after Zaliapin and Ben-Zion, 2020).
+    
+    Other Parameters
+    ----------------
+    d : scalar, optional, default 1.5
+        Only if ``algorithm = "nearest-neighbor"``. Fractal dimension of epicenter/hypocenter.
+    w : scalar, optional, default 0.0
+        Only if ``algorithm = "nearest-neighbor"``. Magnitude weighing factor (usually b-value).
+    eta_0 : scalar, optional, default 0.1
+        Only if ``algorithm = "nearest-neighbor"``. Initial cutoff threshold.
+    alpha_0 : scalar, optional, default 0.1
+        Only if ``algorithm = "nearest-neighbor"``. Cluster threshold.
+    M : int, optional, default 100
+        Only if ``algorithm = "nearest-neighbor"``. Number of reshufflings.
+
+    Returns
+    -------
+    pydecluster.Catalog
+        Declustered earthquake catalog.
+
+    """
     return _decluster_map[algorithm](catalog, **kwargs)
 
 

@@ -16,6 +16,23 @@ def is_arraylike(arr, size):
 
 class Catalog:
     def __init__(self, dates, eastings, northings, depths, magnitudes):
+        """
+        Earthquake catalog.
+
+        Parameters
+        ----------
+        dates : list of datetime.datetime
+            Origin times.
+        eastings : array_like
+            Easting coordinates (in km).
+        northings : array_like
+            Northing coordinates (in km).
+        depths : array_like
+            Depths (in km).
+        magnitudes : array_like
+            Magnitudes.
+        
+        """
         if not isinstance(dates, (list, tuple)):
             raise TypeError()
         if any(not isinstance(time, datetime) for time in dates):
@@ -35,24 +52,57 @@ class Catalog:
         self._magnitudes = magnitudes
 
     def declusterize(self, algorithm="nearest-neighbor", **kwargs):
+        """
+        Declusterize earthquake catalog.
+
+        Parameters
+        ----------
+        algorithm : str, optional, default 'nearest-neighbor'
+            Declustering algorithm:
+            - 'nearest-neighbor': nearest-neighbor algorithm (after Zaliapin and Ben-Zion, 2020).
+        
+        Other Parameters
+        ----------------
+        d : scalar, optional, default 1.5
+            Only if ``algorithm = "nearest-neighbor"``. Fractal dimension of epicenter/hypocenter.
+        w : scalar, optional, default 0.0
+            Only if ``algorithm = "nearest-neighbor"``. Magnitude weighing factor (usually b-value).
+        eta_0 : scalar, optional, default 0.1
+            Only if ``algorithm = "nearest-neighbor"``. Initial cutoff threshold.
+        alpha_0 : scalar, optional, default 0.1
+            Only if ``algorithm = "nearest-neighbor"``. Cluster threshold.
+        M : int, optional, default 100
+            Only if ``algorithm = "nearest-neighbor"``. Number of reshufflings.
+
+        Returns
+        -------
+        pydecluster.Catalog
+            Declustered earthquake catalog.
+
+        """
         return declusterize(self, algorithm, **kwargs)
 
     @property
     def dates(self):
+        """Return origin times."""
         return self._dates
 
     @property
     def eastings(self):
+        """Return easting coordinates."""
         return self._eastings
 
     @property
     def northings(self):
+        """Return northing coordinates."""
         return self._northings
 
     @property
     def depths(self):
+        """Return depths."""
         return self._depths
 
     @property
     def magnitudes(self):
+        """Return magnitudes."""
         return self._magnitudes
