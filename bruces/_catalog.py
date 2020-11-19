@@ -2,7 +2,7 @@ from datetime import datetime
 
 import numpy
 
-from ._helpers import decluster
+from ._decluster import decluster
 
 __all__ = [
     "Catalog",

@@ -2,9 +2,10 @@ import numpy
 
 from numba import prange
 
-from .._common import jitted, proximity
-from .._catalog import Catalog
-from .._helpers import register, to_decimal_year
+from .._helpers import register
+from ..._common import jitted, proximity
+from ..._catalog import Catalog
+from ..._helpers import to_decimal_year
 
 
 def decluster(catalog, d=1.5, w=0.0, eta_0=0.1, alpha_0=0.1, M=100):
