@@ -1,3 +1,4 @@
+from collections import namedtuple
 from datetime import datetime
 
 import numpy
@@ -9,6 +10,9 @@ from ._helpers import to_decimal_year
 __all__ = [
     "Catalog",
 ]
+
+
+Earthquake = namedtuple("Earthquake", ["date", "easting", "northing", "depth", "magnitude"])
 
 
 def is_arraylike(arr, size):
@@ -56,6 +60,29 @@ class Catalog:
     def __len__(self):
         """Return number of earthquakes in catalog."""
         return len(self._dates)
+
+    def __iter__(self):
+        """Iterate over earthquake in catalog as namedtuples."""
+        self._it = 0
+
+        return self
+
+    def __next__(self):
+        """Return next earthquake in catalog."""
+        if self._it < len(self):
+            eq = Earthquake(
+                self.dates[self._it],
+                self.eastings[self._it],
+                self.northings[self._it],
+                self.depths[self._it],
+                self.magnitudes[self._it],
+            )
+            self._it += 1
+
+            return eq
+        
+        else:
+            raise StopIteration
 
     def decluster(self, algorithm="nearest-neighbor", **kwargs):
         """
