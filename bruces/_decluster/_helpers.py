@@ -40,7 +40,7 @@ def decluster(catalog, algorithm="nearest-neighbor", **kwargs):
 
     Returns
     -------
-    pydecluster.Catalog
+    :class:`pydecluster.Catalog`
         Declustered earthquake catalog.
 
     """

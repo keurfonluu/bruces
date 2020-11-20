@@ -3,8 +3,7 @@ import numpy
 from numba import prange
 
 from .._helpers import register
-from ..._common import jitted, proximity
-from ..._catalog import Catalog
+from ..._common import jitted, rescaled_time_distance
 from ..._helpers import to_decimal_year
 
 
@@ -29,10 +28,12 @@ def decluster(catalog, d=1.5, w=0.0, eta_0=0.1, alpha_0=0.1, M=100):
 
     Returns
     -------
-    pydecluster.Catalog
+    :class:`pydecluster.Catalog`
         Declustered earthquake catalog.
 
     """
+    from ..._catalog import Catalog
+
     t = to_decimal_year(catalog.dates)  # Dates in years
     x = catalog.eastings
     y = catalog.northings
@@ -60,6 +61,14 @@ def decluster(catalog, d=1.5, w=0.0, eta_0=0.1, alpha_0=0.1, M=100):
         depths=z[bg],
         magnitudes=m[bg],
     )
+
+
+@jitted
+def proximity(t, x, y, m, ti, xi, yi, d, w):
+    """Calculate nearest-neighbor proximity."""
+    T, R = rescaled_time_distance(t, x, y, m, ti, xi, yi, d, w)
+
+    return T * R if not numpy.isnan(T) else 1.0e20
 
 
 @jitted(parallel=True)

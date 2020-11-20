@@ -2,7 +2,9 @@ from datetime import datetime
 
 import numpy
 
+from ._common import rescaled_time_distance
 from ._decluster import decluster
+from ._helpers import to_decimal_year
 
 __all__ = [
     "Catalog",
@@ -80,11 +82,40 @@ class Catalog:
 
         Returns
         -------
-        pydecluster.Catalog
+        :class:`pydecluster.Catalog`
             Declustered earthquake catalog.
 
         """
         return decluster(self, algorithm, **kwargs)
+
+    def get_rescaled_time_distance(self, d=1.5, w=0.0):
+        """
+        Get rescaled time and distance for each earthquake in the catalog.
+
+        Parameters
+        ----------
+        d : scalar, optional, default 1.5
+            Fractal dimension of epicenter/hypocenter.
+        w : scalar, optional, default 0.0
+            Magnitude weighing factor (usually b-value).
+
+        Returns
+        -------
+        array_like
+            Rescaled times (column 0) and distances (column 1).
+        
+        """
+        t = to_decimal_year(self.dates)  # Dates in years
+        x = self.eastings
+        y = self.northings
+        m = self.magnitudes
+
+        return numpy.array(
+            [
+                rescaled_time_distance(t, x, y, m, t[i], x[i], y[i], d, w)
+                for i in range(len(self))
+            ]
+        )
 
     @property
     def dates(self):
