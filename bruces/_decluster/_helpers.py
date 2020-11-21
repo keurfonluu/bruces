@@ -23,6 +23,7 @@ def decluster(catalog, algorithm="nearest-neighbor", **kwargs):
         Earthquake catalog.
     algorithm : str, optional, default 'nearest-neighbor'
         Declustering algorithm:
+         - 'gardner-knopoff': Gardner-Knopoff method,
          - 'nearest-neighbor': nearest-neighbor algorithm (after Zaliapin and Ben-Zion, 2020).
     
     Other Parameters
