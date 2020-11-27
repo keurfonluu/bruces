@@ -39,7 +39,7 @@ class Catalog:
             Magnitudes.
         
         """
-        if not isinstance(dates, (list, tuple)):
+        if not isinstance(dates, (list, tuple, numpy.ndarray)):
             raise TypeError()
         if any(not isinstance(time, datetime) for time in dates):
             raise TypeError()
@@ -51,15 +51,29 @@ class Catalog:
             if len(arr) != nev:
                 raise ValueError()
 
-        self._dates = dates
-        self._eastings = eastings
-        self._northings = northings
-        self._depths = depths
-        self._magnitudes = magnitudes
+        self._dates = numpy.asarray(dates)
+        self._eastings = numpy.asarray(eastings)
+        self._northings = numpy.asarray(northings)
+        self._depths = numpy.asarray(depths)
+        self._magnitudes = numpy.asarray(magnitudes)
 
     def __len__(self):
         """Return number of earthquakes in catalog."""
         return len(self._dates)
+
+    def __getitem__(self, islice):
+        """Slice catalog."""
+        t = self.dates[islice]
+        x = self.eastings[islice]
+        y = self.northings[islice]
+        z = self.depths[islice]
+        m = self.magnitudes[islice]
+
+        return (
+            Catalog(t, x, y, z, m)
+            if numpy.ndim(t) > 0
+            else Earthquake(t, x, y, z, m)
+        )
 
     def __iter__(self):
         """Iterate over earthquake in catalog as namedtuples."""

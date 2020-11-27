@@ -32,12 +32,10 @@ def decluster(catalog, d=1.5, w=0.0, eta_0=0.1, alpha_0=0.1, M=100):
         Declustered earthquake catalog.
 
     """
-    from ..._catalog import Catalog
-
     t = to_decimal_year(catalog.dates)  # Dates in years
     x = catalog.eastings
     y = catalog.northings
-    z = catalog.depths
+    # z = catalog.depths
     m = catalog.magnitudes
 
     # Calculate nearest-neighbor proximities
@@ -54,13 +52,7 @@ def decluster(catalog, d=1.5, w=0.0, eta_0=0.1, alpha_0=0.1, M=100):
     U = P > numpy.random.rand(len(catalog))
     bg = numpy.nonzero(U)[0]
 
-    return Catalog(
-        dates=[catalog.dates[i] for i in bg],
-        eastings=x[bg],
-        northings=y[bg],
-        depths=z[bg],
-        magnitudes=m[bg],
-    )
+    return catalog[bg]
 
 
 @jitted

@@ -22,8 +22,6 @@ def decluster(catalog):
         Declustered earthquake catalog.
 
     """
-    from ..._catalog import Catalog
-
     t = to_decimal_year(catalog.dates) * 365.25  # Days
     x = catalog.eastings
     y = catalog.northings
@@ -31,14 +29,7 @@ def decluster(catalog):
     m = catalog.magnitudes
 
     bg = _decluster(t, x, y, z, m)
-
-    return Catalog(
-        dates=[d for d, b in zip(catalog.dates, bg) if b],
-        eastings=x[bg],
-        northings=y[bg],
-        depths=z[bg],
-        magnitudes=m[bg],
-    )
+    return catalog[bg]
 
 
 @jitted(parallel=True)

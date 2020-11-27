@@ -34,7 +34,7 @@ def to_decimal_year(dates):
 
         return year + (d - d1).total_seconds() / (d2 - d1).total_seconds()
 
-    if not isinstance(dates, (list, tuple, datetime)):
+    if not isinstance(dates, (list, tuple, numpy.ndarray, datetime)):
         raise TypeError()
     if not isinstance(dates, datetime) and any(not isinstance(date, datetime) for date in dates):
         raise TypeError()
