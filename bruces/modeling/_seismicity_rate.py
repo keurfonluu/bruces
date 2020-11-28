@@ -1,4 +1,5 @@
 import numpy
+from numba import prange
 
 from .._common import jitted
 from .._helpers import to_decimal_year
@@ -94,6 +95,17 @@ def rate(t, s, s0i, tci, tmax, dt, dtmax, dtfac, rtol):
     return numpy.interp(t, times, rates)
 
 
+@jitted(parallel=True)
+def rate_vectorized(t, s, s0i, tci, tmax, dt, dtmax, dtfac, rtol):
+    """Solve ODE for different integration points."""
+    ns = len(s)
+    out = numpy.empty(s.shape, dtype=numpy.float64)
+    for i in prange(ns):
+        out[i] = rate(t, s[i], s0i, tci, tmax, dt, dtmax, dtfac, rtol)
+
+    return out
+
+
 def seismicity_rate(
     times,
     stress,
@@ -161,6 +173,4 @@ def seismicity_rate(
         return rate(t, s, s0i, tci, tmax, dt, dtmax, dtfac, rtol)
 
     else:
-        return numpy.array(
-            [rate(t, ss, s0i, tci, tmax, dt, dtmax, dtfac, rtol) for ss in s]
-        )
+        return rate_vectorized(t, s, s0i, tci, tmax, dt, dtmax, dtfac, rtol)
