@@ -101,7 +101,7 @@ def rate_vectorized(t, s, s0i, tci, tcrit, tmax, dt, dtmax, dtfac, rtol):
     ns = len(s)
     out = numpy.empty(s.shape, dtype=numpy.float64)
     for i in prange(ns):
-        out[i] = rate(t, s[i], s0i, tci, tcrit, tmax, dt, dtmax, dtfac, rtol)
+        out[i] = rate(t, s[i], s0i[i], tci[i], tcrit, tmax, dt, dtmax, dtfac, rtol)
 
     return out
 
@@ -124,13 +124,13 @@ def seismicity_rate(
     Parameters
     ----------
     times : array_like
-        Dates for every stressing rate samples.
+        Dates for every stressing rate samples. Common to all integration points.
     stress : array_like
         Stressing rates or list of stressing rates for every integration points.
-    stress_ini : scalar
-        Background stressing rate.
-    asigma : scalar
-        Free parameter for rate-and-state constitutive model.
+    stress_ini : scalar or array_like
+        Background stressing rate or list of background stressing rates for every integration points.
+    asigma : scalar or array_like
+        Free parameter for rate-and-state constitutive model or list of parameters for every integration points.
     t_crit : datetime.datetime or None, optional, default None
         Critical time. Default is `times[0]`.
     t_bound : datetime.datetime or None, optional, default None
@@ -150,16 +150,32 @@ def seismicity_rate(
         Seismicity rates or list of seismicity rates for every integration points.
     
     """
+
+    def check_parameter(x, ndim, npts):
+        """Check consistency of input parameter."""
+        if numpy.ndim(x) == 0:
+            x = x if ndim == 1 else numpy.full(npts, x, dtype=numpy.float64)
+
+        else:
+            x = numpy.asarray(x, dtype=numpy.float64)
+            if x.size != npts:
+                raise ValueError()
+
+        return x
+
     # Convert datetimes to decimal years
     t = to_decimal_year(times)
-    nt = len(t)
 
     # Check stressing rate
-    s = numpy.asarray(stress) + stress_ini
+    s = numpy.asarray(stress)
     ndim = s.ndim
-    npts = s.size if ndim == 1 else s.shape[1]
-    if npts != nt:
+    if len(t) != (s.size if ndim == 1 else s.shape[1]):
         raise ValueError()
+
+    # Check consistency of parameters related to integration points
+    npts = 1 if ndim == 1 else len(s)
+    s0 = check_parameter(stress_ini, ndim, npts)
+    asig = check_parameter(asigma, ndim, npts)
 
     # Set time stepping parameters
     tcrit = to_decimal_year(t_crit) if t_crit is not None else t[0]
@@ -169,8 +185,11 @@ def seismicity_rate(
     dtfac = reduce_step_factor
 
     # Use inverse to avoid repeated zero division check
-    tci = stress_ini / asigma
-    s0i = 1.0 / stress_ini
+    tci = s0 / asig
+    s0i = 1.0 / s0
+
+    # Add background stressing rate to stressing rate
+    s += s0 if ndim == 1 else s0[:, None]
 
     # Solve ODE
     if ndim == 1:
