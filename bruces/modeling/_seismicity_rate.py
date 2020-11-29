@@ -47,7 +47,7 @@ def pdot(a, b, n):
 
 
 @jitted
-def rate(t, s, s0i, tci, tmax, dt, dtmax, dtfac, rtol):
+def rate(t, s, s0i, tci, tcrit, tmax, dt, dtmax, dtfac, rtol):
     """
     Solve rate-and-state ODE using Runge-Kutta-Fehlberg method.
 
@@ -61,7 +61,7 @@ def rate(t, s, s0i, tci, tmax, dt, dtmax, dtfac, rtol):
     times, rates = [ti], [1.0]
     k = numpy.empty(6, dtype=numpy.float64)
     while ti < tmax:
-        si = s[i] * s0i
+        si = s[i] * s0i if ti >= tcrit else 1.0
 
         # Calculate derivatives
         for j, c in enumerate(_C):
@@ -96,12 +96,12 @@ def rate(t, s, s0i, tci, tmax, dt, dtmax, dtfac, rtol):
 
 
 @jitted(parallel=True)
-def rate_vectorized(t, s, s0i, tci, tmax, dt, dtmax, dtfac, rtol):
+def rate_vectorized(t, s, s0i, tci, tcrit, tmax, dt, dtmax, dtfac, rtol):
     """Solve ODE for different integration points."""
     ns = len(s)
     out = numpy.empty(s.shape, dtype=numpy.float64)
     for i in prange(ns):
-        out[i] = rate(t, s[i], s0i, tci, tmax, dt, dtmax, dtfac, rtol)
+        out[i] = rate(t, s[i], s0i, tci, tcrit, tmax, dt, dtmax, dtfac, rtol)
 
     return out
 
@@ -111,6 +111,7 @@ def seismicity_rate(
     stress,
     stress_ini,
     asigma,
+    t_crit=None,
     t_bound=None,
     first_step=None,
     max_step=None,
@@ -130,6 +131,8 @@ def seismicity_rate(
         Background stressing rate.
     asigma : scalar
         Free parameter for rate-and-state constitutive model.
+    t_crit : datetime.datetime or None, optional, default None
+        Critical time. Default is `times[0]`.
     t_bound : datetime.datetime or None, optional, default None
         Boundary time.
     first_step : scalar or None, optional, default None
@@ -159,6 +162,7 @@ def seismicity_rate(
         raise ValueError()
 
     # Set time stepping parameters
+    tcrit = to_decimal_year(t_crit) if t_crit is not None else t[0]
     tmax = to_decimal_year(t_bound) if t_bound is not None else t[-1]
     dt = first_step if first_step is not None else 1.0 / 365.25
     dtmax = max_step if max_step is not None else 1.0 / 12.0
@@ -170,7 +174,7 @@ def seismicity_rate(
 
     # Solve ODE
     if ndim == 1:
-        return rate(t, s, s0i, tci, tmax, dt, dtmax, dtfac, rtol)
+        return rate(t, s, s0i, tci, tcrit, tmax, dt, dtmax, dtfac, rtol)
 
     else:
-        return rate_vectorized(t, s, s0i, tci, tmax, dt, dtmax, dtfac, rtol)
+        return rate_vectorized(t, s, s0i, tci, tcrit, tmax, dt, dtmax, dtfac, rtol)
