@@ -167,7 +167,7 @@ def seismicity_rate(
     t = to_decimal_year(times)
 
     # Check stressing rate
-    s = numpy.asarray(stress)
+    s = numpy.copy(stress)
     ndim = s.ndim
     if len(t) != (s.size if ndim == 1 else s.shape[1]):
         raise ValueError()
