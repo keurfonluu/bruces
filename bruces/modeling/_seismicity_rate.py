@@ -88,7 +88,7 @@ def rate(t, s, s0i, tci, tcrit, tmax, dt, dtmax, dtfac, rtol):
             # Check current stressing rate
             if i + 1 < nt:
                 dti = t[i + 1] - ti
-                if dt > dti:
+                if 0.0 < dti < dt:
                     dt = dti
                     i += 1
 
