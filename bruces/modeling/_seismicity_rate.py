@@ -156,19 +156,19 @@ def seismicity_rate(
 
         return x
 
-    # Convert datetimes to decimal years
-    t = to_decimal_year(times)
-
     # Check stressing rate
     s = numpy.copy(stress)
     ndim = s.ndim
-    if len(t) != (s.size if ndim == 1 else s.shape[1]):
+    if len(times) != (s.size if ndim == 1 else s.shape[1]):
         raise ValueError()
 
     # Check consistency of parameters related to integration points
     npts = 1 if ndim == 1 else len(s)
     s0 = check_parameter(stress_ini, ndim, npts)
     asig = check_parameter(asigma, ndim, npts)
+
+    # Convert datetimes to decimal years
+    t = to_decimal_year(times)
 
     # Set time stepping parameters
     tcrit = to_decimal_year(t_crit) if t_crit is not None else t[0]
