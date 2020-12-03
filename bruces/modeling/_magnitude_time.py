@@ -79,9 +79,21 @@ def magnitude_time(times, rates, m_bounds, n=50, b_value=1.0):
         List of magnitude samples for every time steps.
 
     """
-    t = to_decimal_year(times)
-    dt = numpy.diff(t)
-    dt = numpy.append(dt, dt[-1])
+    # Check seismicity rate
+    r = numpy.asarray(rates)
+    if r.ndim != 1 or len(times) != r.size:
+        raise ValueError()
+
+    # Check magnitude bounds
+    if len(m_bounds) != 2 or m_bounds[0] - m_bounds[1] >= 0.0:
+        raise ValueError()
     m = numpy.linspace(m_bounds[0], m_bounds[1], n)
 
-    return rate2mag_vectorized(dt, rates, m, b_value)
+    # Convert datetimes to decimal years
+    t = to_decimal_year(times)
+
+    # Convert times to time increments for integration
+    dt = numpy.diff(t)
+    dt = numpy.append(dt, dt[-1])
+
+    return rate2mag_vectorized(dt, r, m, b_value)
