@@ -31,22 +31,6 @@ _W = numpy.array(
 
 
 @jitted
-def rate_rhs(r, s, tci):
-    """Right hand side of rate-and-state ODE (Segall and Lu, 2015)."""
-    return r * tci * (s - r)
-
-
-@jitted
-def pdot(a, b, n):
-    """Partial dot product."""
-    out = 0.0
-    for i in range(n):
-        out += a[i] * b[i]
-
-    return out
-
-
-@jitted
 def rate(t, s, s0i, tci, tcrit, tmax, dt, dtmax, dtfac, rtol):
     """
     Solve rate-and-state ODE using Runge-Kutta-Fehlberg method.
@@ -59,17 +43,26 @@ def rate(t, s, s0i, tci, tcrit, tmax, dt, dtmax, dtfac, rtol):
     nt = len(t)
     i, ti = 0, t[0]
     times, rates = [ti], [1.0]
-    k = numpy.empty(6, dtype=numpy.float64)
     while ti < tmax:
         si = s[i] * s0i if ti >= tcrit else 1.0
 
         # Calculate derivatives
-        for j, c in enumerate(_C):
-            k[j] = dt * rate_rhs(rates[-1] + pdot(c, k, j), si, tci)
+        r0 = rates[-1]
+        k0 = dt * r0 * tci * (si - r0)
+        r1 = rates[-1] + _C[1, 0] * k0
+        k1 = dt * r1 * tci * (si - r1)
+        r2 = rates[-1] + _C[2, 0] * k0 + _C[2, 1] * k1
+        k2 = dt * r2 * tci * (si - r2)
+        r3 = rates[-1] + _C[3, 0] * k0 + _C[3, 1] * k1 + _C[3, 2] * k2
+        k3 = dt * r3 * tci * (si - r3)
+        r4 = rates[-1] + _C[4, 0] * k0 + _C[4, 1] * k1 + _C[4, 2] * k2 + _C[4, 3] * k3
+        k4 = dt * r4 * tci * (si - r4)
+        r5 = rates[-1] + _C[5, 0] * k0 + _C[5, 1] * k1 + _C[5, 2] * k2 + _C[5, 3] * k3 + _C[5, 4] * k4
+        k5 = dt * r5 * tci * (si - r5)
 
         # Calculate error
-        ro4 = rates[-1] + pdot(_W[0], k, 5)
-        ro5 = rates[-1] + pdot(_W[1], k, 6)
+        ro4 = rates[-1] + _W[0, 0] * k0 + _W[0, 2] * k2 + _W[0, 3] * k3 + _W[0, 4] * k4
+        ro5 = rates[-1] + _W[1, 0] * k0 + _W[1, 2] * k2 + _W[1, 3] * k3 + _W[1, 4] * k4 + _W[1, 5] * k5
         eps = max(numpy.abs(ro5 - ro4) / ro5, 1.0e-16)
 
         # Check convergence
