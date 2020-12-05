@@ -1,5 +1,5 @@
 from collections import namedtuple
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import numpy
 
@@ -157,6 +157,49 @@ class Catalog:
                 for i in range(len(self))
             ]
         )
+
+    def get_seismicity_rate(self, tbins):
+        """
+        Get seismicity rate.
+
+        Parameters
+        ----------
+        tbins : datetime.timedelta or sequence of datetime.datetime
+            If `tbins` is a :class:`datetime.timedelta`, it defines the width of each bin.
+            If `tbins` is a sequence of :class:`datetime.datetime`, it defines a monotonically increasing list of bin edges.
+
+        Returns
+        -------
+        array_like
+            Seismicity rate (in events/year).
+        array_like
+            Bin edges.
+        
+        """
+        if isinstance(tbins, timedelta):
+            t = min(self.dates)
+            tmax = max(self.dates)
+
+            bins = []
+            while t < tmax:
+                bins.append(t)
+                t += tbins
+            bins.append(t)
+
+        elif isinstance(tbins, (list, tuple, numpy.ndarray)):
+            if any(not isinstance(t, datetime) for t in tbins):
+                raise TypeError()
+            bins = tbins
+
+        else:
+            raise TypeError()
+
+        t = to_decimal_year(self.dates)
+        bins = to_decimal_year(bins)
+
+        hist, bin_edges = numpy.histogram(t, bins=bins)
+
+        return hist / numpy.diff(bins), bin_edges
 
     @property
     def dates(self):
