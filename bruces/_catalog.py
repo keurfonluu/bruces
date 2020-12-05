@@ -129,7 +129,7 @@ class Catalog:
         """
         return decluster(self, algorithm, **kwargs)
 
-    def get_rescaled_time_distance(self, d=1.5, w=0.0):
+    def rescaled_time_distance(self, d=1.5, w=0.0):
         """
         Get rescaled time and distance for each earthquake in the catalog.
 
@@ -158,7 +158,7 @@ class Catalog:
             ]
         )
 
-    def get_seismicity_rate(self, tbins):
+    def seismicity_rate(self, tbins):
         """
         Get seismicity rate.
 
