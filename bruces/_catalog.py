@@ -179,22 +179,21 @@ class Catalog:
         if isinstance(tbins, (timedelta, numpy.timedelta64)):
             tmin = min(self.dates)
             tmax = max(self.dates)
-            bins = numpy.arange(tmin, tmax, tbins)
+            tbins = numpy.arange(tmin, tmax, tbins).tolist()
 
         elif isinstance(tbins, (list, tuple, numpy.ndarray)):
             if any(not isinstance(t, (datetime, numpy.datetime64)) for t in tbins):
                 raise TypeError()
-            bins = tbins
+            tbins = tbins
 
         else:
             raise TypeError()
 
-        t = to_decimal_year(self.dates)
-        bins = to_decimal_year(bins)
+        ty = to_decimal_year(self.dates)
+        tybins = to_decimal_year(tbins)
+        hist, _ = numpy.histogram(ty, bins=tybins)
 
-        hist, bin_edges = numpy.histogram(t, bins=bins)
-
-        return hist / numpy.diff(bins), bin_edges
+        return hist / numpy.diff(tybins), tbins
 
     @property
     def dates(self):
