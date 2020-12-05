@@ -41,7 +41,7 @@ class Catalog:
         """
         if not isinstance(dates, (list, tuple, numpy.ndarray)):
             raise TypeError()
-        if any(not isinstance(time, datetime) for time in dates):
+        if any(not isinstance(time, (datetime, numpy.datetime64)) for time in dates):
             raise TypeError()
         nev = len(dates)
 
@@ -164,9 +164,9 @@ class Catalog:
 
         Parameters
         ----------
-        tbins : datetime.timedelta or sequence of datetime.datetime
-            If `tbins` is a :class:`datetime.timedelta`, it defines the width of each bin.
-            If `tbins` is a sequence of :class:`datetime.datetime`, it defines a monotonically increasing list of bin edges.
+        tbins : datetime.timedelta, numpy.timedelta64 or sequence of datetime_like
+            If `tbins` is a :class:`datetime.timedelta` or a :class:`numpy.timedelta64`, it defines the width of each bin.
+            If `tbins` is a sequence of datetime_like, it defines a monotonically increasing list of bin edges.
 
         Returns
         -------
@@ -176,18 +176,13 @@ class Catalog:
             Bin edges.
         
         """
-        if isinstance(tbins, timedelta):
-            t = min(self.dates)
+        if isinstance(tbins, (timedelta, numpy.timedelta64)):
+            tmin = min(self.dates)
             tmax = max(self.dates)
-
-            bins = []
-            while t < tmax:
-                bins.append(t)
-                t += tbins
-            bins.append(t)
+            bins = numpy.arange(tmin, tmax, tbins)
 
         elif isinstance(tbins, (list, tuple, numpy.ndarray)):
-            if any(not isinstance(t, datetime) for t in tbins):
+            if any(not isinstance(t, (datetime, numpy.datetime64)) for t in tbins):
                 raise TypeError()
             bins = tbins
 

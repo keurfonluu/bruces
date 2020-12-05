@@ -7,13 +7,16 @@ __all__ = [
 ]
 
 
+_datetime_like = (datetime, numpy.datetime64)
+
+
 def to_decimal_year(dates):
     """
-    Convert :class:`datetime.datetime` to decimal year.
+    Convert :class:`datetime.datetime` or :class:`numpy.datetime64` to decimal year.
     
     Parameters
     ----------
-    dates : datetime.datetime, list or tuple
+    dates : datetime.datetime or numpy.datetime64, list or tuple
         Date time or list of date times.
 
     Returns
@@ -24,23 +27,32 @@ def to_decimal_year(dates):
     """
 
     def decimal_year(d):
-        """Convert a :class:`datetime.datetime` to decimal year."""
-        if not isinstance(d, datetime):
+        """Convert a :class:`datetime.datetime` or :class:`numpy.datetime64` to decimal year."""
+        if isinstance(d, datetime):
+            year = d.year
+        elif isinstance(d, numpy.datetime64):
+            d = d.tolist()
+            year = d.year
+        else:
             raise TypeError()
 
-        year = d.year
         d1 = datetime(year, 1, 1)
         d2 = datetime(year + 1, 1, 1)
 
         return year + (d - d1).total_seconds() / (d2 - d1).total_seconds()
 
-    if not isinstance(dates, (list, tuple, numpy.ndarray, datetime)):
-        raise TypeError()
-    if not isinstance(dates, datetime) and any(not isinstance(date, datetime) for date in dates):
+    ndim = numpy.ndim(dates)
+    if ndim == 0:
+        if not isinstance(dates, _datetime_like):
+            raise TypeError()
+    elif ndim == 1:
+        if any(not isinstance(date, _datetime_like) for date in dates):
+            raise TypeError()
+    else:
         raise TypeError()
 
     return (
         decimal_year(dates)
-        if isinstance(dates, datetime)
+        if ndim == 0
         else numpy.array([decimal_year(date) for date in dates])
     )
