@@ -118,17 +118,17 @@ def seismicity_rate(
     
     Parameters
     ----------
-    times : array_like
+    times : sequence of datetime_likes
         Dates for every stressing rate samples. Common to all integration points.
-    stress : array_like
-        Stressing rates or list of stressing rates for every integration points.
-    stress_ini : scalar or array_like
-        Background stressing rate or list of background stressing rates for every integration points.
-    asigma : scalar or array_like
-        Free parameter for rate-and-state constitutive model or list of parameters for every integration points.
-    t_crit : datetime.datetime or None, optional, default None
+    stress : sequence of scalars
+        Stressing rates or sequence for every integration points.
+    stress_ini : scalar or sequence of scalars
+        Background stressing rate or sequence for every integration points.
+    asigma : scalar or sequence of scalars
+        Free parameter for rate-and-state constitutive model or sequence for every integration points.
+    t_crit : datetime_like or None, optional, default None
         Critical time. Default is `times[0]`.
-    t_bound : datetime.datetime or None, optional, default None
+    t_bound : datetime_like or None, optional, default None
         Boundary time.
     first_step : scalar, timedelta_like or None, optional, default None
         Initial time step size (in years if scalar). Default is 1 day.
@@ -142,7 +142,7 @@ def seismicity_rate(
     Returns
     -------
     array_like
-        Seismicity rates or list of seismicity rates for every integration points.
+        Seismicity rates or list of seismicity rates for every integration points. Returned seismicity rates are relative to background seismicity rate.
     
     """
 
