@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 import numpy
 from numba import prange
 
@@ -128,10 +130,10 @@ def seismicity_rate(
         Critical time. Default is `times[0]`.
     t_bound : datetime.datetime or None, optional, default None
         Boundary time.
-    first_step : scalar or None, optional, default None
-        Initial time step size (in years). Default is 1 day.
-    max_step : scalar or None, optional, default None
-        Maximum allowed time step size (in years). Default is 1 month.
+    first_step : scalar, timedelta_like or None, optional, default None
+        Initial time step size (in years if scalar). Default is 1 day.
+    max_step : scalar, timedelta_like or None, optional, default None
+        Maximum allowed time step size (in years if scalar). Default is 1 month.
     reduce_step_factor : scalar, optional, default 4.0
         Factor by which time step size is reduced for unsuccessful time step.
     rtol : scalar, optional, default 1.0e-5
@@ -176,6 +178,16 @@ def seismicity_rate(
     dt = first_step if first_step is not None else 1.0 / 365.25
     dtmax = max_step if max_step is not None else 1.0 / 12.0
     dtfac = reduce_step_factor
+
+    if isinstance(dt, numpy.timedelta64):
+        dt = dt.tolist()
+    if isinstance(dt, timedelta):
+        dt = dt.total_seconds() / 3600.0 / 24.0 / 365.25
+
+    if isinstance(dtmax, numpy.timedelta64):
+        dtmax = dtmax.tolist()
+    if isinstance(dtmax, timedelta):
+        dtmax = dtmax.total_seconds() / 3600.0 / 24.0 / 365.25
 
     # Use inverse to avoid repeated zero division check
     tci = s0 / asig
