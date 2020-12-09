@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 import numpy
 
-from ._common import rescaled_time_distance
+from ._common import time_space_distances
 from ._decluster import decluster
 from ._helpers import to_decimal_year
 
@@ -129,9 +129,9 @@ class Catalog:
         """
         return decluster(self, algorithm, **kwargs)
 
-    def rescaled_time_distance(self, d=1.5, w=0.0):
+    def time_space_distances(self, d=1.5, w=0.0):
         """
-        Get rescaled time and distance for each earthquake in the catalog.
+        Get rescaled time and space distances for each earthquake in the catalog.
 
         Parameters
         ----------
@@ -143,7 +143,9 @@ class Catalog:
         Returns
         -------
         array_like
-            Rescaled times (column 0) and distances (column 1).
+            Rescaled time distances.
+        array_like
+            Rescaled space distances.
         
         """
         t = to_decimal_year(self.dates)  # Dates in years
@@ -151,9 +153,9 @@ class Catalog:
         y = self.northings
         m = self.magnitudes
 
-        return numpy.array(
+        return numpy.transpose(
             [
-                rescaled_time_distance(t, x, y, m, t[i], x[i], y[i], d, w)
+                time_space_distances(t, x, y, m, t[i], x[i], y[i], d, w)
                 for i in range(len(self))
             ]
         )

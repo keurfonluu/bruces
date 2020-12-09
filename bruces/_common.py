@@ -18,8 +18,8 @@ def jitted(*args, **kwargs):
 
 
 @jitted
-def rescaled_time_distance(t, x, y, m, ti, xi, yi, d=1.5, w=0.0):
-    """Calculate rescaled time and distance."""
+def time_space_distances(t, x, y, m, ti, xi, yi, d=1.5, w=0.0):
+    """Calculate rescaled time and space distances."""
     N = len(t)
 
     eta_i = 1.0e20
