@@ -181,7 +181,7 @@ class Catalog:
         if isinstance(tbins, (timedelta, numpy.timedelta64)):
             tmin = min(self.dates)
             tmax = max(self.dates)
-            tbins = numpy.arange(tmin, tmax, tbins).tolist()
+            tbins = numpy.arange(tmin, tmax, tbins, dtype="M8[ms]").tolist()
 
         elif isinstance(tbins, (list, tuple, numpy.ndarray)):
             if any(not isinstance(t, (datetime, numpy.datetime64)) for t in tbins):
