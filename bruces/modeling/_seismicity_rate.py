@@ -180,12 +180,12 @@ def seismicity_rate(
     dtfac = reduce_step_factor
 
     if isinstance(dt, numpy.timedelta64):
-        dt = dt.tolist()
+        dt = dt.astype("M8[ms]").tolist()
     if isinstance(dt, timedelta):
         dt = dt.total_seconds() / 3600.0 / 24.0 / 365.25
 
     if isinstance(dtmax, numpy.timedelta64):
-        dtmax = dtmax.tolist()
+        dtmax = dtmax.astype("M8[ms]").tolist()
     if isinstance(dtmax, timedelta):
         dtmax = dtmax.total_seconds() / 3600.0 / 24.0 / 365.25
 

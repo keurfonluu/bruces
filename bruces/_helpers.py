@@ -31,7 +31,7 @@ def to_decimal_year(dates):
         if isinstance(d, datetime):
             year = d.year
         elif isinstance(d, numpy.datetime64):
-            d = d.tolist()
+            d = d.astype("M8[ms]").tolist()
             year = d.year
         else:
             raise TypeError()
