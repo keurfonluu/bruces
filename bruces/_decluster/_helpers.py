@@ -19,7 +19,7 @@ def decluster(catalog, algorithm="nearest-neighbor", **kwargs):
 
     Parameters
     ----------
-    catalog : pydecluster.Catalog
+    catalog : bruces.Catalog
         Earthquake catalog.
     algorithm : str, optional, default 'nearest-neighbor'
         Declustering algorithm:
@@ -41,7 +41,7 @@ def decluster(catalog, algorithm="nearest-neighbor", **kwargs):
 
     Returns
     -------
-    :class:`pydecluster.Catalog`
+    :class:`bruces.Catalog`
         Declustered earthquake catalog.
 
     """

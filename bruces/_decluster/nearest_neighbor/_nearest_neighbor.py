@@ -13,7 +13,7 @@ def decluster(catalog, d=1.5, w=0.0, eta_0=0.1, alpha_0=0.1, M=100):
 
     Parameters
     ----------
-    catalog : pydecluster.Catalog
+    catalog : bruces.Catalog
         Earthquake catalog.
     d : scalar, optional, default 1.5
         Fractal dimension of epicenter/hypocenter.
@@ -28,7 +28,7 @@ def decluster(catalog, d=1.5, w=0.0, eta_0=0.1, alpha_0=0.1, M=100):
 
     Returns
     -------
-    :class:`pydecluster.Catalog`
+    :class:`bruces.Catalog`
         Declustered earthquake catalog.
 
     """

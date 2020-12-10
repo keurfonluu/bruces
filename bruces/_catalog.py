@@ -123,7 +123,7 @@ class Catalog:
 
         Returns
         -------
-        :class:`pydecluster.Catalog`
+        :class:`bruces.Catalog`
             Declustered earthquake catalog.
 
         """

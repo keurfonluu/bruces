@@ -13,12 +13,12 @@ def decluster(catalog):
 
     Parameters
     ----------
-    catalog : pydecluster.Catalog
+    catalog : bruces.Catalog
         Earthquake catalog.
 
     Returns
     -------
-    :class:`pydecluster.Catalog`
+    :class:`bruces.Catalog`
         Declustered earthquake catalog.
 
     """
