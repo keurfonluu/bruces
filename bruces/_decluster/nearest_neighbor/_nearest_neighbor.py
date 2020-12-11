@@ -1,10 +1,9 @@
 import numpy
-
 from numba import prange
 
-from .._helpers import register
 from ..._common import jitted, time_space_distances
 from ..._helpers import to_decimal_year
+from .._helpers import register
 
 
 def decluster(catalog, d=1.5, w=0.0, eta_0=0.1, alpha_0=0.1, M=100):
@@ -121,7 +120,7 @@ def _step3(eta, kappa):
     """Calculate normalized nearest-neighbor proximity for each event."""
     N = len(kappa)
     M = len(kappa[0, :])
-    
+
     alpha = numpy.empty(N, dtype=numpy.float64)
     for i in prange(N):
         # Remove events without earlier events

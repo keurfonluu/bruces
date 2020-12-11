@@ -25,7 +25,7 @@ def decluster(catalog, algorithm="nearest-neighbor", **kwargs):
         Declustering algorithm:
          - 'gardner-knopoff': Gardner-Knopoff method,
          - 'nearest-neighbor': nearest-neighbor algorithm (after Zaliapin and Ben-Zion, 2020).
-    
+
     Other Parameters
     ----------------
     d : scalar, optional, default 1.5

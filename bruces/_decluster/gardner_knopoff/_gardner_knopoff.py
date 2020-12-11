@@ -1,10 +1,9 @@
 import numpy
-
 from numba import prange
 
-from .._helpers import register
 from ..._common import jitted
 from ..._helpers import to_decimal_year
+from .._helpers import register
 
 
 def decluster(catalog):
@@ -46,11 +45,7 @@ def _decluster(t, x, y, z, m):
         dr = 10.0 ** dr
 
         # Calculate time window length
-        dt = (
-            0.032 * mag + 2.7389
-            if mag >= 6.5
-            else 0.5409 * mag - 0.547
-        )
+        dt = 0.032 * mag + 2.7389 if mag >= 6.5 else 0.5409 * mag - 0.547
         dt = 10.0 ** dt
 
         # Loop over catalog

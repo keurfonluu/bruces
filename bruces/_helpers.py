@@ -13,7 +13,7 @@ _datetime_like = (datetime, numpy.datetime64)
 def to_decimal_year(dates):
     """
     Convert :class:`datetime.datetime` or :class:`numpy.datetime64` to decimal year.
-    
+
     Parameters
     ----------
     dates : datetime.datetime or numpy.datetime64, list or tuple
@@ -23,11 +23,12 @@ def to_decimal_year(dates):
     -------
     scalar or list
         Decimal year or list of decimal years.
-    
+
     """
 
     def decimal_year(d):
-        """Convert a :class:`datetime.datetime` or :class:`numpy.datetime64` to decimal year."""
+        """Convert a :class:`datetime.datetime` or :class:`numpy.datetime64` to decimal
+        year."""
         if isinstance(d, datetime):
             year = d.year
         elif isinstance(d, numpy.datetime64):

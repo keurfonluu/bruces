@@ -26,7 +26,14 @@ _C = numpy.array(
 _W = numpy.array(
     [
         [25.0 / 216.0, 0.0, 1408.0 / 2565.0, 2197.0 / 4101.0, -1.0 / 5.0, 0.0],
-        [16.0 / 135.0, 0.0, 6656.0 / 12825.0, 28561.0 / 56430.0, -9.0 / 50.0, 2.0 / 55.0],
+        [
+            16.0 / 135.0,
+            0.0,
+            6656.0 / 12825.0,
+            28561.0 / 56430.0,
+            -9.0 / 50.0,
+            2.0 / 55.0,
+        ],
     ],
     dtype=numpy.float64,
 )
@@ -59,12 +66,26 @@ def rate(t, s, s0i, tci, tcrit, tmax, dt, dtmax, dtfac, rtol):
         k3 = dt * r3 * tci * (si - r3)
         r4 = rates[-1] + _C[4, 0] * k0 + _C[4, 1] * k1 + _C[4, 2] * k2 + _C[4, 3] * k3
         k4 = dt * r4 * tci * (si - r4)
-        r5 = rates[-1] + _C[5, 0] * k0 + _C[5, 1] * k1 + _C[5, 2] * k2 + _C[5, 3] * k3 + _C[5, 4] * k4
+        r5 = (
+            rates[-1]
+            + _C[5, 0] * k0
+            + _C[5, 1] * k1
+            + _C[5, 2] * k2
+            + _C[5, 3] * k3
+            + _C[5, 4] * k4
+        )
         k5 = dt * r5 * tci * (si - r5)
 
         # Calculate error
         ro4 = rates[-1] + _W[0, 0] * k0 + _W[0, 2] * k2 + _W[0, 3] * k3 + _W[0, 4] * k4
-        ro5 = rates[-1] + _W[1, 0] * k0 + _W[1, 2] * k2 + _W[1, 3] * k3 + _W[1, 4] * k4 + _W[1, 5] * k5
+        ro5 = (
+            rates[-1]
+            + _W[1, 0] * k0
+            + _W[1, 2] * k2
+            + _W[1, 3] * k3
+            + _W[1, 4] * k4
+            + _W[1, 5] * k5
+        )
         eps = max(numpy.abs(ro5 - ro4) / ro5, 1.0e-16)
 
         # Check convergence
@@ -112,10 +133,10 @@ def seismicity_rate(
     max_step=None,
     reduce_step_factor=4.0,
     rtol=1.0e-5,
-    ):
+):
     """
     Rate-and-state modeling of seismicity rate.
-    
+
     Parameters
     ----------
     times : sequence of datetime_likes
@@ -143,7 +164,7 @@ def seismicity_rate(
     -------
     array_like
         Seismicity rates or list of seismicity rates for every integration points. Returned seismicity rates are relative to background seismicity rate.
-    
+
     """
 
     def check_parameter(x, ndim, npts):

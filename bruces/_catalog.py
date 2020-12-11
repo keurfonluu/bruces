@@ -12,7 +12,9 @@ __all__ = [
 ]
 
 
-Earthquake = namedtuple("Earthquake", ["date", "easting", "northing", "depth", "magnitude"])
+Earthquake = namedtuple(
+    "Earthquake", ["date", "easting", "northing", "depth", "magnitude"]
+)
 
 
 def is_arraylike(arr, size):
@@ -37,7 +39,7 @@ class Catalog:
             Depths (in km).
         magnitudes : array_like
             Magnitudes.
-        
+
         """
         if not isinstance(dates, (list, tuple, numpy.ndarray)):
             raise TypeError()
@@ -70,9 +72,7 @@ class Catalog:
         m = self.magnitudes[islice]
 
         return (
-            Catalog(t, x, y, z, m)
-            if numpy.ndim(t) > 0
-            else Earthquake(t, x, y, z, m)
+            Catalog(t, x, y, z, m) if numpy.ndim(t) > 0 else Earthquake(t, x, y, z, m)
         )
 
     def __iter__(self):
@@ -94,7 +94,7 @@ class Catalog:
             self._it += 1
 
             return eq
-        
+
         else:
             raise StopIteration
 
@@ -107,7 +107,7 @@ class Catalog:
         algorithm : str, optional, default 'nearest-neighbor'
             Declustering algorithm:
             - 'nearest-neighbor': nearest-neighbor algorithm (after Zaliapin and Ben-Zion, 2020).
-        
+
         Other Parameters
         ----------------
         d : scalar, optional, default 1.5
@@ -146,7 +146,7 @@ class Catalog:
             Rescaled time distances.
         array_like
             Rescaled space distances.
-        
+
         """
         t = to_decimal_year(self.dates)  # Dates in years
         x = self.eastings
@@ -176,7 +176,7 @@ class Catalog:
             Seismicity rate (in events/year).
         array_like
             Bin edges.
-        
+
         """
         if isinstance(tbins, (timedelta, numpy.timedelta64)):
             tmin = min(self.dates)
