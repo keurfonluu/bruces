@@ -1,6 +1,15 @@
 bruces
 ======
 
+Installation
+------------
+
+Clone and extract the package, then run from the package location:
+
+.. code::
+
+   pip install . --user
+
 Notice
 ------
 
