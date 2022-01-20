@@ -6,7 +6,7 @@ from ..._helpers import to_decimal_year
 from .._helpers import register
 
 
-def decluster(catalog, d=1.5, w=0.0, eta_0=0.1, alpha_0=0.1, M=100):
+def decluster(catalog, d=1.5, w=0.0, eta_0=0.1, alpha_0=0.1, M=100, seed=None):
     """
     Decluster earthquake catalog (after Zaliapin and Ben-Zion, 2020).
 
@@ -24,6 +24,8 @@ def decluster(catalog, d=1.5, w=0.0, eta_0=0.1, alpha_0=0.1, M=100):
         Cluster threshold.
     M : int, optional, default 100
         Number of reshufflings.
+    seed : int or None, optional, default None
+        Seed for random number generator.
 
     Returns
     -------
@@ -31,6 +33,9 @@ def decluster(catalog, d=1.5, w=0.0, eta_0=0.1, alpha_0=0.1, M=100):
         Declustered earthquake catalog.
 
     """
+    if seed is not None:
+        numpy.random.seed(seed)
+
     t = to_decimal_year(catalog.dates)  # Dates in years
     x = catalog.eastings
     y = catalog.northings
@@ -41,7 +46,7 @@ def decluster(catalog, d=1.5, w=0.0, eta_0=0.1, alpha_0=0.1, M=100):
     eta = _step1(t, x, y, m, d, w)
 
     # Calculate proximity vectors
-    kappa = _step2(t, x, y, m, eta, d, w, eta_0, M)
+    kappa = _step2(t, x, y, m, eta, d, w, eta_0, M, seed)
 
     # Calculate normalized nearest-neighbor proximities
     alpha = _step3(eta, kappa)
@@ -75,8 +80,11 @@ def _step1(t, x, y, m, d, w):
 
 
 @jitted(parallel=True)
-def _step2(t, x, y, m, eta, d, w, eta_0, M):
+def _step2(t, x, y, m, eta, d, w, eta_0, M, seed):
     """Calculate proximity vector for each event."""
+    if seed is not None:
+        numpy.random.seed(seed + 1)
+
     N = len(t)
 
     # Select N0 events that satisfy eta_i > eta_0

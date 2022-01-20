@@ -120,6 +120,8 @@ class Catalog:
             Only if ``algorithm = "nearest-neighbor"``. Cluster threshold.
         M : int, optional, default 100
             Only if ``algorithm = "nearest-neighbor"``. Number of reshufflings.
+        seed : int or None, optional, default None
+            Only if ``algorithm = "nearest-neighbor"``. Seed for random number generator.
 
         Returns
         -------
