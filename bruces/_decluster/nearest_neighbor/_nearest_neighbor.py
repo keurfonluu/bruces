@@ -52,7 +52,7 @@ def decluster(catalog, d=1.5, w=0.0, eta_0=0.1, alpha_0=0.1, M=100, seed=None):
     alpha = _step3(eta, kappa)
 
     # Calculate retention probabilities and identify background events
-    P = alpha * 10.0 ** alpha_0
+    P = alpha * 10.0**alpha_0
     U = P > np.random.rand(len(catalog))
     bg = np.nonzero(U)[0]
 

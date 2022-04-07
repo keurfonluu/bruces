@@ -1,7 +1,6 @@
 from functools import partial
 
 import numpy as np
-
 from disba import surf96, swegn96
 from disba._helpers import resample
 
@@ -22,7 +21,13 @@ pow = {
 def hpulse(w, t):
     wt = 0.5 * w * t
 
-    return np.exp(-1.0j * 2.0 * wt) * 4.0 * np.sin(0.5 * wt) ** 2.0 * np.sin(wt) / wt ** 3.0
+    return (
+        np.exp(-1.0j * 2.0 * wt)
+        * 4.0
+        * np.sin(0.5 * wt) ** 2.0
+        * np.sin(wt)
+        / wt**3.0
+    )
 
 
 @jitted
@@ -40,12 +45,12 @@ def fill_spectrum(x, n):
 
     if n % 2:
         out[1 : n // 2 + 1] = x
-        out[n // 2 + 1:] = np.conjugate(x)[::-1]
+        out[n // 2 + 1 :] = np.conjugate(x)[::-1]
 
     else:
         out[1 : n // 2] = x[:-1]
         out[n // 2] = 2.0 * x[-1].real  # Aliased
-        out[n // 2 + 1:] = np.conjugate(x[:-1])[::-1]
+        out[n // 2 + 1 :] = np.conjugate(x[:-1])[::-1]
 
     return out
 
@@ -95,18 +100,21 @@ def seismogram(
     phi = np.deg2rad(phi)
     cosp = np.cos(phi)
     sinp = np.sin(phi)
-    cosp2 = cosp ** 2.0
-    sinp2 = sinp ** 2.0
+    cosp2 = cosp**2.0
+    sinp2 = sinp**2.0
 
     # Components of moment tensor
     # Rescale to account for mixed units (return cm if M0 is dyne.cm)
-    Mxx, Mxy, Mxz, Myx, Myy, Myz, Mzx, Mzy, Mzz = np.ravel(
-        (
-            moment_tensor
-            if moment_tensor is not None
-            else np.eye(3, dtype=np.float64)
+    Mxx, Mxy, Mxz, Myx, Myy, Myz, Mzx, Mzy, Mzz = (
+        np.ravel(
+            (
+                moment_tensor
+                if moment_tensor is not None
+                else np.eye(3, dtype=np.float64)
+            )
         )
-    ) * 1.0e-19
+        * 1.0e-19
+    )
 
     # Pulse
     if pulse is not None:
@@ -146,7 +154,7 @@ def seismogram(
     # Loop over modes
     t = 1.0 / freq[::-1]
     d, a, b, rho = resample(thickness, velocity_p, velocity_s, density, dh)
-    
+
     depth = d.cumsum() - d[0]
     dz = np.diff(depth)
     nf = int(nf)
@@ -173,7 +181,7 @@ def seismogram(
                         if wave == "rayleigh":
                             r1 = egn[:, 0]
                             r2 = egn[:, 1]
-                            I1 = 0.5 * np.dot(d, rho * (r1 ** 2 + r2 ** 2))
+                            I1 = 0.5 * np.dot(d, rho * (r1**2 + r2**2))
 
                             dr1dz = np.diff(r1) / dz
                             dr2dz = np.diff(r2) / dz
@@ -187,7 +195,15 @@ def seismogram(
                             dr1dzh = np.interp(h, depth, dr1dz)
                             dr2dzh = np.interp(h, depth, dr2dz)
 
-                            cst = kn * r1h * (Mxx * cosp2 + (Mxy + Myx) * sinp * cosp + Myy * sinp2)
+                            cst = (
+                                kn
+                                * r1h
+                                * (
+                                    Mxx * cosp2
+                                    + (Mxy + Myx) * sinp * cosp
+                                    + Myy * sinp2
+                                )
+                            )
                             cst += 1.0j * dr1dzh * (Mxz * cosp + Myz * sinp)
                             cst += -1.0j * kn * r2h * (Mzx * cosp + Mzy * sinp)
                             cst += dr2dzh * Mzz
@@ -198,7 +214,7 @@ def seismogram(
 
                         else:
                             l1 = egn[:, 0]
-                            I1 = 0.5 * np.dot(d, rho * l1 ** 2)
+                            I1 = 0.5 * np.dot(d, rho * l1**2)
 
                             dl1dz = np.diff(l1) / dz
                             dl1dz = np.append(dl1dz, dl1dz[-1])
@@ -207,7 +223,17 @@ def seismogram(
                             l1h = np.interp(h, depth, l1)
                             dl1dzh = np.interp(h, depth, dl1dz)
 
-                            cst = 1.0j * kn * l1h * (Mxx * sinp * cosp - Myx * cosp2 + Mxy * sinp2 - Myy * sinp * cosp)
+                            cst = (
+                                1.0j
+                                * kn
+                                * l1h
+                                * (
+                                    Mxx * sinp * cosp
+                                    - Myx * cosp2
+                                    + Mxy * sinp2
+                                    - Myy * sinp * cosp
+                                )
+                            )
                             cst += -dl1dzh * (Mxz * sinp - Myz * cosp)
                             cst *= 0.125 / c[i] / U[i] / I1 * (2.0 / np.pi / knr) ** 0.5
 

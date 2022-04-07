@@ -71,9 +71,7 @@ class Catalog:
         z = self.depths[islice]
         m = self.magnitudes[islice]
 
-        return (
-            Catalog(t, x, y, z, m) if np.ndim(t) > 0 else Earthquake(t, x, y, z, m)
-        )
+        return Catalog(t, x, y, z, m) if np.ndim(t) > 0 else Earthquake(t, x, y, z, m)
 
     def __iter__(self):
         """Iterate over earthquake in catalog as namedtuples."""

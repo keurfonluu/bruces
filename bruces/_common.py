@@ -36,7 +36,7 @@ def time_space_distances(t, x, y, m, ti, xi, yi, d=1.5, w=0.0):
             if r_ij > 0.0:
                 fac = 10.0 ** (-0.5 * w * m[j])
                 T_ij = -t_ij * fac
-                R_ij = r_ij ** d * fac
+                R_ij = r_ij**d * fac
                 eta_ij = T_ij * R_ij
 
                 if eta_ij < eta_i:

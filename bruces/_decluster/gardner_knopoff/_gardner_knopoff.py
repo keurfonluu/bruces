@@ -42,11 +42,11 @@ def _decluster(t, x, y, z, m):
 
         # Calculate distance window length
         dr = 0.1238 * mag + 0.983
-        dr = 10.0 ** dr
+        dr = 10.0**dr
 
         # Calculate time window length
         dt = 0.032 * mag + 2.7389 if mag >= 6.5 else 0.5409 * mag - 0.547
-        dt = 10.0 ** dt
+        dt = 10.0**dt
 
         # Loop over catalog
         for j in range(N):
