@@ -37,8 +37,11 @@ def rate2mag(dt, r, m, bm):
 
 
 @jitted
-def rate2mag_vectorized(dt, r, m, b):
+def rate2mag_vectorized(dt, r, m, b, seed):
     """Generate magnitude samples for every time steps."""
+    if seed is not None:
+        numpy.random.seed(seed)
+
     nm = len(m)
     nr = len(r)
 
@@ -56,7 +59,7 @@ def rate2mag_vectorized(dt, r, m, b):
     return out
 
 
-def magnitude_time(times, rates, m_bounds, n=50, b_value=1.0):
+def magnitude_time(times, rates, m_bounds, n=50, b_value=1.0, seed=None):
     """
     Generate earthquake magnitude-time distribution.
 
@@ -72,6 +75,8 @@ def magnitude_time(times, rates, m_bounds, n=50, b_value=1.0):
         Number of magnitude points to define CDF.
     b_value : scalar, optional, default 1.0
         b-value.
+    seed : int or None, optional, default None
+        Seed for random number generator.
 
     Returns
     -------
@@ -96,4 +101,4 @@ def magnitude_time(times, rates, m_bounds, n=50, b_value=1.0):
     dt = numpy.diff(t)
     dt = numpy.append(dt, dt[-1])
 
-    return rate2mag_vectorized(dt, r, m, b_value)
+    return rate2mag_vectorized(dt, r, m, b_value, seed)
