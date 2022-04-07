@@ -69,6 +69,7 @@ def seismogram(
     coord="zrt",
     out="displacement",
 ):
+    """Generate a seismogram (experimental)."""
     if wave not in {"rayleigh", "love", "both"}:
         raise ValueError()
 
