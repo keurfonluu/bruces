@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Luu"
+  given-names: "Keurfon"
+  orcid: "https://orcid.org/0000-0001-7927-0019"
+title: "bruces: A bunch of really useful codes for earthquake stuff"
+doi: 10.5281/zenodo.6422572
+url: https://github.com/keurfonluu/bruces
+license: BSD-3-Clause
