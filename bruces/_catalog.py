@@ -1,7 +1,7 @@
 from collections import namedtuple
 from datetime import datetime, timedelta
 
-import numpy
+import numpy as np
 
 from ._common import time_space_distances
 from ._decluster import decluster
@@ -19,7 +19,7 @@ Earthquake = namedtuple(
 
 def is_arraylike(arr, size):
     """Check input array."""
-    return isinstance(arr, (list, tuple, numpy.ndarray)) and numpy.size(arr) == size
+    return isinstance(arr, (list, tuple, np.ndarray)) and np.size(arr) == size
 
 
 class Catalog:
@@ -41,9 +41,9 @@ class Catalog:
             Magnitudes.
 
         """
-        if not isinstance(dates, (list, tuple, numpy.ndarray)):
+        if not isinstance(dates, (list, tuple, np.ndarray)):
             raise TypeError()
-        if any(not isinstance(time, (datetime, numpy.datetime64)) for time in dates):
+        if any(not isinstance(time, (datetime, np.datetime64)) for time in dates):
             raise TypeError()
         nev = len(dates)
 
@@ -53,11 +53,11 @@ class Catalog:
             if len(arr) != nev:
                 raise ValueError()
 
-        self._dates = numpy.asarray(dates)
-        self._eastings = numpy.asarray(eastings)
-        self._northings = numpy.asarray(northings)
-        self._depths = numpy.asarray(depths)
-        self._magnitudes = numpy.asarray(magnitudes)
+        self._dates = np.asarray(dates)
+        self._eastings = np.asarray(eastings)
+        self._northings = np.asarray(northings)
+        self._depths = np.asarray(depths)
+        self._magnitudes = np.asarray(magnitudes)
 
     def __len__(self):
         """Return number of earthquakes in catalog."""
@@ -72,7 +72,7 @@ class Catalog:
         m = self.magnitudes[islice]
 
         return (
-            Catalog(t, x, y, z, m) if numpy.ndim(t) > 0 else Earthquake(t, x, y, z, m)
+            Catalog(t, x, y, z, m) if np.ndim(t) > 0 else Earthquake(t, x, y, z, m)
         )
 
     def __iter__(self):
@@ -155,7 +155,7 @@ class Catalog:
         y = self.northings
         m = self.magnitudes
 
-        return numpy.transpose(
+        return np.transpose(
             [
                 time_space_distances(t, x, y, m, t[i], x[i], y[i], d, w)
                 for i in range(len(self))
@@ -168,8 +168,8 @@ class Catalog:
 
         Parameters
         ----------
-        tbins : datetime.timedelta, numpy.timedelta64 or sequence of datetime_like
-            If `tbins` is a :class:`datetime.timedelta` or a :class:`numpy.timedelta64`, it defines the width of each bin.
+        tbins : datetime.timedelta, np.timedelta64 or sequence of datetime_like
+            If `tbins` is a :class:`datetime.timedelta` or a :class:`np.timedelta64`, it defines the width of each bin.
             If `tbins` is a sequence of datetime_like, it defines a monotonically increasing list of bin edges.
 
         Returns
@@ -180,13 +180,13 @@ class Catalog:
             Bin edges.
 
         """
-        if isinstance(tbins, (timedelta, numpy.timedelta64)):
+        if isinstance(tbins, (timedelta, np.timedelta64)):
             tmin = min(self.dates)
             tmax = max(self.dates)
-            tbins = numpy.arange(tmin, tmax, tbins, dtype="M8[ms]").tolist()
+            tbins = np.arange(tmin, tmax, tbins, dtype="M8[ms]").tolist()
 
-        elif isinstance(tbins, (list, tuple, numpy.ndarray)):
-            if any(not isinstance(t, (datetime, numpy.datetime64)) for t in tbins):
+        elif isinstance(tbins, (list, tuple, np.ndarray)):
+            if any(not isinstance(t, (datetime, np.datetime64)) for t in tbins):
                 raise TypeError()
             tbins = tbins
 
@@ -195,9 +195,9 @@ class Catalog:
 
         ty = to_decimal_year(self.dates)
         tybins = to_decimal_year(tbins)
-        hist, _ = numpy.histogram(ty, bins=tybins)
+        hist, _ = np.histogram(ty, bins=tybins)
 
-        return hist / numpy.diff(tybins), tbins
+        return hist / np.diff(tybins), tbins
 
     @property
     def dates(self):

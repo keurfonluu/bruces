@@ -1,6 +1,6 @@
 from datetime import timedelta
 
-import numpy
+import numpy as np
 from numba import prange
 
 from .._common import jitted
@@ -11,7 +11,7 @@ __all__ = [
 ]
 
 
-_C = numpy.array(
+_C = np.array(
     [
         [0.0, 0.0, 0.0, 0.0, 0.0],
         [1.0 / 4.0, 0.0, 0.0, 0.0, 0.0],
@@ -20,10 +20,10 @@ _C = numpy.array(
         [439.0 / 216.0, -8.0, 3680.0 / 513.0, -845.0 / 4104.0, 0.0],
         [-8.0 / 27.0, 2.0, -3544.0 / 2565.0, 1859.0 / 4104.0, -11.0 / 40.0],
     ],
-    dtype=numpy.float64,
+    dtype=np.float64,
 )
 
-_W = numpy.array(
+_W = np.array(
     [
         [25.0 / 216.0, 0.0, 1408.0 / 2565.0, 2197.0 / 4101.0, -1.0 / 5.0, 0.0],
         [
@@ -35,7 +35,7 @@ _W = numpy.array(
             2.0 / 55.0,
         ],
     ],
-    dtype=numpy.float64,
+    dtype=np.float64,
 )
 
 
@@ -86,7 +86,7 @@ def rate(t, s, s0i, tci, tcrit, tmax, dt, dtmax, dtfac, rtol):
             + _W[1, 4] * k4
             + _W[1, 5] * k5
         )
-        eps = max(numpy.abs(ro5 - ro4) / ro5, 1.0e-16)
+        eps = max(np.abs(ro5 - ro4) / ro5, 1.0e-16)
 
         # Check convergence
         if eps > rtol:
@@ -108,14 +108,14 @@ def rate(t, s, s0i, tci, tcrit, tmax, dt, dtmax, dtfac, rtol):
                     dt = dti
                     i += 1
 
-    return numpy.interp(t, times, rates)
+    return np.interp(t, times, rates)
 
 
 @jitted(parallel=True)
 def rate_vectorized(t, s, s0i, tci, tcrit, tmax, dt, dtmax, dtfac, rtol):
     """Solve ODE for different integration points."""
     ns = len(s)
-    out = numpy.empty(s.shape, dtype=numpy.float64)
+    out = np.empty(s.shape, dtype=np.float64)
     for i in prange(ns):
         out[i] = rate(t, s[i], s0i[i], tci[i], tcrit, tmax, dt, dtmax, dtfac, rtol)
 
@@ -169,18 +169,18 @@ def seismicity_rate(
 
     def check_parameter(x, ndim, npts):
         """Check consistency of input parameter."""
-        if numpy.ndim(x) == 0:
-            x = x if ndim == 1 else numpy.full(npts, x, dtype=numpy.float64)
+        if np.ndim(x) == 0:
+            x = x if ndim == 1 else np.full(npts, x, dtype=np.float64)
 
         else:
-            x = numpy.asarray(x, dtype=numpy.float64)
+            x = np.asarray(x, dtype=np.float64)
             if x.size != npts:
                 raise ValueError()
 
         return x
 
     # Check stressing rate
-    s = numpy.copy(stress)
+    s = np.copy(stress)
     ndim = s.ndim
     if len(times) != (s.size if ndim == 1 else s.shape[1]):
         raise ValueError()
@@ -200,12 +200,12 @@ def seismicity_rate(
     dtmax = max_step if max_step is not None else 1.0 / 12.0
     dtfac = reduce_step_factor
 
-    if isinstance(dt, numpy.timedelta64):
+    if isinstance(dt, np.timedelta64):
         dt = dt.astype("timedelta64[ms]").tolist()
     if isinstance(dt, timedelta):
         dt = dt.total_seconds() / 3600.0 / 24.0 / 365.25
 
-    if isinstance(dtmax, numpy.timedelta64):
+    if isinstance(dtmax, np.timedelta64):
         dtmax = dtmax.astype("timedelta64[ms]").tolist()
     if isinstance(dtmax, timedelta):
         dtmax = dtmax.total_seconds() / 3600.0 / 24.0 / 365.25

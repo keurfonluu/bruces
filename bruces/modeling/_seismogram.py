@@ -1,6 +1,6 @@
 from functools import partial
 
-import numpy
+import numpy as np
 
 from disba import surf96, swegn96
 from disba._helpers import resample
@@ -22,30 +22,30 @@ pow = {
 def hpulse(w, t):
     wt = 0.5 * w * t
 
-    return numpy.exp(-1.0j * 2.0 * wt) * 4.0 * numpy.sin(0.5 * wt) ** 2.0 * numpy.sin(wt) / wt ** 3.0
+    return np.exp(-1.0j * 2.0 * wt) * 4.0 * np.sin(0.5 * wt) ** 2.0 * np.sin(wt) / wt ** 3.0
 
 
 @jitted
 def tpulse(w, t):
     wt = w * t
 
-    return numpy.exp(1.0j * wt) * numpy.sinc(0.5 * wt / numpy.pi) ** 2.0
+    return np.exp(1.0j * wt) * np.sinc(0.5 * wt / np.pi) ** 2.0
 
 
 @jitted
 def fill_spectrum(x, n):
     """Return hermitian symmetric spectrum."""
-    out = numpy.empty(n, dtype=numpy.complex_)
+    out = np.empty(n, dtype=np.complex_)
     out[0] = x[0].real
 
     if n % 2:
         out[1 : n // 2 + 1] = x
-        out[n // 2 + 1:] = numpy.conjugate(x)[::-1]
+        out[n // 2 + 1:] = np.conjugate(x)[::-1]
 
     else:
         out[1 : n // 2] = x[:-1]
         out[n // 2] = 2.0 * x[-1].real  # Aliased
-        out[n // 2 + 1:] = numpy.conjugate(x[:-1])[::-1]
+        out[n // 2 + 1:] = np.conjugate(x[:-1])[::-1]
 
     return out
 
@@ -86,24 +86,24 @@ def seismogram(
         raise ValueError()
 
     # Velocity model
-    thickness, velocity_p, velocity_s, density = numpy.transpose(velocity_model)
+    thickness, velocity_p, velocity_s, density = np.transpose(velocity_model)
 
     # Source parameters
     r, phi, h = source
     phi = (phi - 90.0) * 360.0
-    phi = numpy.deg2rad(phi)
-    cosp = numpy.cos(phi)
-    sinp = numpy.sin(phi)
+    phi = np.deg2rad(phi)
+    cosp = np.cos(phi)
+    sinp = np.sin(phi)
     cosp2 = cosp ** 2.0
     sinp2 = sinp ** 2.0
 
     # Components of moment tensor
     # Rescale to account for mixed units (return cm if M0 is dyne.cm)
-    Mxx, Mxy, Mxz, Myx, Myy, Myz, Mzx, Mzy, Mzz = numpy.ravel(
+    Mxx, Mxy, Mxz, Myx, Myy, Myz, Mzx, Mzy, Mzz = np.ravel(
         (
             moment_tensor
             if moment_tensor is not None
-            else numpy.eye(3, dtype=numpy.float64)
+            else np.eye(3, dtype=np.float64)
         )
     ) * 1.0e-19
 
@@ -132,7 +132,7 @@ def seismogram(
     nsamples = time_max * sampling_rate + 1
     df = sampling_rate / nsamples
     nf = nsamples // 2 + 1
-    freq = df * numpy.arange(1, nf)
+    freq = df * np.arange(1, nf)
 
     # Cutoff frequency and taper width
     if freq_max is not None:
@@ -147,13 +147,13 @@ def seismogram(
     d, a, b, rho = resample(thickness, velocity_p, velocity_s, density, dh)
     
     depth = d.cumsum() - d[0]
-    dz = numpy.diff(depth)
+    dz = np.diff(depth)
     nf = int(nf)
     nsamples = int(nsamples)
 
-    Uz = numpy.zeros(nf - 1, dtype=numpy.complex_)
-    Ur = numpy.zeros(nf - 1, dtype=numpy.complex_)
-    Ut = numpy.zeros(nf - 1, dtype=numpy.complex_)
+    Uz = np.zeros(nf - 1, dtype=np.complex_)
+    Ur = np.zeros(nf - 1, dtype=np.complex_)
+    Ut = np.zeros(nf - 1, dtype=np.complex_)
     for wave in wave:
         iwave = 1 if wave == "love" else 3
 
@@ -164,7 +164,7 @@ def seismogram(
             for i, T in enumerate(t):
                 if U[i] > 0.0:
                     if T * freq_max >= 1.0:
-                        om = 2.0 * numpy.pi / T
+                        om = 2.0 * np.pi / T
                         kn = om / c[i]
                         knr = kn * r
 
@@ -172,45 +172,45 @@ def seismogram(
                         if wave == "rayleigh":
                             r1 = egn[:, 0]
                             r2 = egn[:, 1]
-                            I1 = 0.5 * numpy.dot(d, rho * (r1 ** 2 + r2 ** 2))
+                            I1 = 0.5 * np.dot(d, rho * (r1 ** 2 + r2 ** 2))
 
-                            dr1dz = numpy.diff(r1) / dz
-                            dr2dz = numpy.diff(r2) / dz
-                            dr1dz = numpy.append(dr1dz, dr1dz[-1])
-                            dr2dz = numpy.append(dr2dz, dr2dz[-1])
+                            dr1dz = np.diff(r1) / dz
+                            dr2dz = np.diff(r2) / dz
+                            dr1dz = np.append(dr1dz, dr1dz[-1])
+                            dr2dz = np.append(dr2dz, dr2dz[-1])
 
-                            r1z = numpy.interp(z, depth, r1)
-                            r2z = numpy.interp(z, depth, r2)
-                            r1h = numpy.interp(h, depth, r1)
-                            r2h = numpy.interp(h, depth, r2)
-                            dr1dzh = numpy.interp(h, depth, dr1dz)
-                            dr2dzh = numpy.interp(h, depth, dr2dz)
+                            r1z = np.interp(z, depth, r1)
+                            r2z = np.interp(z, depth, r2)
+                            r1h = np.interp(h, depth, r1)
+                            r2h = np.interp(h, depth, r2)
+                            dr1dzh = np.interp(h, depth, dr1dz)
+                            dr2dzh = np.interp(h, depth, dr2dz)
 
                             cst = kn * r1h * (Mxx * cosp2 + (Mxy + Myx) * sinp * cosp + Myy * sinp2)
                             cst += 1.0j * dr1dzh * (Mxz * cosp + Myz * sinp)
                             cst += -1.0j * kn * r2h * (Mzx * cosp + Mzy * sinp)
                             cst += dr2dzh * Mzz
-                            cst *= 0.125 / c[i] / U[i] / I1 * (2.0 / numpy.pi / knr) ** 0.5
+                            cst *= 0.125 / c[i] / U[i] / I1 * (2.0 / np.pi / knr) ** 0.5
 
-                            Uz[i] += r2z * numpy.exp(1.0j * (knr + 0.25 * numpy.pi)) * cst
-                            Ur[i] += r1z * numpy.exp(1.0j * (knr - 0.25 * numpy.pi)) * cst
+                            Uz[i] += r2z * np.exp(1.0j * (knr + 0.25 * np.pi)) * cst
+                            Ur[i] += r1z * np.exp(1.0j * (knr - 0.25 * np.pi)) * cst
 
                         else:
                             l1 = egn[:, 0]
-                            I1 = 0.5 * numpy.dot(d, rho * l1 ** 2)
+                            I1 = 0.5 * np.dot(d, rho * l1 ** 2)
 
-                            dl1dz = numpy.diff(l1) / dz
-                            dl1dz = numpy.append(dl1dz, dl1dz[-1])
+                            dl1dz = np.diff(l1) / dz
+                            dl1dz = np.append(dl1dz, dl1dz[-1])
 
-                            l1z = numpy.interp(z, depth, l1)
-                            l1h = numpy.interp(h, depth, l1)
-                            dl1dzh = numpy.interp(h, depth, dl1dz)
+                            l1z = np.interp(z, depth, l1)
+                            l1h = np.interp(h, depth, l1)
+                            dl1dzh = np.interp(h, depth, dl1dz)
 
                             cst = 1.0j * kn * l1h * (Mxx * sinp * cosp - Myx * cosp2 + Mxy * sinp2 - Myy * sinp * cosp)
                             cst += -dl1dzh * (Mxz * sinp - Myz * cosp)
-                            cst *= 0.125 / c[i] / U[i] / I1 * (2.0 / numpy.pi / knr) ** 0.5
+                            cst *= 0.125 / c[i] / U[i] / I1 * (2.0 / np.pi / knr) ** 0.5
 
-                            Ut[i] += l1z * numpy.exp(1.0j * (knr + 0.25 * numpy.pi)) * cst
+                            Ut[i] += l1z * np.exp(1.0j * (knr + 0.25 * np.pi)) * cst
 
                 else:
                     break
@@ -222,7 +222,7 @@ def seismogram(
 
     # Convolve with source wavelet
     if pulse is not None:
-        om = 2.0 * numpy.pi * freq
+        om = 2.0 * np.pi * freq
         wavelet = pulse(om)
 
         Uz *= wavelet
@@ -231,22 +231,22 @@ def seismogram(
 
     # Apply time shift (useful for when pulse is wrapped around)
     if time_shift:
-        om = 2.0 * numpy.pi * freq
-        tshift = numpy.exp(1.0j * om * time_shift)
+        om = 2.0 * np.pi * freq
+        tshift = np.exp(1.0j * om * time_shift)
         Uz *= tshift
         Ur *= tshift
         Ut *= tshift
 
     # Apply lowpass filter with sin taper to limit ringing
     if taper_width:
-        lpfilt = numpy.zeros(nf, dtype=numpy.float64)
+        lpfilt = np.zeros(nf, dtype=np.float64)
         i1 = int(freq_max // df // 2)
         i2 = int(taper_width // df // 2)
-        step = 0.5 * numpy.pi / i2
+        step = 0.5 * np.pi / i2
 
         lpfilt[:i1] = 1.0
         for i in range(i2):
-            lpfilt[i1 + i] = numpy.sin(0.5 * numpy.pi - i * step) ** 2.0
+            lpfilt[i1 + i] = np.sin(0.5 * np.pi - i * step) ** 2.0
 
         Uz *= lpfilt[1:]
         Ur *= lpfilt[1:]
@@ -254,7 +254,7 @@ def seismogram(
 
     # Multiply by iw depending on output type (differentiate w.r.t. time)
     if out in pow:
-        om = 2.0 * numpy.pi * freq
+        om = 2.0 * np.pi * freq
         iw = (1.0j * om) ** pow[out]
 
         Uz *= iw
@@ -267,9 +267,9 @@ def seismogram(
     Ut = fill_spectrum(Ut, nsamples)
 
     # Transform signal to time domain
-    uz = numpy.fft.ifft(Uz)[::-1].real
-    ur = numpy.fft.ifft(Ur)[::-1].real
-    ut = numpy.fft.ifft(Ut)[::-1].real
+    uz = np.fft.ifft(Uz)[::-1].real
+    ur = np.fft.ifft(Ur)[::-1].real
+    ut = np.fft.ifft(Ut)[::-1].real
 
     if coord == "zrt":
         return uz, ur, ut

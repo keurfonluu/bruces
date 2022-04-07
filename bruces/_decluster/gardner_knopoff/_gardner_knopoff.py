@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 from numba import prange
 
 from ..._common import jitted
@@ -36,7 +36,7 @@ def _decluster(t, x, y, z, m):
     """Gardner-Knopoff method."""
     N = len(t)
 
-    bg = numpy.ones(N, dtype=numpy.bool_)
+    bg = np.ones(N, dtype=np.bool_)
     for i in prange(N):
         mag = m[i]
 
@@ -51,7 +51,7 @@ def _decluster(t, x, y, z, m):
         # Loop over catalog
         for j in range(N):
             if m[j] < mag:
-                t_ij = numpy.abs(t[j] - t[i])
+                t_ij = np.abs(t[j] - t[i])
                 if t_ij < dt:
                     r_ij = ((x[j] - x[i]) ** 2 + (y[j] - y[i]) ** 2) ** 0.5
                     if r_ij < dr:

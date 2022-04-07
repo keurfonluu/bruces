@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 from numba import jit
 
 
@@ -22,8 +22,8 @@ def time_space_distances(t, x, y, m, ti, xi, yi, d=1.5, w=0.0):
     N = len(t)
 
     eta_i = 1.0e20
-    T_i = numpy.nan
-    R_i = numpy.nan
+    T_i = np.nan
+    R_i = np.nan
     for j in range(N):
         t_ij = t[j] - ti
 

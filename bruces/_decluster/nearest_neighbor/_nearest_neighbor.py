@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 from numba import prange
 
 from ..._common import jitted, time_space_distances
@@ -34,7 +34,7 @@ def decluster(catalog, d=1.5, w=0.0, eta_0=0.1, alpha_0=0.1, M=100, seed=None):
 
     """
     if seed is not None:
-        numpy.random.seed(seed)
+        np.random.seed(seed)
 
     t = to_decimal_year(catalog.dates)  # Dates in years
     x = catalog.eastings
@@ -53,8 +53,8 @@ def decluster(catalog, d=1.5, w=0.0, eta_0=0.1, alpha_0=0.1, M=100, seed=None):
 
     # Calculate retention probabilities and identify background events
     P = alpha * 10.0 ** alpha_0
-    U = P > numpy.random.rand(len(catalog))
-    bg = numpy.nonzero(U)[0]
+    U = P > np.random.rand(len(catalog))
+    bg = np.nonzero(U)[0]
 
     return catalog[bg]
 
@@ -64,7 +64,7 @@ def proximity(t, x, y, m, ti, xi, yi, d, w):
     """Calculate nearest-neighbor proximity."""
     T, R = time_space_distances(t, x, y, m, ti, xi, yi, d, w)
 
-    return T * R if not numpy.isnan(T) else 1.0e20
+    return T * R if not np.isnan(T) else 1.0e20
 
 
 @jitted(parallel=True)
@@ -72,7 +72,7 @@ def _step1(t, x, y, m, d, w):
     """Calculate nearest-neighbor proximity for each event."""
     N = len(t)
 
-    eta = numpy.empty(N, dtype=numpy.float64)
+    eta = np.empty(N, dtype=np.float64)
     for i in prange(N):
         eta[i] = proximity(t, x, y, m, t[i], x[i], y[i], d, w)
 
@@ -83,20 +83,20 @@ def _step1(t, x, y, m, d, w):
 def _step2(t, x, y, m, eta, d, w, eta_0, M, seed):
     """Calculate proximity vector for each event."""
     if seed is not None:
-        numpy.random.seed(seed + 1)
+        np.random.seed(seed + 1)
 
     N = len(t)
 
     # Select N0 events that satisfy eta_i > eta_0
-    ij = numpy.empty(N, dtype=numpy.int32)
+    ij = np.empty(N, dtype=np.int32)
     for i in range(N):
         ij[i] = 1 if eta[i] > eta_0 else 0
     N0 = ij.sum()
 
     # Initialize arrays
-    xm = numpy.empty(N0)
-    ym = numpy.empty(N0)
-    mm = numpy.empty(N0)
+    xm = np.empty(N0)
+    ym = np.empty(N0)
+    mm = np.empty(N0)
 
     j = 0
     for i in range(N):
@@ -107,14 +107,14 @@ def _step2(t, x, y, m, eta, d, w, eta_0, M, seed):
             j += 1
 
     # Loop over catalog
-    kappa = numpy.empty((N, M), dtype=numpy.float64)
+    kappa = np.empty((N, M), dtype=np.float64)
 
     tmin = t.min()
     tmax = t.max()
     for k in range(M):
         # Generate a randomized-reshuffled catalog
-        tm = numpy.random.uniform(tmin, tmax, N0)
-        mm[:] = m[numpy.random.permutation(N0)]
+        tm = np.random.uniform(tmin, tmax, N0)
+        mm[:] = m[np.random.permutation(N0)]
 
         # Calculate proximity vectors with respect to randomized catalog
         for i in prange(N):
@@ -129,7 +129,7 @@ def _step3(eta, kappa):
     N = len(kappa)
     M = len(kappa[0, :])
 
-    alpha = numpy.empty(N, dtype=numpy.float64)
+    alpha = np.empty(N, dtype=np.float64)
     for i in prange(N):
         # Remove events without earlier events
         logk_sum = 0.0
@@ -137,7 +137,7 @@ def _step3(eta, kappa):
         for j in range(M):
             k = kappa[i, j]
             if k < 1.0e20:
-                logk_sum += numpy.log10(k)
+                logk_sum += np.log10(k)
                 count += 1
 
         # First event has no earlier event

@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 
 from .._common import jitted
 from .._helpers import to_decimal_year
@@ -23,31 +23,31 @@ def rate2mag(dt, r, m, bm):
         nm = len(m)
 
         # Calculate cumulative distribution function
-        cdf = numpy.empty(nm, dtype=numpy.float64)
+        cdf = np.empty(nm, dtype=np.float64)
         for i in range(nm):
             cdf[i] = 1.0 - rtm[i:].sum() * dmdt / neq
 
         # Sample neq magnitudes from CDF
-        mout = numpy.interp(numpy.random.rand(int(neq)), cdf, m)
+        mout = np.interp(np.random.rand(int(neq)), cdf, m)
 
         return mout
 
     else:
-        return numpy.empty(0)
+        return np.empty(0)
 
 
 @jitted
 def rate2mag_vectorized(dt, r, m, b, seed):
     """Generate magnitude samples for every time steps."""
     if seed is not None:
-        numpy.random.seed(seed)
+        np.random.seed(seed)
 
     nm = len(m)
     nr = len(r)
 
     # Calculate Gutenberg-Richter rate scaling factor
-    blg10 = b * numpy.log(10.0)
-    bm = numpy.empty(nm, dtype=numpy.float64)
+    blg10 = b * np.log(10.0)
+    bm = np.empty(nm, dtype=np.float64)
     for i in range(nm):
         bm[i] = blg10 * 10.0 ** (-b * (m[i] - m[0]))
 
@@ -85,20 +85,20 @@ def magnitude_time(times, rates, m_bounds, n=50, b_value=1.0, seed=None):
 
     """
     # Check seismicity rate
-    r = numpy.asarray(rates)
+    r = np.asarray(rates)
     if r.ndim != 1 or len(times) != r.size:
         raise ValueError()
 
     # Check magnitude bounds
     if len(m_bounds) != 2 or m_bounds[0] - m_bounds[1] >= 0.0:
         raise ValueError()
-    m = numpy.linspace(m_bounds[0], m_bounds[1], n)
+    m = np.linspace(m_bounds[0], m_bounds[1], n)
 
     # Convert datetimes to decimal years
     t = to_decimal_year(times)
 
     # Convert times to time increments for integration
-    dt = numpy.diff(t)
-    dt = numpy.append(dt, dt[-1])
+    dt = np.diff(t)
+    dt = np.append(dt, dt[-1])
 
     return rate2mag_vectorized(dt, r, m, b_value, seed)
