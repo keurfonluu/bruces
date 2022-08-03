@@ -133,7 +133,7 @@ class Catalog:
         """
         return decluster(self, algorithm, **kwargs)
 
-    def time_space_distances(self, d=1.5, w=0.0, prune_nans=False):
+    def time_space_distances(self, d=1.5, w=0.0, returns_log=True, prune_nans=False):
         """
         Get rescaled time and space distances for each earthquake in the catalog.
 
@@ -143,6 +143,8 @@ class Catalog:
             Fractal dimension of epicenter/hypocenter.
         w : scalar, optional, default 0.0
             Magnitude weighting factor (usually b-value).
+        returns_log : bool, optional, default True
+            If `True`, return distance as log10.
         prune_nans : bool, optional, default False
             If `True`, remove NaN values from output.
 
@@ -170,6 +172,10 @@ class Catalog:
             idx = ~np.isnan(T)
             T = T[idx]
             R = R[idx]
+
+        if returns_log:
+            T = np.log10(T)
+            R = np.log10(R)
 
         return T, R
 
@@ -241,9 +247,7 @@ class Catalog:
         text_args_.update(text_args)
 
         # Calculate rescaled time and space distances
-        T, R = self.time_space_distances(d, w, prune_nans=True)
-        T = np.log10(T)
-        R = np.log10(R)
+        T, R = self.time_space_distances(d, w, returns_log=True, prune_nans=True)
 
         # Determine optimal axes
         T2 = prune_outliers(T)
