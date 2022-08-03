@@ -133,7 +133,7 @@ class Catalog:
         """
         return decluster(self, algorithm, **kwargs)
 
-    def time_space_distances(self, d=1.5, w=0.0):
+    def time_space_distances(self, d=1.5, w=0.0, prune_nans=False):
         """
         Get rescaled time and space distances for each earthquake in the catalog.
 
@@ -143,6 +143,8 @@ class Catalog:
             Fractal dimension of epicenter/hypocenter.
         w : scalar, optional, default 0.0
             Magnitude weighting factor (usually b-value).
+        prune_nans : bool, optional, default False
+            If `True`, remove NaN values from output.
 
         Returns
         -------
@@ -157,12 +159,19 @@ class Catalog:
         y = self.northings
         m = self.magnitudes
 
-        return np.transpose(
+        T, R = np.transpose(
             [
                 time_space_distances(t, x, y, m, t[i], x[i], y[i], d, w)
                 for i in range(len(self))
             ]
         )
+
+        if prune_nans:
+            idx = ~np.isnan(T)
+            T = T[idx]
+            R = R[idx]
+
+        return T, R
 
     def plot_time_space_distances(
         self,
@@ -202,7 +211,7 @@ class Catalog:
 
         """
 
-        def remove_outliers(x):
+        def prune_outliers(x):
             """Median Absolute Deviation."""
             p50 = np.median(x)
             mad = 1.4826 * np.median(np.abs(x - p50))
@@ -232,16 +241,13 @@ class Catalog:
         text_args_.update(text_args)
 
         # Calculate rescaled time and space distances
-        T, R = self.time_space_distances(d, w)
-        
-        # Remove nan values and apply log
-        idx = ~np.isnan(T)
-        T = np.log10(T[idx])
-        R = np.log10(R[idx])
+        T, R = self.time_space_distances(d, w, prune_nans=True)
+        T = np.log10(T)
+        R = np.log10(R)
 
         # Determine optimal axes
-        T2 = remove_outliers(T)
-        R2 = remove_outliers(R)
+        T2 = prune_outliers(T)
+        R2 = prune_outliers(R)
         
         xmin, xmax = T2.min(), T2.max()
         ymin, ymax = R2.min(), R2.max()
