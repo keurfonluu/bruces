@@ -17,7 +17,7 @@ def decluster(catalog, d=1.5, w=0.0, eta_0=0.1, alpha_0=0.1, M=100, seed=None):
     d : scalar, optional, default 1.5
         Fractal dimension of epicenter/hypocenter.
     w : scalar, optional, default 0.0
-        Magnitude weighing factor (usually b-value).
+        Magnitude weighting factor (usually b-value).
     eta_0 : scalar, optional, default 0.1
         Initial cutoff threshold.
     alpha_0 : scalar, optional, default 0.1

@@ -106,14 +106,16 @@ class Catalog:
         ----------
         algorithm : str, optional, default 'nearest-neighbor'
             Declustering algorithm:
-            - 'nearest-neighbor': nearest-neighbor algorithm (after Zaliapin and Ben-Zion, 2020).
+
+             - 'gardner-knopoff': Gardner-Knopoff method
+             - 'nearest-neighbor': nearest-neighbor algorithm (after Zaliapin and Ben-Zion, 2020)
 
         Other Parameters
         ----------------
         d : scalar, optional, default 1.5
             Only if ``algorithm = "nearest-neighbor"``. Fractal dimension of epicenter/hypocenter.
         w : scalar, optional, default 0.0
-            Only if ``algorithm = "nearest-neighbor"``. Magnitude weighing factor (usually b-value).
+            Only if ``algorithm = "nearest-neighbor"``. Magnitude weighting factor (usually b-value).
         eta_0 : scalar, optional, default 0.1
             Only if ``algorithm = "nearest-neighbor"``. Initial cutoff threshold.
         alpha_0 : scalar, optional, default 0.1
@@ -140,7 +142,7 @@ class Catalog:
         d : scalar, optional, default 1.5
             Fractal dimension of epicenter/hypocenter.
         w : scalar, optional, default 0.0
-            Magnitude weighing factor (usually b-value).
+            Magnitude weighting factor (usually b-value).
 
         Returns
         -------
@@ -182,7 +184,7 @@ class Catalog:
         d : scalar, optional, default 1.5
             Fractal dimension of epicenter/hypocenter.
         w : scalar, optional, default 0.0
-            Magnitude weighing factor (usually b-value).
+            Magnitude weighting factor (usually b-value).
         eta_0 : scalar, array_like or None, optional, None
             Constant eta_0 values for which to draw a constant line.
         kde : bool, optional, default True
