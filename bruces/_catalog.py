@@ -206,7 +206,7 @@ class Catalog:
         return self.__fit_cutoff_threshold(T, R)
 
     @staticmethod
-    def __fit_cutoff_threshold(T, R):
+    def __fit_cutoff_threshold(T, R, debug=False):
         """Fit cutoff threshold."""
 
         def gaussian(x, A, mu, sig):
@@ -225,6 +225,14 @@ class Catalog:
         # Estimate optimal eta_0
         _, mu1, sig1, _, mu2, sig2 = params
         eta_0 = mu1 - 2.0 * abs(sig1) if mu1 > mu2 else mu2 - 2.0 * abs(sig2)
+
+        if debug:
+            _, ax = plt.subplots(1, 1)
+            ax.hist(T + R, bins=50)
+            ax.plot(xedges, bimodal(xedges, *params), color="black", linewidth=2)
+            ax.plot(xedges, gaussian(xedges, *params[:3]), color="black", linestyle="--")
+            ax.plot(xedges, gaussian(xedges, *params[3:]), color="black", linestyle="--")
+            ax.axvline(eta_0, color="red")
 
         return eta_0
 
