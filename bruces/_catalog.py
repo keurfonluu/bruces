@@ -119,7 +119,7 @@ class Catalog:
             Only if ``algorithm = "nearest-neighbor"``. Magnitude weighting factor (usually b-value).
         eta_0 : scalar or None, optional, default None
             Only if ``algorithm = "nearest-neighbor"``. Initial cutoff threshold (as log10). If `None`, invoke :meth:`bruces.Catalog.fit_cutoff_threshold`.
-        alpha_0 : scalar, optional, default 0.1
+        alpha_0 : scalar, optional, default 1.0
             Only if ``algorithm = "nearest-neighbor"``. Cluster threshold.
         M : int, optional, default 100
             Only if ``algorithm = "nearest-neighbor"``. Number of reshufflings.
