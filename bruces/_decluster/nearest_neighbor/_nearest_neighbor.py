@@ -19,7 +19,7 @@ def decluster(catalog, d=1.5, w=0.0, eta_0=None, alpha_0=0.1, M=100, seed=None):
     w : scalar, optional, default 0.0
         Magnitude weighting factor (usually b-value).
     eta_0 : scalar or None, optional, default None
-        Initial cutoff threshold. If `None`, invoke :meth:`bruces.Catalog.fit_cutoff_threshold`.
+        Initial cutoff threshold (as log10). If `None`, invoke :meth:`bruces.Catalog.fit_cutoff_threshold`.
     alpha_0 : scalar, optional, default 0.1
         Cluster threshold.
     M : int, optional, default 100
@@ -38,6 +38,7 @@ def decluster(catalog, d=1.5, w=0.0, eta_0=None, alpha_0=0.1, M=100, seed=None):
 
     if eta_0 is None:
         eta_0 = catalog.fit_cutoff_threshold(d, w)
+        eta_0 = 10.0 ** eta_0
 
     t = to_decimal_year(catalog.dates)  # Dates in years
     x = catalog.eastings
