@@ -2,6 +2,8 @@ from collections import namedtuple
 from datetime import datetime, timedelta
 
 import numpy as np
+import matplotlib.pyplot as plt
+from scipy.stats import gaussian_kde
 
 from ._common import time_space_distances
 from ._decluster import decluster
@@ -159,6 +161,145 @@ class Catalog:
                 for i in range(len(self))
             ]
         )
+
+    def plot_time_space_distances(
+        self,
+        d=1.5,
+        w=0.0,
+        eta_0=None,
+        kde=True,
+        bins=20,
+        hist_args=None,
+        line_args=None,
+        text_args=None,
+        ax=None,
+    ):
+        """
+        Plot rescaled time vs space distances.
+
+        Parameters
+        ----------
+        d : scalar, optional, default 1.5
+            Fractal dimension of epicenter/hypocenter.
+        w : scalar, optional, default 0.0
+            Magnitude weighing factor (usually b-value).
+        eta_0 : scalar, array_like or None, optional, None
+            Constant eta_0 values for which to draw a constant line.
+        kde : bool, optional, default True
+            If `True`, use Gaussian Kernel Density Estimator.
+        bins : int, optional, default 20
+            Number of bins for both axes.
+        hist_args : dict or None, optional, default None
+            Plot arguments passed to :func:`matplotlib.pyplot.contourf` or :func:`matplotlib.pyplot.pcolormesh`.
+        line_args : dict or None, optional, default None
+            Plot arguments passed to :func:`matplotlib.pyplot.plot`.
+        text_args : dict or None, optional, default None
+            Plot arguments passed to :func:`matplotlib.pyplot.text`.
+        ax : :class:`matplotlib.pyplot.Axes` or None, optional, default None
+            Matplotlib axes.
+
+        """
+
+        def remove_outliers(x):
+            """Median Absolute Deviation."""
+            p50 = np.median(x)
+            mad = 1.4826 * np.median(np.abs(x - p50))
+
+            return x[np.abs((x - p50) / mad) < 3.0]
+
+        if eta_0 is not None and not (np.ndim(eta_0) in {0, 1}):
+            raise TypeError()
+
+        # Default plot arguments
+        hist_args = hist_args if hist_args else {}
+        line_args = line_args if line_args else {}
+        text_args = text_args if text_args else {}
+
+        hist_args_ = {"cmap": "Blues"}
+        line_args_ = {"color": "black", "linestyle": ":"}
+        text_args_ = {
+            "rotation": -45.0,
+            "rotation_mode": "anchor",
+            "transform_rotates_text": True,
+        }
+        if kde:
+            hist_args_["levels"] = 20
+
+        hist_args_.update(hist_args)
+        line_args_.update(line_args)
+        text_args_.update(text_args)
+
+        # Calculate rescaled time and space distances
+        T, R = self.time_space_distances(d, w)
+        
+        # Remove nan values and apply log
+        idx = ~np.isnan(T)
+        T = np.log10(T[idx])
+        R = np.log10(R[idx])
+
+        # Determine optimal axes
+        T2 = remove_outliers(T)
+        R2 = remove_outliers(R)
+        
+        xmin, xmax = T2.min(), T2.max()
+        ymin, ymax = R2.min(), R2.max()
+
+        xmin = np.sign(xmin) * np.ceil(np.abs(xmin))
+        xmax = np.sign(xmax) * np.ceil(np.abs(xmax))
+        ymin = np.sign(ymin) * np.ceil(np.abs(ymin))
+        ymax = np.sign(ymax) * np.ceil(np.abs(ymax))
+
+        xedges = np.linspace(xmin, xmax, bins)
+        yedges = np.linspace(ymin, ymax, bins)
+        X, Y = np.meshgrid(xedges, yedges)
+
+        # Calculate density
+        if kde:
+            kernel = gaussian_kde((T, R))
+            H = kernel(np.vstack([X.ravel(), Y.ravel()])).T.reshape(X.shape)
+
+        else:
+            H = np.histogram2d(T, R, bins=(xedges, yedges), density=True)[0]
+            H = H.T
+
+        # Plot density
+        if ax is None:
+            _, ax = plt.subplots(1, 1, figsize=(6, 6))
+
+        if kde:
+            ax.contourf(X, Y, H, **hist_args_)
+        
+        else:
+            ax.pcolormesh(X, Y, H, **hist_args_)
+
+        # Plot constant eta_0 lines
+        if eta_0 is not None:
+            xx = np.array([xmin, xmax])
+            
+            if np.ndim(eta_0) == 0:
+                eta_0 = [eta_0]
+
+            eta_0 = np.asarray(eta_0)
+            for value in eta_0:
+                ax.plot(xx, value - xx, **line_args_)
+
+                # Annotation
+                xt = xmin + 0.1 * (xmax - xmin)
+                yt = value - xt + 0.05
+                if yt >= ymax:
+                    xt = xmax - 0.1 * (xmax - xmin)
+                    yt = value - xt + 0.05
+
+                if ymin < yt < ymax:
+                    ax.text(xt, yt, f"{value:.1f}", **text_args_)
+
+        # Plot parameters
+        ax.set_xlabel("Rescaled time ($\log_{10} T$)")
+        ax.set_ylabel("Rescaled distance ($\log_{10} R$)")
+        ax.set_xlim(xmin, xmax)
+        ax.set_ylim(ymin, ymax)
+
+        return ax
 
     def seismicity_rate(self, tbins):
         """
