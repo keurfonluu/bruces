@@ -323,6 +323,15 @@ class Catalog:
         ymin = np.sign(ymin) * np.ceil(np.abs(ymin))
         ymax = np.sign(ymax) * np.ceil(np.abs(ymax))
 
+        dx = xmax - xmin
+        dy = ymax - ymin
+        
+        if dx >= dy:
+            ymax = ymin + dx
+
+        else:
+            xmax = xmin + dy
+
         xedges = np.linspace(xmin, xmax, bins)
         yedges = np.linspace(ymin, ymax, bins)
         X, Y = np.meshgrid(xedges, yedges)
