@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.optimize import curve_fit
 from scipy.stats import gaussian_kde
 
 from ._common import time_space_distances
@@ -116,8 +117,8 @@ class Catalog:
             Only if ``algorithm = "nearest-neighbor"``. Fractal dimension of epicenter/hypocenter.
         w : scalar, optional, default 0.0
             Only if ``algorithm = "nearest-neighbor"``. Magnitude weighting factor (usually b-value).
-        eta_0 : scalar, optional, default 0.1
-            Only if ``algorithm = "nearest-neighbor"``. Initial cutoff threshold.
+        eta_0 : scalar or None, optional, default None
+            Only if ``algorithm = "nearest-neighbor"``. Initial cutoff threshold. If `None`, invoke :meth:`bruces.Catalog.fit_cutoff_threshold`.
         alpha_0 : scalar, optional, default 0.1
             Only if ``algorithm = "nearest-neighbor"``. Cluster threshold.
         M : int, optional, default 100
@@ -179,13 +180,61 @@ class Catalog:
 
         return T, R
 
+    def fit_cutoff_threshold(self, d=1.5, w=0.0):
+        """
+        Estimate the optimal cutoff threshold for nearest-neighbor.
+
+        Parameters
+        ----------
+        d : scalar, optional, default 1.5
+            Fractal dimension of epicenter/hypocenter.
+        w : scalar, optional, default 0.0
+            Magnitude weighting factor (usually b-value).
+
+        Returns
+        -------
+        float
+            Optimal initial cutoff threshold.
+
+        Note
+        ----
+        This function assumes that the catalog is clustered.
+        
+        """
+        T, R = self.time_space_distances(d, w, returns_log=True, prune_nans=True)
+
+        return self.__fit_cutoff_threshold(T, R)
+
+    @staticmethod
+    def __fit_cutoff_threshold(T, R):
+        """Fit cutoff threshold."""
+
+        def gaussian(x, A, mu, sig):
+            """Gaussian distribution function."""
+            return A * np.exp(-0.5 * ((x - mu) / sig) ** 2)
+        
+        def bimodal(x, A1, mu1, sig1, A2, mu2, sig2):
+            """Bimodal Gaussian distribution function."""
+            return gaussian(x, A1, mu1, sig1) + gaussian(x, A2, mu2, sig2)
+
+        # Fit a bimodal distribution to data
+        hist, bin_edges = np.histogram(T + R, bins=50)
+        xedges = 0.5 * (bin_edges[1:] + bin_edges[:-1])
+        params, _ = curve_fit(bimodal, xedges, hist)
+
+        # Estimate optimal eta_0
+        _, mu1, sig1, _, mu2, sig2 = params
+        eta_0 = mu1 - 2.0 * sig1 if mu1 > mu2 else mu2 - 2.0 * sig2
+
+        return eta_0
+
     def plot_time_space_distances(
         self,
         d=1.5,
         w=0.0,
         eta_0=None,
         kde=True,
-        bins=20,
+        bins=50,
         hist_args=None,
         line_args=None,
         text_args=None,
@@ -200,11 +249,11 @@ class Catalog:
             Fractal dimension of epicenter/hypocenter.
         w : scalar, optional, default 0.0
             Magnitude weighting factor (usually b-value).
-        eta_0 : scalar, array_like or None, optional, None
-            Constant eta_0 values for which to draw a constant line.
+        eta_0 : scalar, 'auto', array_like or None, optional, None
+            Initial cutoff threshold values for which to draw a constant line. If `eta_0 = "auto"`, invoke :meth:`bruces.Catalog.fit_cutoff_threshold`.
         kde : bool, optional, default True
             If `True`, use Gaussian Kernel Density Estimator.
-        bins : int, optional, default 20
+        bins : int, optional, default 50
             Number of bins for both axes.
         hist_args : dict or None, optional, default None
             Plot arguments passed to :func:`matplotlib.pyplot.contourf` or :func:`matplotlib.pyplot.pcolormesh`.
@@ -213,6 +262,11 @@ class Catalog:
         text_args : dict or None, optional, default None
             Plot arguments passed to :func:`matplotlib.pyplot.text`.
         ax : :class:`matplotlib.pyplot.Axes` or None, optional, default None
+            Matplotlib axes.
+
+        Returns
+        -------
+        :class:`matplotlib.pyplot.Axes`
             Matplotlib axes.
 
         """
@@ -287,6 +341,9 @@ class Catalog:
         # Plot constant eta_0 lines
         if eta_0 is not None:
             xx = np.array([xmin, xmax])
+
+            if eta_0 == "auto":
+                eta_0 = self.__fit_cutoff_threshold(T, R)
             
             if np.ndim(eta_0) == 0:
                 eta_0 = [eta_0]
