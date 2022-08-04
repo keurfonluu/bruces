@@ -113,9 +113,9 @@ class Catalog:
 
         Other Parameters
         ----------------
-        d : scalar, optional, default 1.5
+        d : scalar, optional, default 1.6
             Only if ``algorithm = "nearest-neighbor"``. Fractal dimension of epicenter/hypocenter.
-        w : scalar, optional, default 0.0
+        w : scalar, optional, default 1.0
             Only if ``algorithm = "nearest-neighbor"``. Magnitude weighting factor (usually b-value).
         eta_0 : scalar or None, optional, default None
             Only if ``algorithm = "nearest-neighbor"``. Initial cutoff threshold (as log10). If `None`, invoke :meth:`bruces.Catalog.fit_cutoff_threshold`.
@@ -134,15 +134,15 @@ class Catalog:
         """
         return decluster(self, algorithm, **kwargs)
 
-    def time_space_distances(self, d=1.5, w=0.0, returns_log=True, prune_nans=False):
+    def time_space_distances(self, d=1.6, w=1.0, returns_log=True, prune_nans=False):
         """
         Get rescaled time and space distances for each earthquake in the catalog.
 
         Parameters
         ----------
-        d : scalar, optional, default 1.5
+        d : scalar, optional, default 1.6
             Fractal dimension of epicenter/hypocenter.
-        w : scalar, optional, default 0.0
+        w : scalar, optional, default 1.0
             Magnitude weighting factor (usually b-value).
         returns_log : bool, optional, default True
             If `True`, return distance as log10.
@@ -180,15 +180,15 @@ class Catalog:
 
         return T, R
 
-    def fit_cutoff_threshold(self, d=1.5, w=0.0):
+    def fit_cutoff_threshold(self, d=1.6, w=1.0):
         """
         Estimate the optimal cutoff threshold for nearest-neighbor.
 
         Parameters
         ----------
-        d : scalar, optional, default 1.5
+        d : scalar, optional, default 1.6
             Fractal dimension of epicenter/hypocenter.
-        w : scalar, optional, default 0.0
+        w : scalar, optional, default 1.0
             Magnitude weighting factor (usually b-value).
 
         Returns
@@ -244,8 +244,8 @@ class Catalog:
 
     def plot_time_space_distances(
         self,
-        d=1.5,
-        w=0.0,
+        d=1.6,
+        w=1.0,
         eta_0=None,
         kde=True,
         bins=50,
@@ -259,9 +259,9 @@ class Catalog:
 
         Parameters
         ----------
-        d : scalar, optional, default 1.5
+        d : scalar, optional, default 1.6
             Fractal dimension of epicenter/hypocenter.
-        w : scalar, optional, default 0.0
+        w : scalar, optional, default 1.0
             Magnitude weighting factor (usually b-value).
         eta_0 : scalar, 'auto', array_like or None, optional, None
             Initial cutoff threshold values (as log10) for which to draw a constant line. If `eta_0 = "auto"`, invoke :meth:`bruces.Catalog.fit_cutoff_threshold`.

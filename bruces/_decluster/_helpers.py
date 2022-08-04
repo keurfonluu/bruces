@@ -1,5 +1,3 @@
-import numpy
-
 __all__ = [
     "decluster",
 ]
@@ -19,7 +17,7 @@ def decluster(catalog, algorithm="nearest-neighbor", **kwargs):
 
     Parameters
     ----------
-    catalog : bruces.Catalog
+    catalog : :class:`bruces.Catalog`
         Earthquake catalog.
     algorithm : str, optional, default 'nearest-neighbor'
         Declustering algorithm:
@@ -29,12 +27,12 @@ def decluster(catalog, algorithm="nearest-neighbor", **kwargs):
 
     Other Parameters
     ----------------
-    d : scalar, optional, default 1.5
+    d : scalar, optional, default 1.6
         Only if ``algorithm = "nearest-neighbor"``. Fractal dimension of epicenter/hypocenter.
-    w : scalar, optional, default 0.0
+    w : scalar, optional, default 1.0
         Only if ``algorithm = "nearest-neighbor"``. Magnitude weighting factor (usually b-value).
     eta_0 : scalar, optional, default 0.1
-        Only if ``algorithm = "nearest-neighbor"``. Initial cutoff threshold.
+        Only if ``algorithm = "nearest-neighbor"``. Initial cutoff threshold (as log10). If `None`, invoke :meth:`bruces.Catalog.fit_cutoff_threshold`.
     alpha_0 : scalar, optional, default 0.1
         Only if ``algorithm = "nearest-neighbor"``. Cluster threshold.
     M : int, optional, default 100

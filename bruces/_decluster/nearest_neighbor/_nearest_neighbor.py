@@ -6,7 +6,7 @@ from ..._helpers import to_decimal_year
 from .._helpers import register
 
 
-def decluster(catalog, d=1.5, w=0.0, eta_0=None, alpha_0=1.0, M=100, seed=None):
+def decluster(catalog, d=1.6, w=1.0, eta_0=None, alpha_0=1.0, M=100, seed=None):
     """
     Decluster earthquake catalog (after Zaliapin and Ben-Zion, 2020).
 
@@ -14,9 +14,9 @@ def decluster(catalog, d=1.5, w=0.0, eta_0=None, alpha_0=1.0, M=100, seed=None):
     ----------
     catalog : :class:`bruces.Catalog`
         Earthquake catalog.
-    d : scalar, optional, default 1.5
+    d : scalar, optional, default 1.6
         Fractal dimension of epicenter/hypocenter.
-    w : scalar, optional, default 0.0
+    w : scalar, optional, default 1.0
         Magnitude weighting factor (usually b-value).
     eta_0 : scalar or None, optional, default None
         Initial cutoff threshold (as log10). If `None`, invoke :meth:`bruces.Catalog.fit_cutoff_threshold`.
