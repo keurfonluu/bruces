@@ -218,9 +218,15 @@ class Catalog:
             return gaussian(x, A1, mu1, sig1) + gaussian(x, A2, mu2, sig2)
 
         # Fit a bimodal distribution to data
-        hist, bin_edges = np.histogram(T + R, bins=50)
+        H = T + R
+        hist, bin_edges = np.histogram(H, bins=50)
         xedges = 0.5 * (bin_edges[1:] + bin_edges[:-1])
-        params, _ = curve_fit(bimodal, xedges, hist)
+
+        A = 0.5 * hist.max()
+        mu = H.mean()
+        sig = 1.0
+        p0 = (A, mu - sig, sig, A, mu + sig, sig)
+        params, _ = curve_fit(bimodal, xedges, hist, p0)
 
         # Estimate optimal eta_0
         _, mu1, sig1, _, mu2, sig2 = params
