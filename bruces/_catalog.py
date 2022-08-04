@@ -118,7 +118,7 @@ class Catalog:
         w : scalar, optional, default 1.0
             Only if ``algorithm = "nearest-neighbor"``. Magnitude weighting factor (usually b-value).
         eta_0 : scalar or None, optional, default None
-            Only if ``algorithm = "nearest-neighbor"``. Initial cutoff threshold (as log10). If `None`, invoke :meth:`bruces.Catalog.fit_cutoff_threshold`.
+            Only if ``algorithm = "nearest-neighbor"``. Initial cutoff threshold. If `None`, invoke :meth:`bruces.Catalog.fit_cutoff_threshold`.
         alpha_0 : scalar, optional, default 1.0
             Only if ``algorithm = "nearest-neighbor"``. Cluster threshold.
         M : int, optional, default 100
@@ -174,9 +174,9 @@ class Catalog:
             T = T[idx]
             R = R[idx]
 
-        if returns_log:
-            T = np.log10(T)
-            R = np.log10(R)
+        if not returns_log:
+            T = np.power(10.0, T)
+            R = np.power(10.0, R)
 
         return T, R
 
@@ -194,7 +194,7 @@ class Catalog:
         Returns
         -------
         float
-            Optimal initial cutoff threshold (as log10).
+            Optimal initial cutoff threshold.
 
         Note
         ----
@@ -264,7 +264,7 @@ class Catalog:
         w : scalar, optional, default 1.0
             Magnitude weighting factor (usually b-value).
         eta_0 : scalar, 'auto', array_like or None, optional, None
-            Initial cutoff threshold values (as log10) for which to draw a constant line. If `eta_0 = "auto"`, invoke :meth:`bruces.Catalog.fit_cutoff_threshold`.
+            Initial cutoff threshold values for which to draw a constant line. If `eta_0 = "auto"`, invoke :meth:`bruces.Catalog.fit_cutoff_threshold`.
         kde : bool, optional, default True
             If `True`, use Gaussian Kernel Density Estimator.
         bins : int, optional, default 50
