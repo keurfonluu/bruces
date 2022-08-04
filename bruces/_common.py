@@ -8,7 +8,9 @@ def jitted(*args, **kwargs):
         {
             "nopython": True,
             "nogil": True,
-            "fastmath": True,
+            # Disable fast-math flag "nnan" and "reassoc"
+            # <https://llvm.org/docs/LangRef.html#fast-math-flags>
+            "fastmath": {"ninf", "nsz", "arcp", "contract", "afn"},
             # "boundscheck": False,
             "cache": True,
         }
@@ -17,11 +19,11 @@ def jitted(*args, **kwargs):
 
 
 @jitted
-def time_space_distances(t, x, y, m, ti, xi, yi, d=1.5, w=0.0):
+def time_space_distances(t, x, y, m, ti, xi, yi, d=1.6, w=1.0):
     """Calculate rescaled time and space distances."""
     N = len(t)
 
-    eta_i = 1.0e20
+    eta_i = 20.0
     T_i = np.nan
     R_i = np.nan
     for j in range(N):
@@ -30,14 +32,16 @@ def time_space_distances(t, x, y, m, ti, xi, yi, d=1.5, w=0.0):
         # For each event, we are looking for its parent which corresponds
         # to the earliest event with the smallest proximity value
         if t_ij < 0.0:
-            r_ij = ((x[j] - xi) ** 2.0 + (y[j] - yi) ** 2.0) ** 0.5
+            r_ij = np.sqrt((x[j] - xi) ** 2.0 + (y[j] - yi) ** 2.0)
 
             # Skip events with the same epicenter
             if r_ij > 0.0:
-                fac = 10.0 ** (-0.5 * w * m[j])
-                T_ij = -t_ij * fac
-                R_ij = r_ij**d * fac
-                eta_ij = T_ij * R_ij
+                # Rewrite equations as log10 to avoid using power exponents
+                # Computing log10 is much faster than power
+                fac = -0.5 * w * m[j]
+                T_ij = np.log10(-t_ij) + fac
+                R_ij = d * np.log10(r_ij) + fac
+                eta_ij = T_ij + R_ij
 
                 if eta_ij < eta_i:
                     eta_i = eta_ij

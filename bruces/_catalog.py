@@ -2,6 +2,9 @@ from collections import namedtuple
 from datetime import datetime, timedelta
 
 import numpy as np
+import matplotlib.pyplot as plt
+from scipy.optimize import curve_fit
+from scipy.stats import gaussian_kde
 
 from ._common import time_space_distances
 from ._decluster import decluster
@@ -104,17 +107,19 @@ class Catalog:
         ----------
         algorithm : str, optional, default 'nearest-neighbor'
             Declustering algorithm:
-            - 'nearest-neighbor': nearest-neighbor algorithm (after Zaliapin and Ben-Zion, 2020).
+
+             - 'gardner-knopoff': Gardner-Knopoff method
+             - 'nearest-neighbor': nearest-neighbor algorithm (after Zaliapin and Ben-Zion, 2020)
 
         Other Parameters
         ----------------
-        d : scalar, optional, default 1.5
+        d : scalar, optional, default 1.6
             Only if ``algorithm = "nearest-neighbor"``. Fractal dimension of epicenter/hypocenter.
-        w : scalar, optional, default 0.0
-            Only if ``algorithm = "nearest-neighbor"``. Magnitude weighing factor (usually b-value).
-        eta_0 : scalar, optional, default 0.1
-            Only if ``algorithm = "nearest-neighbor"``. Initial cutoff threshold.
-        alpha_0 : scalar, optional, default 0.1
+        w : scalar, optional, default 1.0
+            Only if ``algorithm = "nearest-neighbor"``. Magnitude weighting factor (usually b-value).
+        eta_0 : scalar or None, optional, default None
+            Only if ``algorithm = "nearest-neighbor"``. Initial cutoff threshold. If `None`, invoke :meth:`bruces.Catalog.fit_cutoff_threshold`.
+        alpha_0 : scalar, optional, default 1.0
             Only if ``algorithm = "nearest-neighbor"``. Cluster threshold.
         M : int, optional, default 100
             Only if ``algorithm = "nearest-neighbor"``. Number of reshufflings.
@@ -129,16 +134,20 @@ class Catalog:
         """
         return decluster(self, algorithm, **kwargs)
 
-    def time_space_distances(self, d=1.5, w=0.0):
+    def time_space_distances(self, d=1.6, w=1.0, returns_log=True, prune_nans=False):
         """
         Get rescaled time and space distances for each earthquake in the catalog.
 
         Parameters
         ----------
-        d : scalar, optional, default 1.5
+        d : scalar, optional, default 1.6
             Fractal dimension of epicenter/hypocenter.
-        w : scalar, optional, default 0.0
-            Magnitude weighing factor (usually b-value).
+        w : scalar, optional, default 1.0
+            Magnitude weighting factor (usually b-value).
+        returns_log : bool, optional, default True
+            If `True`, return distance as log10.
+        prune_nans : bool, optional, default False
+            If `True`, remove NaN values from output.
 
         Returns
         -------
@@ -153,12 +162,248 @@ class Catalog:
         y = self.northings
         m = self.magnitudes
 
-        return np.transpose(
+        T, R = np.transpose(
             [
                 time_space_distances(t, x, y, m, t[i], x[i], y[i], d, w)
                 for i in range(len(self))
             ]
         )
+
+        if prune_nans:
+            idx = ~np.isnan(T)
+            T = T[idx]
+            R = R[idx]
+
+        if not returns_log:
+            T = np.power(10.0, T)
+            R = np.power(10.0, R)
+
+        return T, R
+
+    def fit_cutoff_threshold(self, d=1.6, w=1.0):
+        """
+        Estimate the optimal cutoff threshold for nearest-neighbor.
+
+        Parameters
+        ----------
+        d : scalar, optional, default 1.6
+            Fractal dimension of epicenter/hypocenter.
+        w : scalar, optional, default 1.0
+            Magnitude weighting factor (usually b-value).
+
+        Returns
+        -------
+        float
+            Optimal initial cutoff threshold.
+
+        Note
+        ----
+        This function assumes that the catalog is clustered.
+        
+        """
+        T, R = self.time_space_distances(d, w, returns_log=True, prune_nans=True)
+
+        return self.__fit_cutoff_threshold(T, R)
+
+    @staticmethod
+    def __fit_cutoff_threshold(T, R, debug=False):
+        """Fit cutoff threshold."""
+
+        def gaussian(x, A, mu, sig):
+            """Gaussian distribution function."""
+            return A * np.exp(-0.5 * ((x - mu) / sig) ** 2)
+        
+        def bimodal(x, A1, mu1, sig1, A2, mu2, sig2):
+            """Bimodal Gaussian distribution function."""
+            return gaussian(x, A1, mu1, sig1) + gaussian(x, A2, mu2, sig2)
+
+        # Fit a bimodal distribution to data
+        H = T + R
+        hist, bin_edges = np.histogram(H, bins=50)
+        xedges = 0.5 * (bin_edges[1:] + bin_edges[:-1])
+
+        A = 0.5 * hist.max()
+        mu = H.mean()
+        sig = 1.0
+        p0 = (A, mu - sig, sig, A, mu + sig, sig)
+        params, _ = curve_fit(bimodal, xedges, hist, p0)
+
+        # Estimate optimal eta_0
+        _, mu1, sig1, _, mu2, sig2 = params
+        eta_0 = mu1 - 2.0 * abs(sig1) if mu1 > mu2 else mu2 - 2.0 * abs(sig2)
+
+        if debug:
+            _, ax = plt.subplots(1, 1)
+            ax.hist(T + R, bins=50)
+            ax.plot(xedges, bimodal(xedges, *params), color="black", linewidth=2)
+            ax.plot(xedges, gaussian(xedges, *params[:3]), color="black", linestyle="--")
+            ax.plot(xedges, gaussian(xedges, *params[3:]), color="black", linestyle="--")
+            ax.axvline(eta_0, color="red")
+
+        return eta_0
+
+    def plot_time_space_distances(
+        self,
+        d=1.6,
+        w=1.0,
+        eta_0=None,
+        eta_0_diag=None,
+        kde=True,
+        bins=50,
+        hist_args=None,
+        line_args=None,
+        text_args=None,
+        ax=None,
+    ):
+        """
+        Plot rescaled time vs space distances.
+
+        Parameters
+        ----------
+        d : scalar, optional, default 1.6
+            Fractal dimension of epicenter/hypocenter.
+        w : scalar, optional, default 1.0
+            Magnitude weighting factor (usually b-value).
+        eta_0 : scalar, 'auto', array_like or None, optional, default None
+            Initial cutoff threshold values for which to draw a constant line. If `eta_0 = "auto"`, invoke :meth:`bruces.Catalog.fit_cutoff_threshold`.
+        eta_0_diag : scalar or None, optional, default None
+            If not `None`, plot will be centered around `eta_0_diag`. This option is automatically enabled if `eta_0 = "auto"`.
+        kde : bool, optional, default True
+            If `True`, use Gaussian Kernel Density Estimator.
+        bins : int, optional, default 50
+            Number of bins for both axes.
+        hist_args : dict or None, optional, default None
+            Plot arguments passed to :func:`matplotlib.pyplot.contourf` or :func:`matplotlib.pyplot.pcolormesh`.
+        line_args : dict or None, optional, default None
+            Plot arguments passed to :func:`matplotlib.pyplot.plot`.
+        text_args : dict or None, optional, default None
+            Plot arguments passed to :func:`matplotlib.pyplot.text`.
+        ax : :class:`matplotlib.pyplot.Axes` or None, optional, default None
+            Matplotlib axes.
+
+        Returns
+        -------
+        :class:`matplotlib.pyplot.Axes`
+            Matplotlib axes.
+
+        """
+
+        def prune_outliers(x):
+            """Median Absolute Deviation."""
+            p50 = np.median(x)
+            mad = 1.4826 * np.median(np.abs(x - p50))
+
+            return x[np.abs((x - p50) / mad) < 3.0]
+
+        if eta_0 is not None and not (np.ndim(eta_0) in {0, 1}):
+            raise TypeError()
+
+        # Default plot arguments
+        hist_args = hist_args if hist_args else {}
+        line_args = line_args if line_args else {}
+        text_args = text_args if text_args else {}
+
+        hist_args_ = {"cmap": "Blues"}
+        line_args_ = {"color": "black", "linestyle": ":"}
+        text_args_ = {
+            "rotation": -45.0,
+            "rotation_mode": "anchor",
+            "transform_rotates_text": True,
+        }
+        if kde:
+            hist_args_["levels"] = 20
+
+        hist_args_.update(hist_args)
+        line_args_.update(line_args)
+        text_args_.update(text_args)
+
+        # Calculate rescaled time and space distances
+        T, R = self.time_space_distances(d, w, returns_log=True, prune_nans=True)
+
+        # Fit cutoff threshold
+        if eta_0 == "auto":
+            eta_0 = self.__fit_cutoff_threshold(T, R)
+            eta_0_diag = eta_0
+
+        # Determine optimal axes
+        T2 = prune_outliers(T)
+        R2 = prune_outliers(R)
+        
+        xmin, xmax = T2.min(), T2.max()
+        ymin, ymax = R2.min(), R2.max()
+
+        xmin = np.sign(xmin) * np.ceil(np.abs(xmin))
+        xmax = np.sign(xmax) * np.ceil(np.abs(xmax))
+        ymin = np.sign(ymin) * np.ceil(np.abs(ymin))
+        ymax = np.sign(ymax) * np.ceil(np.abs(ymax))
+
+        dx = xmax - xmin
+        dy = ymax - ymin
+        
+        if dx >= dy:
+            ymax = ymin + dx
+
+        else:
+            xmax = xmin + dy
+
+        if eta_0_diag is not None:
+            dx = 0.5 * (eta_0_diag - xmax - ymin)
+            xmin += dx
+            xmax += dx
+            ymin += dx
+            ymax += dx
+
+        xedges = np.linspace(xmin, xmax, bins)
+        yedges = np.linspace(ymin, ymax, bins)
+        X, Y = np.meshgrid(xedges, yedges)
+
+        # Calculate density
+        if kde:
+            kernel = gaussian_kde((T, R))
+            H = kernel(np.vstack([X.ravel(), Y.ravel()])).T.reshape(X.shape)
+
+        else:
+            H = np.histogram2d(T, R, bins=(xedges, yedges), density=True)[0]
+            H = H.T
+
+        # Plot density
+        if ax is None:
+            _, ax = plt.subplots(1, 1, figsize=(6, 6))
+
+        if kde:
+            ax.contourf(X, Y, H, **hist_args_)
+        
+        else:
+            ax.pcolormesh(X, Y, H, **hist_args_)
+
+        # Plot constant eta_0 lines
+        if eta_0 is not None:
+            xx = np.array([xmin, xmax])
+            
+            if np.ndim(eta_0) == 0:
+                eta_0 = [eta_0]
+
+            eta_0 = np.asarray(eta_0)
+            for value in eta_0:
+                ax.plot(xx, value - xx, **line_args_)
+
+                # Annotation
+                xt = xmin + 0.1 * (xmax - xmin)
+                yt = value - xt + 0.05
+                if yt >= ymax:
+                    xt = xmax - 0.1 * (xmax - xmin)
+                    yt = value - xt + 0.05
+
+                if ymin < yt < ymax:
+                    ax.text(xt, yt, f"{value:.1f}", **text_args_)
+
+        # Plot parameters
+        ax.set_xlabel("Rescaled time ($\log_{10} T$)")
+        ax.set_ylabel("Rescaled distance ($\log_{10} R$)")
+        ax.set_xlim(xmin, xmax)
+        ax.set_ylim(ymin, ymax)
+
+        return ax
 
     def seismicity_rate(self, tbins):
         """
