@@ -247,6 +247,7 @@ class Catalog:
         d=1.6,
         w=1.0,
         eta_0=None,
+        eta_0_diag=None,
         kde=True,
         bins=50,
         hist_args=None,
@@ -263,8 +264,10 @@ class Catalog:
             Fractal dimension of epicenter/hypocenter.
         w : scalar, optional, default 1.0
             Magnitude weighting factor (usually b-value).
-        eta_0 : scalar, 'auto', array_like or None, optional, None
+        eta_0 : scalar, 'auto', array_like or None, optional, default None
             Initial cutoff threshold values for which to draw a constant line. If `eta_0 = "auto"`, invoke :meth:`bruces.Catalog.fit_cutoff_threshold`.
+        eta_0_diag : scalar or None, optional, default None
+            If not `None`, plot will be centered around `eta_0_diag`. This option is automatically enabled if `eta_0 = "auto"`.
         kde : bool, optional, default True
             If `True`, use Gaussian Kernel Density Estimator.
         bins : int, optional, default 50
@@ -317,6 +320,11 @@ class Catalog:
         # Calculate rescaled time and space distances
         T, R = self.time_space_distances(d, w, returns_log=True, prune_nans=True)
 
+        # Fit cutoff threshold
+        if eta_0 == "auto":
+            eta_0 = self.__fit_cutoff_threshold(T, R)
+            eta_0_diag = eta_0
+
         # Determine optimal axes
         T2 = prune_outliers(T)
         R2 = prune_outliers(R)
@@ -337,6 +345,13 @@ class Catalog:
 
         else:
             xmax = xmin + dy
+
+        if eta_0_diag is not None:
+            dx = 0.5 * (eta_0_diag - xmax - ymin)
+            xmin += dx
+            xmax += dx
+            ymin += dx
+            ymax += dx
 
         xedges = np.linspace(xmin, xmax, bins)
         yedges = np.linspace(ymin, ymax, bins)
@@ -364,9 +379,6 @@ class Catalog:
         # Plot constant eta_0 lines
         if eta_0 is not None:
             xx = np.array([xmin, xmax])
-
-            if eta_0 == "auto":
-                eta_0 = self.__fit_cutoff_threshold(T, R)
             
             if np.ndim(eta_0) == 0:
                 eta_0 = [eta_0]
