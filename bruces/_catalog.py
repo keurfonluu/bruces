@@ -206,39 +206,71 @@ class Catalog:
         return self.__fit_cutoff_threshold(T, R)
 
     @staticmethod
-    def __fit_cutoff_threshold(T, R, debug=False):
+    def __fit_cutoff_threshold(T, R, bins="freedman-diaconis", debug=False):
         """Fit cutoff threshold."""
 
         def gaussian(x, A, mu, sig):
             """Gaussian distribution function."""
-            return A * np.exp(-0.5 * ((x - mu) / sig) ** 2)
+            return np.abs(A) * np.exp(-0.5 * ((x - mu) / sig) ** 2)
         
         def bimodal(x, A1, mu1, sig1, A2, mu2, sig2):
             """Bimodal Gaussian distribution function."""
             return gaussian(x, A1, mu1, sig1) + gaussian(x, A2, mu2, sig2)
 
-        # Fit a bimodal distribution to data
+        # 1D histogram data
         H = T + R
-        hist, bin_edges = np.histogram(H, bins=50)
+
+        # Optimal number of bins
+        if bins == "square-root":
+            bins = int(np.ceil(len(H) ** 0.5))
+
+        elif bins == "rice":
+            bins = int(2.0 * np.ceil(len(H) ** (1.0 / 3.0)))
+
+        elif bins == "freedman-diaconis":
+            q3, q1 = np.percentile(H, [75 ,25])
+            h = 2.0 * (q3 - q1) / len(H) ** (1.0 / 3.0)
+            bins = int(np.ceil((H.max() - H.min()) / h))
+
+        # Fit a bimodal distribution to data
+        hist, bin_edges = np.histogram(H, bins=bins)
         xedges = 0.5 * (bin_edges[1:] + bin_edges[:-1])
 
         A = 0.5 * hist.max()
         mu = H.mean()
         sig = 1.0
         p0 = (A, mu - sig, sig, A, mu + sig, sig)
-        params, _ = curve_fit(bimodal, xedges, hist, p0)
+        
+        try:
+            params, _ = curve_fit(bimodal, xedges, hist, p0)
+            _, mu1, sig1, _, mu2, sig2 = params
+            sig1 = abs(sig1)
+            sig2 = abs(sig2)
+            
+            # Check unimodality and estimate optimal eta_0
+            if mu1 - sig1 < mu2 < mu1 + sig1 or mu2 - sig1 < mu1 < mu2 + sig1:
+                eta_0 = None
 
-        # Estimate optimal eta_0
-        _, mu1, sig1, _, mu2, sig2 = params
-        eta_0 = mu1 - 2.0 * abs(sig1) if mu1 > mu2 else mu2 - 2.0 * abs(sig2)
+            else:
+                eta_0 = mu1 - 2.0 * sig1 if mu1 > mu2 else mu2 - 2.0 * sig2
+
+            success = True
+
+        except RuntimeError:
+            eta_0 = None
+            success = False
 
         if debug:
             _, ax = plt.subplots(1, 1)
-            ax.hist(T + R, bins=50)
-            ax.plot(xedges, bimodal(xedges, *params), color="black", linewidth=2)
-            ax.plot(xedges, gaussian(xedges, *params[:3]), color="black", linestyle="--")
-            ax.plot(xedges, gaussian(xedges, *params[3:]), color="black", linestyle="--")
-            ax.axvline(eta_0, color="red")
+            ax.hist(H, bins=bins)
+
+            if success:
+                ax.plot(xedges, bimodal(xedges, *params), color="black", linewidth=2)
+                ax.plot(xedges, gaussian(xedges, *params[:3]), color="black", linestyle="--")
+                ax.plot(xedges, gaussian(xedges, *params[3:]), color="black", linestyle="--")
+
+            if eta_0 is not None:
+                ax.axvline(eta_0, color="red")
 
         return eta_0
 
