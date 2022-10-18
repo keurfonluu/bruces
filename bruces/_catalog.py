@@ -206,7 +206,7 @@ class Catalog:
         return self.__fit_cutoff_threshold(T, R)
 
     @staticmethod
-    def __fit_cutoff_threshold(T, R, bins="freedman-diaconis", debug=False):
+    def __fit_cutoff_threshold(T, R, bins="freedman-diaconis", debug=True):
         """Fit cutoff threshold."""
 
         def gaussian(x, A, mu, sig):
@@ -248,7 +248,7 @@ class Catalog:
             sig2 = abs(sig2)
             
             # Check unimodality and estimate optimal eta_0
-            if mu1 - sig1 < mu2 < mu1 + sig1 or mu2 - sig1 < mu1 < mu2 + sig1:
+            if mu1 - sig1 < mu2 < mu1 + sig1 or mu2 - sig2 < mu1 < mu2 + sig2:
                 eta_0 = None
 
             else:
@@ -261,16 +261,32 @@ class Catalog:
             success = False
 
         if debug:
+            blue = (54.0 / 255.0, 92.0 / 255.0, 141.0 / 255.0)
             _, ax = plt.subplots(1, 1)
-            ax.hist(H, bins=bins)
+            ax.hist(H, bins=bins, color=blue, alpha=0.5)
 
             if success:
-                ax.plot(xedges, bimodal(xedges, *params), color="black", linewidth=2)
-                ax.plot(xedges, gaussian(xedges, *params[:3]), color="black", linestyle="--")
-                ax.plot(xedges, gaussian(xedges, *params[3:]), color="black", linestyle="--")
+                x = np.linspace(xedges.min(), xedges.max(), 100)
+                ax.plot(x, bimodal(x, *params), color="black", lw=2)
+                ax.plot(x, gaussian(x, *params[:3]), color="black", lw=1, ls="--")
+                ax.plot(x, gaussian(x, *params[3:]), color="black", lw=1, ls="--")
+
+                ax.set_xlabel("$T + R$")
+                ax.set_ylabel("Count")
 
             if eta_0 is not None:
                 ax.axvline(eta_0, color="red")
+
+                text_args = {
+                    "ha": "right",
+                    "color": "red",
+                    "rotation": 90.0,
+                    "rotation_mode": "anchor",
+                    "transform_rotates_text": True,
+                }
+                xt = eta_0 - 0.1
+                yt = ax.get_ylim()[1]
+                ax.text(xt, yt, f"$\eta_0$ = {eta_0:.1f}", **text_args)
 
         return eta_0
 
