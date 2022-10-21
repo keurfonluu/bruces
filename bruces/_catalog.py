@@ -206,7 +206,7 @@ class Catalog:
         return self.__fit_cutoff_threshold(T, R)
 
     @staticmethod
-    def __fit_cutoff_threshold(T, R, bins="freedman-diaconis", debug=True):
+    def __fit_cutoff_threshold(T, R, bins="freedman-diaconis", debug=False):
         """Fit cutoff threshold."""
 
         def gaussian(x, A, mu, sig):
