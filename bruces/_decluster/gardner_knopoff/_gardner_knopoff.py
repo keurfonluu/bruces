@@ -50,12 +50,12 @@ def _decluster(t, x, y, z, m):
 
         # Loop over catalog
         for j in range(N):
-            if m[j] < mag:
+            if bg[j] and m[j] < mag:
                 t_ij = np.abs(t[j] - t[i])
                 if t_ij < dt:
                     r_ij = ((x[j] - x[i]) ** 2 + (y[j] - y[i]) ** 2) ** 0.5
                     if r_ij < dr:
-                        bg[i] = False
+                        bg[j] = False
 
     return bg
 
