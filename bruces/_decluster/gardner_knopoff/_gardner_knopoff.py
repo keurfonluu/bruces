@@ -50,12 +50,10 @@ def _decluster(t, x, y, z, m):
 
         # Loop over catalog
         for j in prange(N):
-            if bg[j] and m[j] < mag:
-                t_ij = np.abs(t[j] - t[i])
-                if t_ij < dt:
-                    r_ij = ((x[j] - x[i]) ** 2 + (y[j] - y[i]) ** 2) ** 0.5
-                    if r_ij < dr:
-                        bg[j] = False
+            if bg[j] and m[j] < mag and 0 < t[j] - t[i] < dt:
+                r_ij = ((x[j] - x[i]) ** 2 + (y[j] - y[i]) ** 2) ** 0.5
+                if r_ij < dr:
+                    bg[j] = False
 
     return bg
 
