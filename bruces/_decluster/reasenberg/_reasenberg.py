@@ -85,13 +85,11 @@ def _decluster(t, x, y, z, m, rfact, xmeff, xk, taumin, taumax, p):
             cond1 = d1 < r1
 
             # Check if event j is within interaction distance of largest event
+            cond2 = False
             if not cond1 and tau > taumin:
                 r2 = rmain[mid]
                 d2 = ((x[j] - x[mid]) ** 2 + (y[j] - y[mid]) ** 2)
                 cond2 = d2 < r2
-
-            else:
-                cond2 = False
             
             # Associate events
             if cond1 or cond2:
@@ -100,6 +98,7 @@ def _decluster(t, x, y, z, m, rfact, xmeff, xk, taumin, taumax, p):
 
                 # Merge if both are already associated to a cluster
                 if id1 >= 0 and id2 >= 0:
+                    # Keep earliest cluster
                     if t[i] < t[j]:
                         cid1 = id1
                         cid2 = id2
@@ -116,6 +115,7 @@ def _decluster(t, x, y, z, m, rfact, xmeff, xk, taumin, taumax, p):
                     else:
                         clusters_main[cid2] = clusters_main[cid1]
 
+                    # Assign flag -1 to merged cluster
                     clusters_main[cid2] = -1
 
                 # Add event j to cluster associated to event i
