@@ -35,18 +35,24 @@ def decluster(catalog, rfact=10.0, xmeff=1.5, xk=0.5, taumin=1.0, taumax=10.0, p
     return catalog[bg]
 
 
-# @jitted
+@jitted
 def _decluster(t, x, y, z, m, rfact, xmeff, xk, taumin, taumax, p):
     """Reasenberg's method."""
     N = len(t)
 
+    # Clusters' IDs
     clusters = np.full(N, -1, dtype=np.int32)
-    clusters_main = []  # Largest event IDs of clusters
+
+    # Clusters' largest events' IDs
+    # These are the background events
+    clusters_main = np.full(N, -1, dtype=np.int32)
 
     # Interaction radii
     rmain = 0.011 * 10.0 ** (0.4 * m)
 
     # Loop over catalog
+    n_clusters = 0
+
     for i in range(N - 1):
         # If event is not yet clustered
         if clusters[i] < 0:
@@ -134,20 +140,24 @@ def _decluster(t, x, y, z, m, rfact, xmeff, xk, taumin, taumax, p):
 
                 # Create a new cluster
                 else:
-                    cid = len(clusters_main)
+                    n_clusters += 1
+
+                    cid = n_clusters - 1
                     clusters[i] = cid
                     clusters[j] = cid
 
-                    clusters_main.append(i if m[i] > m[j] else j)
+                    clusters_main[cid] = i if m[i] > m[j] else j
 
             # Next event
             j += 1
 
-    # Remove merged event clusters
-    # Process events not associated as independent clusters
-    bg = np.concatenate(([c for c in clusters_main if c >= 0], [i for i, c in enumerate(clusters) if c < 0]))
+    # Remove merged clusters (-1 in clusters_main)
+    # Process events not associated as independent clusters (-1 in clusters)
+    bg = np.zeros(N, dtype=np.bool_)
+    bg[clusters_main[clusters_main >= 0]] = True
+    bg[clusters < 0] = True
 
-    return np.sort(bg)
+    return bg
 
 
 register("reasenberg", decluster)
