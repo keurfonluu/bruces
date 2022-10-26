@@ -5,7 +5,7 @@ from ..._helpers import to_decimal_year
 from .._helpers import register
 
 
-def decluster(catalog, rfact=10.0, xmeff=1.5, xk=0.5, taumin=1.0, taumax=10.0, p=0.95):
+def decluster(catalog, rfact=10, xmeff=None, xk=0.5, taumin=1.0, taumax=10.0, p=0.95):
     """
     Decluster earthquake catalog using Reasenberg's method.
 
@@ -13,6 +13,18 @@ def decluster(catalog, rfact=10.0, xmeff=1.5, xk=0.5, taumin=1.0, taumax=10.0, p
     ----------
     catalog : bruces.Catalog
         Earthquake catalog.
+    rfact : int, optional, default 10
+        Number of crack radii surrounding each earthquake within which to consider linking a new event into a cluster.
+    xmeff : scalar or None, optional, default None
+        "Effective" lower magnitude cutoff for catalog. If `None`, use minimum magnitude in catalog.
+    xk : scalar, optional, default 0.5
+        Factor by which ``xmeff`` is raised during clusters.
+    taumin : scalar, optional, default 1.0
+        Look ahead time for non-clustered events (in days).
+    taumax : scalar, optional, default 10.0
+        Maximum look ahead time for clustered events (in days).
+    p : scalar, optional, default 0.95
+        Confidence of observing the next event in the sequence.
 
     Returns
     -------
@@ -30,6 +42,8 @@ def decluster(catalog, rfact=10.0, xmeff=1.5, xk=0.5, taumin=1.0, taumax=10.0, p
     y = catalog.northings[idx]
     z = catalog.depths[idx]
     m = catalog.magnitudes[idx]
+
+    xmeff = xmeff if xmeff is not None else m.min()
 
     bg = _decluster(t, x, y, z, m, rfact, xmeff, xk, taumin, taumax, p)
     return catalog[bg]

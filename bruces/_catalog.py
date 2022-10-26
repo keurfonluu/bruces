@@ -110,6 +110,7 @@ class Catalog:
 
              - 'gardner-knopoff': Gardner-Knopoff method
              - 'nearest-neighbor': nearest-neighbor algorithm (after Zaliapin and Ben-Zion, 2020)
+             - 'reasenberg': Reasenberg's method (after Reasenberg, 1985)
 
         Other Parameters
         ----------------
@@ -125,6 +126,18 @@ class Catalog:
             Only if ``algorithm = "nearest-neighbor"``. Number of reshufflings.
         seed : int or None, optional, default None
             Only if ``algorithm = "nearest-neighbor"``. Seed for random number generator.
+        rfact : int, optional, default 10
+            Only if ``algorithm = "reasenberg"``. Number of crack radii surrounding each earthquake within which to consider linking a new event into a cluster.
+        xmeff : scalar or None, optional, default None
+            Only if ``algorithm = "reasenberg"``. "Effective" lower magnitude cutoff for catalog. If `None`, use minimum magnitude in catalog.
+        xk : scalar, optional, default 0.5
+            Only if ``algorithm = "reasenberg"``. Factor by which ``xmeff`` is raised during clusters.
+        taumin : scalar, optional, default 1.0
+            Only if ``algorithm = "reasenberg"``. Look ahead time for non-clustered events (in days).
+        taumax : scalar, optional, default 10.0
+            Only if ``algorithm = "reasenberg"``. Maximum look ahead time for clustered events (in days).
+        p : scalar, optional, default 0.95
+            Only if ``algorithm = "reasenberg"``. Confidence of observing the next event in the sequence.
 
         Returns
         -------
