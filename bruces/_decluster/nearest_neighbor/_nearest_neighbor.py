@@ -1,7 +1,7 @@
 import numpy as np
 from numba import prange
 
-from ..._common import jitted, time_space_distances
+from ..._common import jitted, set_seed, time_space_distances
 from ..._helpers import to_decimal_year
 from .._helpers import register
 
@@ -35,6 +35,7 @@ def decluster(catalog, d=1.6, w=1.0, eta_0=None, alpha_0=1.0, M=100, seed=None):
     """
     if seed is not None:
         np.random.seed(seed)
+        set_seed(seed)
 
     if eta_0 is None:
         eta_0 = catalog.fit_cutoff_threshold(d, w)
@@ -49,7 +50,7 @@ def decluster(catalog, d=1.6, w=1.0, eta_0=None, alpha_0=1.0, M=100, seed=None):
     eta = _step1(t, x, y, m, d, w)
 
     # Calculate proximity vectors
-    kappa = _step2(t, x, y, m, eta, d, w, eta_0, M, seed)
+    kappa = _step2(t, x, y, m, eta, d, w, eta_0, M)
 
     # Calculate normalized nearest-neighbor proximities
     alpha = _step3(eta, kappa)
@@ -82,11 +83,8 @@ def _step1(t, x, y, m, d, w):
 
 
 @jitted
-def _step2(t, x, y, m, eta, d, w, eta_0, M, seed):
+def _step2(t, x, y, m, eta, d, w, eta_0, M):
     """Calculate proximity vector for each event."""
-    if seed is not None:
-        np.random.seed(seed)
-
     N = len(t)
 
     # Select N0 events that satisfy eta_i > eta_0

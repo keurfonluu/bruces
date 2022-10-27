@@ -19,6 +19,12 @@ def jitted(*args, **kwargs):
 
 
 @jitted
+def set_seed(seed):
+    """Set random seed for numba."""
+    np.random.seed(seed)
+
+
+@jitted
 def time_space_distances(t, x, y, m, ti, xi, yi, d=1.6, w=1.0):
     """Calculate rescaled time and space distances."""
     N = len(t)
