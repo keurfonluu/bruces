@@ -81,11 +81,11 @@ def _step1(t, x, y, m, d, w):
     return eta
 
 
-@jitted(parallel=True)
+@jitted
 def _step2(t, x, y, m, eta, d, w, eta_0, M, seed):
     """Calculate proximity vector for each event."""
     if seed is not None:
-        np.random.seed(seed + 1)
+        np.random.seed(seed)
 
     N = len(t)
 
@@ -119,10 +119,18 @@ def _step2(t, x, y, m, eta, d, w, eta_0, M, seed):
         mm[:] = m[np.random.permutation(N0)]
 
         # Calculate proximity vectors with respect to randomized catalog
-        for i in prange(N):
-            kappa[i, k] = proximity(tm, xm, ym, mm, t[i], x[i], y[i], d, w)
+        # Generating random numbers is not thread safe
+        # See <https://stackoverflow.com/questions/71351836/random-seeds-and-multithreading-in-numba>
+        _step2_kappa(tm, xm, ym, mm, t, x, y, d, w, kappa[:, k])
 
     return kappa
+
+
+@jitted(parallel=True)
+def _step2_kappa(tm, xm, ym, mm, t, x, y, d, w, kappa):
+    """Calculate kappa in parallel."""
+    for i in prange(len(kappa)):
+        kappa[i] = proximity(tm, xm, ym, mm, t[i], x[i], y[i], d, w)
 
 
 @jitted(parallel=True)
