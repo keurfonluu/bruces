@@ -8,11 +8,11 @@ from .._helpers import register
 
 def decluster(catalog):
     """
-    Decluster earthquake catalog using Gardner-Knopoff method.
+    Decluster earthquake catalog using Gardner-Knopoff's method.
 
     Parameters
     ----------
-    catalog : bruces.Catalog
+    catalog : :class:`bruces.Catalog`
         Earthquake catalog.
 
     Returns
@@ -33,7 +33,7 @@ def decluster(catalog):
 
 @jitted(parallel=True)
 def _decluster(t, x, y, z, m):
-    """Gardner-Knopoff method."""
+    """Gardner-Knopoff's method."""
     N = len(t)
 
     bg = np.ones(N, dtype=np.bool_)

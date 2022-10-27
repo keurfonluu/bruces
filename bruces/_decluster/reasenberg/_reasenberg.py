@@ -11,7 +11,7 @@ def decluster(catalog, rfact=10, xmeff=None, xk=0.5, taumin=1.0, taumax=10.0, p=
 
     Parameters
     ----------
-    catalog : bruces.Catalog
+    catalog : :class:`bruces.Catalog`
         Earthquake catalog.
     rfact : int, optional, default 10
         Number of crack radii surrounding each earthquake within which to consider linking a new event into a cluster.

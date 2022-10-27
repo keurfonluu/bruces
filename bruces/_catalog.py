@@ -32,7 +32,7 @@ class Catalog:
 
         Parameters
         ----------
-        dates : list of datetime.datetime
+        dates : sequence of datetime_like
             Origin times.
         eastings : array_like
             Easting coordinates (in km).
@@ -108,7 +108,7 @@ class Catalog:
         algorithm : str, optional, default 'nearest-neighbor'
             Declustering algorithm:
 
-             - 'gardner-knopoff': Gardner-Knopoff method
+             - 'gardner-knopoff': Gardner-Knopoff's method (after Gardner and Knopoff, 1974)
              - 'nearest-neighbor': nearest-neighbor algorithm (after Zaliapin and Ben-Zion, 2020)
              - 'reasenberg': Reasenberg's method (after Reasenberg, 1985)
 
@@ -472,7 +472,7 @@ class Catalog:
 
         Parameters
         ----------
-        tbins : datetime.timedelta, np.timedelta64 or sequence of datetime_like
+        tbins : datetime_like or sequence of datetime_like
             If `tbins` is a :class:`datetime.timedelta` or a :class:`np.timedelta64`, it defines the width of each bin.
             If `tbins` is a sequence of datetime_like, it defines a monotonically increasing list of bin edges.
 

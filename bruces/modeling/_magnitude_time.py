@@ -65,7 +65,7 @@ def magnitude_time(times, rates, m_bounds, n=50, b_value=1.0, seed=None):
 
     Parameters
     ----------
-    times : array_like
+    times : sequence of datetime_like
         Dates for every seismicity rate samples.
     rates : array_like
         Seismicity rates.
