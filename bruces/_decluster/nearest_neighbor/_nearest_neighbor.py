@@ -6,7 +6,7 @@ from ..._helpers import to_decimal_year
 from .._helpers import register
 
 
-def decluster(catalog, d=1.6, w=1.0, eta_0=None, alpha_0=1.0, use_depth=False, M=100, seed=None):
+def decluster(catalog, d=1.6, w=1.0, eta_0=None, alpha_0=1.5, use_depth=False, M=100, seed=None):
     """
     Decluster earthquake catalog (after Zaliapin and Ben-Zion, 2020).
 
@@ -20,7 +20,7 @@ def decluster(catalog, d=1.6, w=1.0, eta_0=None, alpha_0=1.0, use_depth=False, M
         Magnitude weighting factor (usually b-value).
     eta_0 : scalar or None, optional, default None
         Initial cutoff threshold. If `None`, invoke :meth:`bruces.Catalog.fit_cutoff_threshold`.
-    alpha_0 : scalar, optional, default 1.0
+    alpha_0 : scalar, optional, default 1.5
         Cluster threshold.
     use_depth : bool, optional, default False
         If `True`, consider depth in interevent distance calculation.

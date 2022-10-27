@@ -120,7 +120,7 @@ class Catalog:
             Only if ``algorithm = "nearest-neighbor"``. Magnitude weighting factor (usually b-value).
         eta_0 : scalar or None, optional, default None
             Only if ``algorithm = "nearest-neighbor"``. Initial cutoff threshold. If `None`, invoke :meth:`bruces.Catalog.fit_cutoff_threshold`.
-        alpha_0 : scalar, optional, default 1.0
+        alpha_0 : scalar, optional, default 1.5
             Only if ``algorithm = "nearest-neighbor"``. Cluster threshold.
         use_depth : bool, optional, default False
             Only if ``algorithm = "nearest-neighbor"``. If `True`, consider depth in interevent distance calculation.
