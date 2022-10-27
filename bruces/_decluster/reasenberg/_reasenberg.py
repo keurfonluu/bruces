@@ -1,6 +1,6 @@
 import numpy as np
 
-from ..._common import jitted
+from ..._common import jitted, dist3d
 from ..._helpers import to_decimal_year
 from .._helpers import register
 
@@ -101,14 +101,14 @@ def _decluster(t, x, y, z, m, rfact, xmeff, xk, taumin, taumax, p):
 
             # Check if event j is within interaction distance of most recent event
             r1 = rfact * rmain[i]
-            d1 = ((x[j] - x[i]) ** 2 + (y[j] - y[i]) ** 2)
+            d1 = dist3d(x[i], y[i], z[i], x[j], y[j], z[j])
             cond1 = d1 < r1
 
             # Check if event j is within interaction distance of largest event
             cond2 = False
             if not cond1 and tau > taumin:
                 r2 = rmain[mid]
-                d2 = ((x[j] - x[mid]) ** 2 + (y[j] - y[mid]) ** 2)
+                d2 = dist3d(x[mid], y[mid], z[mid], x[j], y[j], z[j])
                 cond2 = d2 < r2
             
             # Associate events

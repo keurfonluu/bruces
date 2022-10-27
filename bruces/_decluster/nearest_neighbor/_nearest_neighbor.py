@@ -6,7 +6,7 @@ from ..._helpers import to_decimal_year
 from .._helpers import register
 
 
-def decluster(catalog, d=1.6, w=1.0, eta_0=None, alpha_0=1.0, M=100, seed=None):
+def decluster(catalog, d=1.6, w=1.0, eta_0=None, alpha_0=1.0, use_depth=False, M=100, seed=None):
     """
     Decluster earthquake catalog (after Zaliapin and Ben-Zion, 2020).
 
@@ -22,6 +22,8 @@ def decluster(catalog, d=1.6, w=1.0, eta_0=None, alpha_0=1.0, M=100, seed=None):
         Initial cutoff threshold. If `None`, invoke :meth:`bruces.Catalog.fit_cutoff_threshold`.
     alpha_0 : scalar, optional, default 1.0
         Cluster threshold.
+    use_depth : bool, optional, default False
+        If `True`, consider depth in interevent distance calculation.
     M : int, optional, default 100
         Number of reshufflings.
     seed : int or None, optional, default None
@@ -43,14 +45,14 @@ def decluster(catalog, d=1.6, w=1.0, eta_0=None, alpha_0=1.0, M=100, seed=None):
     t = to_decimal_year(catalog.dates)  # Dates in years
     x = catalog.eastings
     y = catalog.northings
-    # z = catalog.depths
+    z = catalog.depths
     m = catalog.magnitudes
 
     # Calculate nearest-neighbor proximities
-    eta = _step1(t, x, y, m, d, w)
+    eta = _step1(t, x, y, z, m, d, w, use_depth)
 
     # Calculate proximity vectors
-    kappa = _step2(t, x, y, m, eta, d, w, eta_0, M)
+    kappa = _step2(t, x, y, z, m, eta, d, w, eta_0, M, use_depth)
 
     # Calculate normalized nearest-neighbor proximities
     alpha = _step3(eta, kappa)
@@ -63,27 +65,27 @@ def decluster(catalog, d=1.6, w=1.0, eta_0=None, alpha_0=1.0, M=100, seed=None):
 
 
 @jitted
-def proximity(t, x, y, m, ti, xi, yi, d, w):
+def proximity(t, x, y, z, m, ti, xi, yi, zi, d, w, use_depth):
     """Calculate nearest-neighbor proximity."""
-    T, R = time_space_distances(t, x, y, m, ti, xi, yi, d, w)
+    T, R = time_space_distances(t, x, y, z, m, ti, xi, yi, zi, d, w, use_depth)
 
     return T + R if not np.isnan(T) else 20.0
 
 
 @jitted(parallel=True)
-def _step1(t, x, y, m, d, w):
+def _step1(t, x, y, z, m, d, w, use_depth):
     """Calculate nearest-neighbor proximity for each event."""
     N = len(t)
 
     eta = np.empty(N, dtype=np.float64)
     for i in prange(N):
-        eta[i] = proximity(t, x, y, m, t[i], x[i], y[i], d, w)
+        eta[i] = proximity(t, x, y, z, m, t[i], x[i], y[i], z[i], d, w, use_depth)
 
     return eta
 
 
 @jitted
-def _step2(t, x, y, m, eta, d, w, eta_0, M):
+def _step2(t, x, y, z, m, eta, d, w, eta_0, M, use_depth):
     """Calculate proximity vector for each event."""
     N = len(t)
 
@@ -96,6 +98,7 @@ def _step2(t, x, y, m, eta, d, w, eta_0, M):
     # Initialize arrays
     xm = np.empty(N0)
     ym = np.empty(N0)
+    zm = np.empty(N0)
     mm = np.empty(N0)
 
     j = 0
@@ -103,6 +106,7 @@ def _step2(t, x, y, m, eta, d, w, eta_0, M):
         if ij[i] == 1:
             xm[j] = x[i]
             ym[j] = y[i]
+            zm[j] = z[i]
             mm[j] = m[i]
             j += 1
 
@@ -119,16 +123,16 @@ def _step2(t, x, y, m, eta, d, w, eta_0, M):
         # Calculate proximity vectors with respect to randomized catalog
         # Generating random numbers is not thread safe
         # See <https://stackoverflow.com/questions/71351836/random-seeds-and-multithreading-in-numba>
-        _step2_kappa(tm, xm, ym, mm, t, x, y, d, w, kappa[:, k])
+        _step2_kappa(tm, xm, ym, zm, mm, t, x, y, z, d, w, use_depth, kappa[:, k])
 
     return kappa
 
 
 @jitted(parallel=True)
-def _step2_kappa(tm, xm, ym, mm, t, x, y, d, w, kappa):
+def _step2_kappa(tm, xm, ym, zm, mm, t, x, y, z, d, w, use_depth, kappa):
     """Calculate kappa in parallel."""
     for i in prange(len(kappa)):
-        kappa[i] = proximity(tm, xm, ym, mm, t[i], x[i], y[i], d, w)
+        kappa[i] = proximity(tm, xm, ym, zm, mm, t[i], x[i], y[i], z[i], d, w, use_depth)
 
 
 @jitted(parallel=True)

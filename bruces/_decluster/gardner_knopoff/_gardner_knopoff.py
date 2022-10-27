@@ -1,7 +1,7 @@
 import numpy as np
 from numba import prange
 
-from ..._common import jitted
+from ..._common import jitted, dist3d
 from ..._helpers import to_decimal_year
 from .._helpers import register
 
@@ -51,7 +51,7 @@ def _decluster(t, x, y, z, m):
         # Loop over catalog
         for j in prange(N):
             if bg[j] and m[j] < mag and 0 < t[j] - t[i] < dt:
-                r_ij = ((x[j] - x[i]) ** 2 + (y[j] - y[i]) ** 2) ** 0.5
+                r_ij = dist3d(x[i], y[i], z[i], x[j], y[j], z[j])
                 if r_ij < dr:
                     bg[j] = False
 

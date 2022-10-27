@@ -36,6 +36,8 @@ def decluster(catalog, algorithm="nearest-neighbor", **kwargs):
         Only if ``algorithm = "nearest-neighbor"``. Initial cutoff threshold. If `None`, invoke :meth:`bruces.Catalog.fit_cutoff_threshold`.
     alpha_0 : scalar, optional, default 0.1
         Only if ``algorithm = "nearest-neighbor"``. Cluster threshold.
+    use_depth : bool, optional, default False
+        Only if ``algorithm = "nearest-neighbor"``. If `True`, consider depth in interevent distance calculation.
     M : int, optional, default 100
         Only if ``algorithm = "nearest-neighbor"``. Number of reshufflings.
     seed : int or None, optional, default None

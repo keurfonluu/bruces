@@ -122,6 +122,8 @@ class Catalog:
             Only if ``algorithm = "nearest-neighbor"``. Initial cutoff threshold. If `None`, invoke :meth:`bruces.Catalog.fit_cutoff_threshold`.
         alpha_0 : scalar, optional, default 1.0
             Only if ``algorithm = "nearest-neighbor"``. Cluster threshold.
+        use_depth : bool, optional, default False
+            Only if ``algorithm = "nearest-neighbor"``. If `True`, consider depth in interevent distance calculation.
         M : int, optional, default 100
             Only if ``algorithm = "nearest-neighbor"``. Number of reshufflings.
         seed : int or None, optional, default None
@@ -147,7 +149,7 @@ class Catalog:
         """
         return decluster(self, algorithm, **kwargs)
 
-    def time_space_distances(self, d=1.6, w=1.0, returns_log=True, prune_nans=False):
+    def time_space_distances(self, d=1.6, w=1.0, use_depth=False, returns_log=True, prune_nans=False):
         """
         Get rescaled time and space distances for each earthquake in the catalog.
 
@@ -157,6 +159,8 @@ class Catalog:
             Fractal dimension of epicenter/hypocenter.
         w : scalar, optional, default 1.0
             Magnitude weighting factor (usually b-value).
+        use_depth : bool, optional, default False
+            If `True`, consider depth in interevent distance calculation.
         returns_log : bool, optional, default True
             If `True`, return distance as log10.
         prune_nans : bool, optional, default False
@@ -173,11 +177,12 @@ class Catalog:
         t = to_decimal_year(self.dates)  # Dates in years
         x = self.eastings
         y = self.northings
+        z = self.depths
         m = self.magnitudes
 
         T, R = np.transpose(
             [
-                time_space_distances(t, x, y, m, t[i], x[i], y[i], d, w)
+                time_space_distances(t, x, y, z, m, t[i], x[i], y[i], z[i], d, w, use_depth)
                 for i in range(len(self))
             ]
         )
@@ -193,12 +198,14 @@ class Catalog:
 
         return T, R
 
-    def fit_cutoff_threshold(self, d=1.6, w=1.0):
+    def fit_cutoff_threshold(self, d=1.6, w=1.0, use_depth=False):
         """
         Estimate the optimal cutoff threshold for nearest-neighbor.
 
         Parameters
         ----------
+        use_depth : bool, optional, default False
+            If `True`, consider depth in interevent distance calculation.
         d : scalar, optional, default 1.6
             Fractal dimension of epicenter/hypocenter.
         w : scalar, optional, default 1.0
@@ -214,7 +221,7 @@ class Catalog:
         This function assumes that the catalog is clustered.
         
         """
-        T, R = self.time_space_distances(d, w, returns_log=True, prune_nans=True)
+        T, R = self.time_space_distances(d, w, use_depth, returns_log=True, prune_nans=True)
 
         return self.__fit_cutoff_threshold(T, R)
 
@@ -307,6 +314,7 @@ class Catalog:
         self,
         d=1.6,
         w=1.0,
+        use_depth=False,
         eta_0=None,
         eta_0_diag=None,
         kde=True,
@@ -325,6 +333,8 @@ class Catalog:
             Fractal dimension of epicenter/hypocenter.
         w : scalar, optional, default 1.0
             Magnitude weighting factor (usually b-value).
+        use_depth : bool, optional, default False
+            If `True`, consider depth in interevent distance calculation.
         eta_0 : scalar, 'auto', array_like or None, optional, default None
             Initial cutoff threshold values for which to draw a constant line. If `eta_0 = "auto"`, invoke :meth:`bruces.Catalog.fit_cutoff_threshold`.
         eta_0_diag : scalar or None, optional, default None
@@ -379,7 +389,7 @@ class Catalog:
         text_args_.update(text_args)
 
         # Calculate rescaled time and space distances
-        T, R = self.time_space_distances(d, w, returns_log=True, prune_nans=True)
+        T, R = self.time_space_distances(d, w, use_depth, returns_log=True, prune_nans=True)
 
         # Fit cutoff threshold
         if eta_0 == "auto":
