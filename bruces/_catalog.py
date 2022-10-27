@@ -476,22 +476,22 @@ class Catalog:
 
         return ax
 
-    def seismicity_rate(self, tbins):
+    def seismicity_rate(self, tbins, return_cumulative=False):
         """
         Get seismicity rate.
 
         Parameters
         ----------
-        tbins : datetime_like or sequence of datetime_like
-            If `tbins` is a :class:`datetime.timedelta` or a :class:`np.timedelta64`, it defines the width of each bin.
+        tbins : timedelta_like or sequence of datetime_like
+            If `tbins` is a timedelta_like, it defines the width of each bin.
             If `tbins` is a sequence of datetime_like, it defines a monotonically increasing list of bin edges.
 
         Returns
         -------
         array_like
-            Seismicity rate (in events/year).
-        array_like
-            Bin edges.
+            Seismicity rate (in events/year) or cumulative seismicity (number of events).
+        sequence of datetime_like
+            Dates.
 
         """
         if isinstance(tbins, (timedelta, np.timedelta64)):
@@ -511,7 +511,10 @@ class Catalog:
         tybins = to_decimal_year(tbins)
         hist, _ = np.histogram(ty, bins=tybins)
 
-        return hist / np.diff(tybins), tbins
+        out = hist.cumsum() if return_cumulative else hist / np.diff(tybins)
+        t = np.array(tbins[:-1]) + 0.5 * np.diff(tbins)
+
+        return out, t.tolist()
 
     @property
     def dates(self):
