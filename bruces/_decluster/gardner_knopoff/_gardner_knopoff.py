@@ -21,7 +21,7 @@ def decluster(catalog):
         Declustered earthquake catalog.
 
     """
-    t = to_decimal_year(catalog.origin_times) * 365.25  # Days
+    t = catalog.years * 365.25  # Days
     x = catalog.eastings
     y = catalog.northings
     z = catalog.depths

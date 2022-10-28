@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 import numpy as np
 from numba import prange
@@ -139,13 +139,13 @@ def seismicity_rate(
 
     Parameters
     ----------
-    times : sequence of datetime_likes
-        Dates for every stressing rate samples. Common to all integration points.
-    stress : sequence of scalars
+    times : sequence of scalar or sequence of datetime_like
+        Dates for every stressing rate samples (in years if scalar). Common to all integration points.
+    stress : sequence of scalar
         Stressing rates or sequence for every integration points.
-    stress_ini : scalar or sequence of scalars
+    stress_ini : scalar or sequence of scalar
         Background stressing rate or sequence for every integration points.
-    asigma : scalar or sequence of scalars
+    asigma : scalar or sequence of scalar
         Free parameter for rate-and-state constitutive model or sequence for every integration points.
     t_crit : datetime_like or None, optional, default None
         Critical time. Default is `times[0]`.
@@ -191,7 +191,11 @@ def seismicity_rate(
     asig = check_parameter(asigma, ndim, npts)
 
     # Convert datetimes to decimal years
-    t = to_decimal_year(times)
+    t = (
+        to_decimal_year(times)
+        if isinstance(times, (datetime, np.datetime64))
+        else times
+    )
 
     # Set time stepping parameters
     tcrit = to_decimal_year(t_crit) if t_crit is not None else t[0]

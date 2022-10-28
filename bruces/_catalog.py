@@ -174,7 +174,7 @@ class Catalog:
             Rescaled space distances.
 
         """
-        t = to_decimal_year(self.origin_times)
+        t = self.years
         x = self.eastings
         y = self.northings
         z = self.depths
@@ -497,6 +497,12 @@ class Catalog:
         if isinstance(tbins, (timedelta, np.timedelta64)):
             tmin = min(self.origin_times)
             tmax = max(self.origin_times)
+
+            # numpy no longer supports timezone aware datetimes
+            if isinstance(tmin, datetime):
+                tmin = tmin.replace(tzinfo=None)
+                tmax = tmax.replace(tzinfo=None)
+
             tbins = np.arange(tmin, tmax, tbins, dtype="M8[ms]").tolist()
 
         elif isinstance(tbins, (list, tuple, np.ndarray)):
@@ -507,7 +513,7 @@ class Catalog:
         else:
             raise TypeError()
 
-        ty = to_decimal_year(self.origin_times)
+        ty = self.years
         tybins = to_decimal_year(tbins)
         hist, _ = np.histogram(ty, bins=tybins)
 
