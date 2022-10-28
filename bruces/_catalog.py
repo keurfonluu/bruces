@@ -540,3 +540,8 @@ class Catalog:
     def magnitudes(self):
         """Return magnitudes."""
         return self._magnitudes
+
+    @property
+    def years(self):
+        """Return origin times in decimal years."""
+        return to_decimal_year(self._dates)
