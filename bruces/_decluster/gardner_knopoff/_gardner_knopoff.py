@@ -37,7 +37,7 @@ def _decluster(t, x, y, z, m):
     N = len(t)
 
     bg = np.ones(N, dtype=np.bool_)
-    for i in range(N):
+    for i in prange(N):
         mag = m[i]
 
         # Calculate distance window length
@@ -49,7 +49,7 @@ def _decluster(t, x, y, z, m):
         dt = 10.0**dt
 
         # Loop over catalog
-        for j in prange(N):
+        for j in range(N):
             if bg[j] and m[j] < mag and 0 < t[j] - t[i] < dt:
                 r_ij = dist3d(x[i], y[i], z[i], x[j], y[j], z[j])
                 if r_ij < dr:
