@@ -42,7 +42,7 @@ def decluster(catalog, d=1.6, w=1.0, eta_0=None, alpha_0=1.5, use_depth=False, M
     if eta_0 is None:
         eta_0 = catalog.fit_cutoff_threshold(d, w)
 
-    t = to_decimal_year(catalog.dates)  # Dates in years
+    t = to_decimal_year(catalog.origin_times)  # Years
     x = catalog.eastings
     y = catalog.northings
     z = catalog.depths

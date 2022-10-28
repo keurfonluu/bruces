@@ -26,13 +26,13 @@ def is_arraylike(arr, size):
 
 
 class Catalog:
-    def __init__(self, dates, eastings, northings, depths, magnitudes):
+    def __init__(self, origin_times, eastings, northings, depths, magnitudes):
         """
         Earthquake catalog.
 
         Parameters
         ----------
-        dates : sequence of datetime_like
+        origin_times : sequence of datetime_like
             Origin times.
         eastings : array_like
             Easting coordinates (in km).
@@ -44,11 +44,11 @@ class Catalog:
             Magnitudes.
 
         """
-        if not isinstance(dates, (list, tuple, np.ndarray)):
+        if not isinstance(origin_times, (list, tuple, np.ndarray)):
             raise TypeError()
-        if any(not isinstance(time, (datetime, np.datetime64)) for time in dates):
+        if any(not isinstance(time, (datetime, np.datetime64)) for time in origin_times):
             raise TypeError()
-        nev = len(dates)
+        nev = len(origin_times)
 
         for arr in (eastings, northings, depths, magnitudes):
             if not is_arraylike(arr, nev):
@@ -56,7 +56,7 @@ class Catalog:
             if len(arr) != nev:
                 raise ValueError()
 
-        self._dates = np.asarray(dates)
+        self._origin_times = np.asarray(origin_times)
         self._eastings = np.asarray(eastings)
         self._northings = np.asarray(northings)
         self._depths = np.asarray(depths)
@@ -64,11 +64,11 @@ class Catalog:
 
     def __len__(self):
         """Return number of earthquakes in catalog."""
-        return len(self._dates)
+        return len(self._origin_times)
 
     def __getitem__(self, islice):
         """Slice catalog."""
-        t = self.dates[islice]
+        t = self.origin_times[islice]
         x = self.eastings[islice]
         y = self.northings[islice]
         z = self.depths[islice]
@@ -86,7 +86,7 @@ class Catalog:
         """Return next earthquake in catalog."""
         if self._it < len(self):
             eq = Earthquake(
-                self.dates[self._it],
+                self.origin_times[self._it],
                 self.eastings[self._it],
                 self.northings[self._it],
                 self.depths[self._it],
@@ -174,7 +174,7 @@ class Catalog:
             Rescaled space distances.
 
         """
-        t = to_decimal_year(self.dates)  # Dates in years
+        t = to_decimal_year(self.origin_times)
         x = self.eastings
         y = self.northings
         z = self.depths
@@ -495,8 +495,8 @@ class Catalog:
 
         """
         if isinstance(tbins, (timedelta, np.timedelta64)):
-            tmin = min(self.dates)
-            tmax = max(self.dates)
+            tmin = min(self.origin_times)
+            tmax = max(self.origin_times)
             tbins = np.arange(tmin, tmax, tbins, dtype="M8[ms]").tolist()
 
         elif isinstance(tbins, (list, tuple, np.ndarray)):
@@ -507,7 +507,7 @@ class Catalog:
         else:
             raise TypeError()
 
-        ty = to_decimal_year(self.dates)
+        ty = to_decimal_year(self.origin_times)
         tybins = to_decimal_year(tbins)
         hist, _ = np.histogram(ty, bins=tybins)
 
@@ -517,9 +517,9 @@ class Catalog:
         return out, t.tolist()
 
     @property
-    def dates(self):
+    def origin_times(self):
         """Return origin times."""
-        return self._dates
+        return self._origin_times
 
     @property
     def eastings(self):
@@ -544,4 +544,4 @@ class Catalog:
     @property
     def years(self):
         """Return origin times in decimal years."""
-        return to_decimal_year(self._dates)
+        return to_decimal_year(self._origin_times)

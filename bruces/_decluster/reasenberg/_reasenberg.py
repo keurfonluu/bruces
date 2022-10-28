@@ -32,7 +32,7 @@ def decluster(catalog, rfact=10, xmeff=None, xk=0.5, taumin=1.0, taumax=10.0, p=
         Declustered earthquake catalog.
 
     """
-    t = to_decimal_year(catalog.dates) * 365.25  # Days
+    t = to_decimal_year(catalog.origin_times) * 365.25  # Days
 
     # Make sure that events in catalog are sorted
     idx = np.argsort(t)
