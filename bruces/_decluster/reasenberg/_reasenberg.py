@@ -1,7 +1,6 @@
 import numpy as np
 
 from ..._common import jitted, dist3d
-from ..._helpers import to_decimal_year
 from .._helpers import register
 
 

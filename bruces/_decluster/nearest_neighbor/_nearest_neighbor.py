@@ -2,7 +2,6 @@ import numpy as np
 from numba import prange
 
 from ..._common import jitted, set_seed, time_space_distances
-from ..._helpers import to_decimal_year
 from .._helpers import register
 
 
