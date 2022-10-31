@@ -8,6 +8,6 @@ __all__ = [
     "decluster",
     "modeling",
     "from_csep",
-    "to_decimal_year",    
+    "to_decimal_year",
     "__version__",
 ]

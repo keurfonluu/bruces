@@ -2,14 +2,14 @@ import logging
 from collections import namedtuple
 from datetime import datetime, timedelta
 
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 from scipy.optimize import curve_fit
 from scipy.stats import gaussian_kde
 
 from ._common import time_space_distances
-from .decluster import decluster
 from ._helpers import to_decimal_year
+from .decluster import decluster
 
 __all__ = [
     "Catalog",
@@ -47,7 +47,9 @@ class Catalog:
         """
         if not isinstance(origin_times, (list, tuple, np.ndarray)):
             raise TypeError()
-        if any(not isinstance(time, (datetime, np.datetime64)) for time in origin_times):
+        if any(
+            not isinstance(time, (datetime, np.datetime64)) for time in origin_times
+        ):
             raise TypeError()
         nev = len(origin_times)
 
@@ -150,7 +152,9 @@ class Catalog:
         """
         return decluster(self, algorithm, **kwargs)
 
-    def time_space_distances(self, d=1.6, w=1.0, use_depth=False, returns_log=True, prune_nans=False):
+    def time_space_distances(
+        self, d=1.6, w=1.0, use_depth=False, returns_log=True, prune_nans=False
+    ):
         """
         Get rescaled time and space distances for each earthquake in the catalog.
 
@@ -183,7 +187,9 @@ class Catalog:
 
         T, R = np.transpose(
             [
-                time_space_distances(t, x, y, z, m, t[i], x[i], y[i], z[i], d, w, use_depth)
+                time_space_distances(
+                    t, x, y, z, m, t[i], x[i], y[i], z[i], d, w, use_depth
+                )
                 for i in range(len(self))
             ]
         )
@@ -220,19 +226,22 @@ class Catalog:
         Note
         ----
         This function assumes that the catalog is clustered.
-        
+
         """
-        T, R = self.time_space_distances(d, w, use_depth, returns_log=True, prune_nans=True)
+        T, R = self.time_space_distances(
+            d, w, use_depth, returns_log=True, prune_nans=True
+        )
 
         return self.__fit_cutoff_threshold(T, R)
 
     @staticmethod
     def __fit_cutoff_threshold(T, R, bins="freedman-diaconis", debug=False):
         """Fit cutoff threshold."""
+
         def gaussian(x, A, mu, sig):
             """Gaussian distribution function."""
             return np.abs(A) * np.exp(-0.5 * ((x - mu) / sig) ** 2)
-        
+
         def bimodal(x, A1, mu1, sig1, A2, mu2, sig2):
             """Bimodal Gaussian distribution function."""
             return gaussian(x, A1, mu1, sig1) + gaussian(x, A2, mu2, sig2)
@@ -248,7 +257,7 @@ class Catalog:
             bins = int(2.0 * np.ceil(len(H) ** (1.0 / 3.0)))
 
         elif bins == "freedman-diaconis":
-            q3, q1 = np.percentile(H, [75 ,25])
+            q3, q1 = np.percentile(H, [75, 25])
             h = 2.0 * (q3 - q1) / len(H) ** (1.0 / 3.0)
             bins = int(np.ceil((H.max() - H.min()) / h))
 
@@ -260,13 +269,13 @@ class Catalog:
         mu = H.mean()
         sig = 1.0
         p0 = (A, mu - sig, sig, A, mu + sig, sig)
-        
+
         try:
             params, _ = curve_fit(bimodal, xedges, hist, p0)
             _, mu1, sig1, _, mu2, sig2 = params
             sig1 = abs(sig1)
             sig2 = abs(sig2)
-            
+
             # Check unimodality and estimate optimal eta_0
             if mu1 - sig1 < mu2 < mu1 + sig1 or mu2 - sig2 < mu1 < mu2 + sig2:
                 eta_0 = None
@@ -309,7 +318,9 @@ class Catalog:
                 ax.text(xt, yt, f"$\eta_0$ = {eta_0:.1f}", **text_args)
 
         if eta_0 is None:
-            logging.warn("Nearest-neighbors distribution does not appear to be bimodal.")
+            logging.warn(
+                "Nearest-neighbors distribution does not appear to be bimodal."
+            )
 
         return eta_0
 
@@ -392,7 +403,9 @@ class Catalog:
         text_args_.update(text_args)
 
         # Calculate rescaled time and space distances
-        T, R = self.time_space_distances(d, w, use_depth, returns_log=True, prune_nans=True)
+        T, R = self.time_space_distances(
+            d, w, use_depth, returns_log=True, prune_nans=True
+        )
 
         # Fit cutoff threshold
         if eta_0 == "auto":
@@ -402,7 +415,7 @@ class Catalog:
         # Determine optimal axes
         T2 = prune_outliers(T)
         R2 = prune_outliers(R)
-        
+
         xmin, xmax = T2.min(), T2.max()
         ymin, ymax = R2.min(), R2.max()
 
@@ -413,7 +426,7 @@ class Catalog:
 
         dx = xmax - xmin
         dy = ymax - ymin
-        
+
         if dx >= dy:
             ymax = ymin + dx
 
@@ -446,14 +459,14 @@ class Catalog:
 
         if kde:
             ax.contourf(X, Y, H, **hist_args_)
-        
+
         else:
             ax.pcolormesh(X, Y, H, **hist_args_)
 
         # Plot constant eta_0 lines
         if eta_0 is not None:
             xx = np.array([xmin, xmax])
-            
+
             if np.ndim(eta_0) == 0:
                 eta_0 = [eta_0]
 

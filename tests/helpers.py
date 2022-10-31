@@ -12,7 +12,7 @@ def comcat():
     Note
     ----
     The following code has been used to download the catalog:
-    
+
     .. code-block::
 
         from datetime import datetime

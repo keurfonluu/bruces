@@ -7,7 +7,9 @@ from ..._common import jitted, set_seed, time_space_distances
 from .._helpers import register
 
 
-def decluster(catalog, d=1.6, w=1.0, eta_0=None, alpha_0=1.5, use_depth=False, M=100, seed=None):
+def decluster(
+    catalog, d=1.6, w=1.0, eta_0=None, alpha_0=1.5, use_depth=False, M=100, seed=None
+):
     """
     Decluster earthquake catalog (after Zaliapin and Ben-Zion, 2020).
 
@@ -138,7 +140,9 @@ def _step2(t, x, y, z, m, eta, d, w, eta_0, M, use_depth):
 def _step2_kappa(tm, xm, ym, zm, mm, t, x, y, z, d, w, use_depth, kappa):
     """Calculate kappa in parallel."""
     for i in prange(len(kappa)):
-        kappa[i] = proximity(tm, xm, ym, zm, mm, t[i], x[i], y[i], z[i], d, w, use_depth)
+        kappa[i] = proximity(
+            tm, xm, ym, zm, mm, t[i], x[i], y[i], z[i], d, w, use_depth
+        )
 
 
 @jitted(parallel=True)

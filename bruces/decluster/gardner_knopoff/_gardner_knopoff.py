@@ -1,7 +1,7 @@
 import numpy as np
 from numba import prange
 
-from ..._common import jitted, dist3d
+from ..._common import dist3d, jitted
 from .._helpers import register
 
 

@@ -1,6 +1,6 @@
 import numpy as np
 
-from ..._common import jitted, dist3d
+from ..._common import dist3d, jitted
 from .._helpers import register
 
 
@@ -109,7 +109,7 @@ def _decluster(t, x, y, z, m, rfact, xmeff, xk, taumin, taumax, p):
                 r2 = rmain[mid]
                 d2 = dist3d(x[mid], y[mid], z[mid], x[j], y[j], z[j])
                 cond2 = d2 < r2
-            
+
             # Associate events
             if cond1 or cond2:
                 id1 = clusters[i]
@@ -121,7 +121,7 @@ def _decluster(t, x, y, z, m, rfact, xmeff, xk, taumin, taumax, p):
                     if t[i] < t[j]:
                         cid1 = id1
                         cid2 = id2
-                    
+
                     else:
                         cid1 = id2
                         cid2 = id1

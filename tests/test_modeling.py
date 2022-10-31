@@ -1,4 +1,5 @@
 import datetime
+
 import numpy as np
 
 import bruces
@@ -28,7 +29,7 @@ def test_seismicity_rate():
 def test_magnitude_time():
     n = 101
     t = np.linspace(0.0, 10.0, n)
-    r = 100.0 * np.exp(-(t - 2.0) ** 2)
+    r = 100.0 * np.exp(-((t - 2.0) ** 2))
 
     mags = bruces.modeling.magnitude_time(
         times=t,

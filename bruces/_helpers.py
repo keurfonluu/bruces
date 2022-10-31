@@ -24,7 +24,7 @@ def from_csep(catalog):
     -------
     :class:`bruces.Catalog`
         Output catalog.
-    
+
     """
     import utm
 
@@ -72,7 +72,10 @@ def to_decimal_year(dates):
         d1 = datetime(year, 1, 1)
         d2 = datetime(year + 1, 1, 1)
 
-        return year + (d.replace(tzinfo=None) - d1).total_seconds() / (d2 - d1).total_seconds()
+        return (
+            year
+            + (d.replace(tzinfo=None) - d1).total_seconds() / (d2 - d1).total_seconds()
+        )
 
     ndim = np.ndim(dates)
     if ndim == 0:
