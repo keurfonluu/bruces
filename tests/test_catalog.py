@@ -1,6 +1,6 @@
 import os
 
-from datetime import datetime, timedelta
+from datetime import timedelta
 import helpers
 import matplotlib.pyplot as plt
 import numpy as np
@@ -75,6 +75,6 @@ def test_plot_time_space_distances(kde, monkeypatch):
     ],
 )
 def test_seismicity_rate(tbins, return_cumulative, sum_ref):
-    s, t = cat.seismicity_rate(tbins, return_cumulative)
+    s, _ = cat.seismicity_rate(tbins, return_cumulative)
 
     assert np.allclose(s.sum(), sum_ref)
