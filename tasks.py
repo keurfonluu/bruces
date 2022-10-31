@@ -10,7 +10,7 @@ import bruces
 @task
 def build(c):
     shutil.rmtree("dist", ignore_errors=True)
-    c.run("python -m pep517.build --source --binary .")
+    c.run("python -m build --sdist --wheel .")
 
 
 @task
@@ -45,8 +45,8 @@ def clean(c, bytecode=False):
 
 @task
 def black(c):
-    c.run("black -t py36 bruces")
-    # c.run("black -t py36 test")
+    c.run("black -t py38 bruces")
+    c.run("black -t py38 tests")
 
 
 @task
@@ -57,7 +57,7 @@ def docstring(c):
 @task
 def isort(c):
     c.run("isort bruces")
-    # c.run("isort test")
+    c.run("isort tests")
 
 
 @task
