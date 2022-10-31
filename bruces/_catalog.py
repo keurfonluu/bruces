@@ -1,3 +1,4 @@
+import logging
 from collections import namedtuple
 from datetime import datetime, timedelta
 
@@ -228,7 +229,6 @@ class Catalog:
     @staticmethod
     def __fit_cutoff_threshold(T, R, bins="freedman-diaconis", debug=False):
         """Fit cutoff threshold."""
-
         def gaussian(x, A, mu, sig):
             """Gaussian distribution function."""
             return np.abs(A) * np.exp(-0.5 * ((x - mu) / sig) ** 2)
@@ -307,6 +307,9 @@ class Catalog:
                 xt = eta_0 - 0.1
                 yt = ax.get_ylim()[1]
                 ax.text(xt, yt, f"$\eta_0$ = {eta_0:.1f}", **text_args)
+
+        if eta_0 is None:
+            logging.warn("Nearest-neighbors distribution does not appear to be bimodal.")
 
         return eta_0
 

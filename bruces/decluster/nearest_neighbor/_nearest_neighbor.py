@@ -1,3 +1,5 @@
+import logging
+
 import numpy as np
 from numba import prange
 
@@ -40,6 +42,11 @@ def decluster(catalog, d=1.6, w=1.0, eta_0=None, alpha_0=1.5, use_depth=False, M
 
     if eta_0 is None:
         eta_0 = catalog.fit_cutoff_threshold(d, w)
+
+        if eta_0 is None:
+            logging.warn("Skipping nearest-neighbor declustering.")
+
+            return catalog
 
     t = catalog.years
     x = catalog.eastings
