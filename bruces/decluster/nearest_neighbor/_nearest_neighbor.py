@@ -98,25 +98,14 @@ def _step2(t, x, y, z, m, eta, d, w, eta_0, M, use_depth):
     N = len(t)
 
     # Select N0 events that satisfy eta_i > eta_0
-    ij = np.empty(N, dtype=np.int32)
-    for i in range(N):
-        ij[i] = 1 if eta[i] > eta_0 else 0
+    ij = eta > eta_0
     N0 = ij.sum()
 
     # Initialize arrays
-    xm = np.empty(N0)
-    ym = np.empty(N0)
-    zm = np.empty(N0)
-    mm = np.empty(N0)
-
-    j = 0
-    for i in range(N):
-        if ij[i] == 1:
-            xm[j] = x[i]
-            ym[j] = y[i]
-            zm[j] = z[i]
-            mm[j] = m[i]
-            j += 1
+    xm = x[ij]
+    ym = y[ij]
+    zm = z[ij]
+    mm = np.empty(N0, dtype=np.float64)
 
     # Loop over catalog
     kappa = np.empty((N, M), dtype=np.float64)
