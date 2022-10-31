@@ -1,7 +1,13 @@
+import pathlib
+
 from . import decluster, modeling
-from .__about__ import __version__
 from ._catalog import Catalog
 from ._helpers import from_csep, to_decimal_year
+
+
+with open(f"{pathlib.Path(__file__).parent}/VERSION") as f:
+    __version__ = f.readline().strip()
+
 
 __all__ = [
     "Catalog",
