@@ -1,5 +1,4 @@
 import numpy as np
-from numba import prange
 
 from ..._common import dist3d, jitted
 from .._helpers import register
@@ -30,13 +29,13 @@ def decluster(catalog):
     return catalog[bg]
 
 
-@jitted(parallel=True)
+@jitted
 def _decluster(t, x, y, z, m):
     """Gardner-Knopoff's method."""
     N = len(t)
 
     bg = np.ones(N, dtype=np.bool_)
-    for i in prange(N):
+    for i in range(N):
         mag = m[i]
 
         # Calculate distance window length
