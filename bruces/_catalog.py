@@ -7,7 +7,7 @@ from scipy.optimize import curve_fit
 from scipy.stats import gaussian_kde
 
 from ._common import time_space_distances
-from ._decluster import decluster
+from .decluster import decluster
 from ._helpers import to_decimal_year
 
 __all__ = [
