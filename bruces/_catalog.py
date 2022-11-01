@@ -315,7 +315,7 @@ class Catalog:
                 }
                 xt = eta_0 - 0.1
                 yt = ax.get_ylim()[1]
-                ax.text(xt, yt, f"$\eta_0$ = {eta_0:.1f}", **text_args)
+                ax.text(xt, yt, rf"$\eta_0$ = {eta_0:.1f}", **text_args)
 
         if eta_0 is None:
             logging.warn(
@@ -485,8 +485,8 @@ class Catalog:
                     ax.text(xt, yt, f"{value:.1f}", **text_args_)
 
         # Plot parameters
-        ax.set_xlabel("Rescaled time ($\log_{10} T$)")
-        ax.set_ylabel("Rescaled distance ($\log_{10} R$)")
+        ax.set_xlabel(r"Rescaled time ($\log_{10} T$)")
+        ax.set_ylabel(r"Rescaled distance ($\log_{10} R$)")
         ax.set_xlim(xmin, xmax)
         ax.set_ylim(ymin, ymax)
 
