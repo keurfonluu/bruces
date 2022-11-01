@@ -9,7 +9,7 @@ __all__ = [
 ]
 
 
-pow = {
+pow_ = {
     "velocity": 1.0,
     "acceleration": 2.0,
 }
@@ -287,9 +287,9 @@ def seismogram(
         Ut *= lpfilt[1:]
 
     # Multiply by iw depending on output type (differentiate w.r.t. time)
-    if out in pow:
+    if out in pow_:
         om = 2.0 * np.pi * freq
-        iw = (1.0j * om) ** pow[out]
+        iw = (1.0j * om) ** pow_[out]
 
         Uz *= iw
         Ur *= iw

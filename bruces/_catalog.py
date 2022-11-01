@@ -501,6 +501,8 @@ class Catalog:
         tbins : timedelta_like or sequence of datetime_like
             If `tbins` is a timedelta_like, it defines the width of each bin.
             If `tbins` is a sequence of datetime_like, it defines a monotonically increasing list of bin edges.
+        return_cumulative : bool, optional, default False
+            If `True`, return cumulative number of events instead of seismicity rate.
 
         Returns
         -------
