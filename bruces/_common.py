@@ -19,7 +19,25 @@ def jitted(*args, **kwargs):
 
 
 @jitted
-def time_space_distances(t, x, y, m, ti, xi, yi, d=1.6, w=1.0):
+def set_seed(seed):
+    """Set random seed for numba."""
+    np.random.seed(seed)
+
+
+@jitted
+def dist2d(x1, y1, x2, y2):
+    """Euclidean distance in 2D."""
+    return ((x1 - x2) ** 2 + (y1 - y2) ** 2) ** 0.5
+
+
+@jitted
+def dist3d(x1, y1, z1, x2, y2, z2):
+    """Euclidean distance in 3D."""
+    return ((x1 - x2) ** 2 + (y1 - y2) ** 2 + (z1 - z2) ** 2) ** 0.5
+
+
+@jitted
+def time_space_distances(t, x, y, z, m, ti, xi, yi, zi, d=1.6, w=1.0, use_depth=False):
     """Calculate rescaled time and space distances."""
     N = len(t)
 
@@ -32,7 +50,11 @@ def time_space_distances(t, x, y, m, ti, xi, yi, d=1.6, w=1.0):
         # For each event, we are looking for its parent which corresponds
         # to the earliest event with the smallest proximity value
         if t_ij < 0.0:
-            r_ij = np.sqrt((x[j] - xi) ** 2.0 + (y[j] - yi) ** 2.0)
+            r_ij = (
+                dist2d(xi, yi, x[j], y[j])
+                if not use_depth
+                else dist3d(xi, yi, zi, x[j], y[j], z[j])
+            )
 
             # Skip events with the same epicenter
             if r_ij > 0.0:

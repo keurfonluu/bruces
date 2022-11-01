@@ -3,6 +3,7 @@ from datetime import datetime
 import numpy as np
 
 __all__ = [
+    "from_csep",
     "to_decimal_year",
 ]
 
@@ -10,13 +11,45 @@ __all__ = [
 _datetime_like = (datetime, np.datetime64)
 
 
-def to_decimal_year(dates):
+def from_csep(catalog):
     """
-    Convert :class:`datetime.datetime` or :class:`np.datetime64` to decimal year.
+    Convert a :class:`csep.Catalog` to :class:`bruces.Catalog`.
 
     Parameters
     ----------
-    dates : datetime.datetime or np.datetime64, list or tuple
+    catalog : :class:`csep.Catalog`
+        Input catalog.
+
+    Returns
+    -------
+    :class:`bruces.Catalog`
+        Output catalog.
+
+    """
+    import utm
+
+    from ._catalog import Catalog
+
+    dates = catalog.get_datetimes()
+    latitudes = catalog.get_latitudes()
+    longitudes = catalog.get_longitudes()
+    depths = catalog.get_depths()
+    magnitudes = catalog.get_magnitudes()
+
+    eastings, northings, _, _ = utm.from_latlon(latitudes, longitudes)
+    eastings *= 1.0e-3
+    northings *= 1.0e-3
+
+    return Catalog(dates, eastings, northings, depths, magnitudes)
+
+
+def to_decimal_year(dates):
+    """
+    Convert datetime_like to decimal year.
+
+    Parameters
+    ----------
+    dates : datetime_like or sequence of datetime_like
         Date time or list of date times.
 
     Returns
@@ -27,8 +60,7 @@ def to_decimal_year(dates):
     """
 
     def decimal_year(d):
-        """Convert a :class:`datetime.datetime` or :class:`np.datetime64` to decimal
-        year."""
+        """Convert a datetime_like to decimal year."""
         if isinstance(d, datetime):
             year = d.year
         elif isinstance(d, np.datetime64):
@@ -40,7 +72,10 @@ def to_decimal_year(dates):
         d1 = datetime(year, 1, 1)
         d2 = datetime(year + 1, 1, 1)
 
-        return year + (d - d1).total_seconds() / (d2 - d1).total_seconds()
+        return (
+            year
+            + (d.replace(tzinfo=None) - d1).total_seconds() / (d2 - d1).total_seconds()
+        )
 
     ndim = np.ndim(dates)
     if ndim == 0:

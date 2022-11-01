@@ -1,14 +1,15 @@
+import logging
 from collections import namedtuple
 from datetime import datetime, timedelta
 
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 from scipy.optimize import curve_fit
 from scipy.stats import gaussian_kde
 
 from ._common import time_space_distances
-from ._decluster import decluster
 from ._helpers import to_decimal_year
+from .decluster import decluster
 
 __all__ = [
     "Catalog",
@@ -26,13 +27,13 @@ def is_arraylike(arr, size):
 
 
 class Catalog:
-    def __init__(self, dates, eastings, northings, depths, magnitudes):
+    def __init__(self, origin_times, eastings, northings, depths, magnitudes):
         """
         Earthquake catalog.
 
         Parameters
         ----------
-        dates : list of datetime.datetime
+        origin_times : sequence of datetime_like
             Origin times.
         eastings : array_like
             Easting coordinates (in km).
@@ -44,11 +45,13 @@ class Catalog:
             Magnitudes.
 
         """
-        if not isinstance(dates, (list, tuple, np.ndarray)):
+        if not isinstance(origin_times, (list, tuple, np.ndarray)):
             raise TypeError()
-        if any(not isinstance(time, (datetime, np.datetime64)) for time in dates):
+        if any(
+            not isinstance(time, (datetime, np.datetime64)) for time in origin_times
+        ):
             raise TypeError()
-        nev = len(dates)
+        nev = len(origin_times)
 
         for arr in (eastings, northings, depths, magnitudes):
             if not is_arraylike(arr, nev):
@@ -56,7 +59,7 @@ class Catalog:
             if len(arr) != nev:
                 raise ValueError()
 
-        self._dates = np.asarray(dates)
+        self._origin_times = np.asarray(origin_times)
         self._eastings = np.asarray(eastings)
         self._northings = np.asarray(northings)
         self._depths = np.asarray(depths)
@@ -64,11 +67,11 @@ class Catalog:
 
     def __len__(self):
         """Return number of earthquakes in catalog."""
-        return len(self._dates)
+        return len(self._origin_times)
 
     def __getitem__(self, islice):
         """Slice catalog."""
-        t = self.dates[islice]
+        t = self.origin_times[islice]
         x = self.eastings[islice]
         y = self.northings[islice]
         z = self.depths[islice]
@@ -86,7 +89,7 @@ class Catalog:
         """Return next earthquake in catalog."""
         if self._it < len(self):
             eq = Earthquake(
-                self.dates[self._it],
+                self.origin_times[self._it],
                 self.eastings[self._it],
                 self.northings[self._it],
                 self.depths[self._it],
@@ -108,8 +111,9 @@ class Catalog:
         algorithm : str, optional, default 'nearest-neighbor'
             Declustering algorithm:
 
-             - 'gardner-knopoff': Gardner-Knopoff method
+             - 'gardner-knopoff': Gardner-Knopoff's method (after Gardner and Knopoff, 1974)
              - 'nearest-neighbor': nearest-neighbor algorithm (after Zaliapin and Ben-Zion, 2020)
+             - 'reasenberg': Reasenberg's method (after Reasenberg, 1985)
 
         Other Parameters
         ----------------
@@ -119,12 +123,26 @@ class Catalog:
             Only if ``algorithm = "nearest-neighbor"``. Magnitude weighting factor (usually b-value).
         eta_0 : scalar or None, optional, default None
             Only if ``algorithm = "nearest-neighbor"``. Initial cutoff threshold. If `None`, invoke :meth:`bruces.Catalog.fit_cutoff_threshold`.
-        alpha_0 : scalar, optional, default 1.0
+        alpha_0 : scalar, optional, default 1.5
             Only if ``algorithm = "nearest-neighbor"``. Cluster threshold.
+        use_depth : bool, optional, default False
+            Only if ``algorithm = "nearest-neighbor"``. If `True`, consider depth in interevent distance calculation.
         M : int, optional, default 100
             Only if ``algorithm = "nearest-neighbor"``. Number of reshufflings.
         seed : int or None, optional, default None
             Only if ``algorithm = "nearest-neighbor"``. Seed for random number generator.
+        rfact : int, optional, default 10
+            Only if ``algorithm = "reasenberg"``. Number of crack radii surrounding each earthquake within which to consider linking a new event into a cluster.
+        xmeff : scalar or None, optional, default None
+            Only if ``algorithm = "reasenberg"``. "Effective" lower magnitude cutoff for catalog. If `None`, use minimum magnitude in catalog.
+        xk : scalar, optional, default 0.5
+            Only if ``algorithm = "reasenberg"``. Factor by which ``xmeff`` is raised during clusters.
+        taumin : scalar, optional, default 1.0
+            Only if ``algorithm = "reasenberg"``. Look ahead time for non-clustered events (in days).
+        taumax : scalar, optional, default 10.0
+            Only if ``algorithm = "reasenberg"``. Maximum look ahead time for clustered events (in days).
+        p : scalar, optional, default 0.95
+            Only if ``algorithm = "reasenberg"``. Confidence of observing the next event in the sequence.
 
         Returns
         -------
@@ -134,7 +152,9 @@ class Catalog:
         """
         return decluster(self, algorithm, **kwargs)
 
-    def time_space_distances(self, d=1.6, w=1.0, returns_log=True, prune_nans=False):
+    def time_space_distances(
+        self, d=1.6, w=1.0, use_depth=False, returns_log=True, prune_nans=False
+    ):
         """
         Get rescaled time and space distances for each earthquake in the catalog.
 
@@ -144,6 +164,8 @@ class Catalog:
             Fractal dimension of epicenter/hypocenter.
         w : scalar, optional, default 1.0
             Magnitude weighting factor (usually b-value).
+        use_depth : bool, optional, default False
+            If `True`, consider depth in interevent distance calculation.
         returns_log : bool, optional, default True
             If `True`, return distance as log10.
         prune_nans : bool, optional, default False
@@ -157,14 +179,17 @@ class Catalog:
             Rescaled space distances.
 
         """
-        t = to_decimal_year(self.dates)  # Dates in years
+        t = self.years
         x = self.eastings
         y = self.northings
+        z = self.depths
         m = self.magnitudes
 
         T, R = np.transpose(
             [
-                time_space_distances(t, x, y, m, t[i], x[i], y[i], d, w)
+                time_space_distances(
+                    t, x, y, z, m, t[i], x[i], y[i], z[i], d, w, use_depth
+                )
                 for i in range(len(self))
             ]
         )
@@ -180,12 +205,14 @@ class Catalog:
 
         return T, R
 
-    def fit_cutoff_threshold(self, d=1.6, w=1.0):
+    def fit_cutoff_threshold(self, d=1.6, w=1.0, use_depth=False):
         """
         Estimate the optimal cutoff threshold for nearest-neighbor.
 
         Parameters
         ----------
+        use_depth : bool, optional, default False
+            If `True`, consider depth in interevent distance calculation.
         d : scalar, optional, default 1.6
             Fractal dimension of epicenter/hypocenter.
         w : scalar, optional, default 1.0
@@ -199,46 +226,101 @@ class Catalog:
         Note
         ----
         This function assumes that the catalog is clustered.
-        
+
         """
-        T, R = self.time_space_distances(d, w, returns_log=True, prune_nans=True)
+        T, R = self.time_space_distances(
+            d, w, use_depth, returns_log=True, prune_nans=True
+        )
 
         return self.__fit_cutoff_threshold(T, R)
 
     @staticmethod
-    def __fit_cutoff_threshold(T, R, debug=False):
+    def __fit_cutoff_threshold(T, R, bins="freedman-diaconis", debug=False):
         """Fit cutoff threshold."""
 
         def gaussian(x, A, mu, sig):
             """Gaussian distribution function."""
-            return A * np.exp(-0.5 * ((x - mu) / sig) ** 2)
-        
+            return np.abs(A) * np.exp(-0.5 * ((x - mu) / sig) ** 2)
+
         def bimodal(x, A1, mu1, sig1, A2, mu2, sig2):
             """Bimodal Gaussian distribution function."""
             return gaussian(x, A1, mu1, sig1) + gaussian(x, A2, mu2, sig2)
 
-        # Fit a bimodal distribution to data
+        # 1D histogram data
         H = T + R
-        hist, bin_edges = np.histogram(H, bins=50)
+
+        # Optimal number of bins
+        if bins == "square-root":
+            bins = int(np.ceil(len(H) ** 0.5))
+
+        elif bins == "rice":
+            bins = int(2.0 * np.ceil(len(H) ** (1.0 / 3.0)))
+
+        elif bins == "freedman-diaconis":
+            q3, q1 = np.percentile(H, [75, 25])
+            h = 2.0 * (q3 - q1) / len(H) ** (1.0 / 3.0)
+            bins = int(np.ceil((H.max() - H.min()) / h))
+
+        # Fit a bimodal distribution to data
+        hist, bin_edges = np.histogram(H, bins=bins)
         xedges = 0.5 * (bin_edges[1:] + bin_edges[:-1])
 
         A = 0.5 * hist.max()
         mu = H.mean()
         sig = 1.0
         p0 = (A, mu - sig, sig, A, mu + sig, sig)
-        params, _ = curve_fit(bimodal, xedges, hist, p0)
 
-        # Estimate optimal eta_0
-        _, mu1, sig1, _, mu2, sig2 = params
-        eta_0 = mu1 - 2.0 * abs(sig1) if mu1 > mu2 else mu2 - 2.0 * abs(sig2)
+        try:
+            params, _ = curve_fit(bimodal, xedges, hist, p0)
+            _, mu1, sig1, _, mu2, sig2 = params
+            sig1 = abs(sig1)
+            sig2 = abs(sig2)
+
+            # Check unimodality and estimate optimal eta_0
+            if mu1 - sig1 < mu2 < mu1 + sig1 or mu2 - sig2 < mu1 < mu2 + sig2:
+                eta_0 = None
+
+            else:
+                eta_0 = mu1 - 2.0 * sig1 if mu1 > mu2 else mu2 - 2.0 * sig2
+
+            success = True
+
+        except RuntimeError:
+            eta_0 = None
+            success = False
 
         if debug:
+            blue = (54.0 / 255.0, 92.0 / 255.0, 141.0 / 255.0)
             _, ax = plt.subplots(1, 1)
-            ax.hist(T + R, bins=50)
-            ax.plot(xedges, bimodal(xedges, *params), color="black", linewidth=2)
-            ax.plot(xedges, gaussian(xedges, *params[:3]), color="black", linestyle="--")
-            ax.plot(xedges, gaussian(xedges, *params[3:]), color="black", linestyle="--")
-            ax.axvline(eta_0, color="red")
+            ax.hist(H, bins=bins, color=blue, alpha=0.5)
+
+            if success:
+                x = np.linspace(xedges.min(), xedges.max(), 100)
+                ax.plot(x, bimodal(x, *params), color="black", lw=2)
+                ax.plot(x, gaussian(x, *params[:3]), color="black", lw=1, ls="--")
+                ax.plot(x, gaussian(x, *params[3:]), color="black", lw=1, ls="--")
+
+                ax.set_xlabel("$T + R$")
+                ax.set_ylabel("Count")
+
+            if eta_0 is not None:
+                ax.axvline(eta_0, color="red")
+
+                text_args = {
+                    "ha": "right",
+                    "color": "red",
+                    "rotation": 90.0,
+                    "rotation_mode": "anchor",
+                    "transform_rotates_text": True,
+                }
+                xt = eta_0 - 0.1
+                yt = ax.get_ylim()[1]
+                ax.text(xt, yt, rf"$\eta_0$ = {eta_0:.1f}", **text_args)
+
+        if eta_0 is None:
+            logging.warn(
+                "Nearest-neighbors distribution does not appear to be bimodal."
+            )
 
         return eta_0
 
@@ -246,6 +328,7 @@ class Catalog:
         self,
         d=1.6,
         w=1.0,
+        use_depth=False,
         eta_0=None,
         eta_0_diag=None,
         kde=True,
@@ -264,6 +347,8 @@ class Catalog:
             Fractal dimension of epicenter/hypocenter.
         w : scalar, optional, default 1.0
             Magnitude weighting factor (usually b-value).
+        use_depth : bool, optional, default False
+            If `True`, consider depth in interevent distance calculation.
         eta_0 : scalar, 'auto', array_like or None, optional, default None
             Initial cutoff threshold values for which to draw a constant line. If `eta_0 = "auto"`, invoke :meth:`bruces.Catalog.fit_cutoff_threshold`.
         eta_0_diag : scalar or None, optional, default None
@@ -318,7 +403,9 @@ class Catalog:
         text_args_.update(text_args)
 
         # Calculate rescaled time and space distances
-        T, R = self.time_space_distances(d, w, returns_log=True, prune_nans=True)
+        T, R = self.time_space_distances(
+            d, w, use_depth, returns_log=True, prune_nans=True
+        )
 
         # Fit cutoff threshold
         if eta_0 == "auto":
@@ -328,7 +415,7 @@ class Catalog:
         # Determine optimal axes
         T2 = prune_outliers(T)
         R2 = prune_outliers(R)
-        
+
         xmin, xmax = T2.min(), T2.max()
         ymin, ymax = R2.min(), R2.max()
 
@@ -339,7 +426,7 @@ class Catalog:
 
         dx = xmax - xmin
         dy = ymax - ymin
-        
+
         if dx >= dy:
             ymax = ymin + dx
 
@@ -372,14 +459,14 @@ class Catalog:
 
         if kde:
             ax.contourf(X, Y, H, **hist_args_)
-        
+
         else:
             ax.pcolormesh(X, Y, H, **hist_args_)
 
         # Plot constant eta_0 lines
         if eta_0 is not None:
             xx = np.array([xmin, xmax])
-            
+
             if np.ndim(eta_0) == 0:
                 eta_0 = [eta_0]
 
@@ -398,34 +485,40 @@ class Catalog:
                     ax.text(xt, yt, f"{value:.1f}", **text_args_)
 
         # Plot parameters
-        ax.set_xlabel("Rescaled time ($\log_{10} T$)")
-        ax.set_ylabel("Rescaled distance ($\log_{10} R$)")
+        ax.set_xlabel(r"Rescaled time ($\log_{10} T$)")
+        ax.set_ylabel(r"Rescaled distance ($\log_{10} R$)")
         ax.set_xlim(xmin, xmax)
         ax.set_ylim(ymin, ymax)
 
         return ax
 
-    def seismicity_rate(self, tbins):
+    def seismicity_rate(self, tbins, return_cumulative=False):
         """
         Get seismicity rate.
 
         Parameters
         ----------
-        tbins : datetime.timedelta, np.timedelta64 or sequence of datetime_like
-            If `tbins` is a :class:`datetime.timedelta` or a :class:`np.timedelta64`, it defines the width of each bin.
+        tbins : timedelta_like or sequence of datetime_like
+            If `tbins` is a timedelta_like, it defines the width of each bin.
             If `tbins` is a sequence of datetime_like, it defines a monotonically increasing list of bin edges.
 
         Returns
         -------
         array_like
-            Seismicity rate (in events/year).
-        array_like
-            Bin edges.
+            Seismicity rate (in events/year) or cumulative seismicity (number of events).
+        sequence of datetime_like
+            Dates.
 
         """
         if isinstance(tbins, (timedelta, np.timedelta64)):
-            tmin = min(self.dates)
-            tmax = max(self.dates)
+            tmin = min(self.origin_times)
+            tmax = max(self.origin_times)
+
+            # numpy no longer supports timezone aware datetimes
+            if isinstance(tmin, datetime):
+                tmin = tmin.replace(tzinfo=None)
+                tmax = tmax.replace(tzinfo=None)
+
             tbins = np.arange(tmin, tmax, tbins, dtype="M8[ms]").tolist()
 
         elif isinstance(tbins, (list, tuple, np.ndarray)):
@@ -436,16 +529,19 @@ class Catalog:
         else:
             raise TypeError()
 
-        ty = to_decimal_year(self.dates)
+        ty = self.years
         tybins = to_decimal_year(tbins)
         hist, _ = np.histogram(ty, bins=tybins)
 
-        return hist / np.diff(tybins), tbins
+        out = hist.cumsum() if return_cumulative else hist / np.diff(tybins)
+        t = np.array(tbins[:-1]) + 0.5 * np.diff(tbins)
+
+        return out, t.tolist()
 
     @property
-    def dates(self):
+    def origin_times(self):
         """Return origin times."""
-        return self._dates
+        return self._origin_times
 
     @property
     def eastings(self):
@@ -466,3 +562,8 @@ class Catalog:
     def magnitudes(self):
         """Return magnitudes."""
         return self._magnitudes
+
+    @property
+    def years(self):
+        """Return origin times in decimal years."""
+        return to_decimal_year(self._origin_times)

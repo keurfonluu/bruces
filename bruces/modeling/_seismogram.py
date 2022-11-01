@@ -1,8 +1,6 @@
 from functools import partial
 
 import numpy as np
-from disba import surf96, swegn96
-from disba._helpers import resample
 
 from .._common import jitted
 
@@ -75,6 +73,15 @@ def seismogram(
     out="displacement",
 ):
     """Generate a seismogram (experimental)."""
+    try:
+        from disba import surf96, swegn96
+        from disba._helpers import resample
+
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            "bruces.modeling.seismogram requires disba to be installed."
+        )
+
     if wave not in {"rayleigh", "love", "both"}:
         raise ValueError()
 

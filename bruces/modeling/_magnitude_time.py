@@ -1,6 +1,8 @@
+from datetime import datetime
+
 import numpy as np
 
-from .._common import jitted
+from .._common import jitted, set_seed
 from .._helpers import to_decimal_year
 
 __all__ = [
@@ -37,11 +39,8 @@ def rate2mag(dt, r, m, bm):
 
 
 @jitted
-def rate2mag_vectorized(dt, r, m, b, seed):
+def rate2mag_vectorized(dt, r, m, b):
     """Generate magnitude samples for every time steps."""
-    if seed is not None:
-        np.random.seed(seed)
-
     nm = len(m)
     nr = len(r)
 
@@ -65,8 +64,8 @@ def magnitude_time(times, rates, m_bounds, n=50, b_value=1.0, seed=None):
 
     Parameters
     ----------
-    times : array_like
-        Dates for every seismicity rate samples.
+    times : sequence of scalar or sequence of datetime_like
+        Dates for every seismicity rate samples (in years if scalar).
     rates : array_like
         Seismicity rates.
     m_bounds : array_like
@@ -95,10 +94,18 @@ def magnitude_time(times, rates, m_bounds, n=50, b_value=1.0, seed=None):
     m = np.linspace(m_bounds[0], m_bounds[1], n)
 
     # Convert datetimes to decimal years
-    t = to_decimal_year(times)
+    t = (
+        to_decimal_year(times)
+        if isinstance(times, (datetime, np.datetime64))
+        else times
+    )
 
     # Convert times to time increments for integration
     dt = np.diff(t)
     dt = np.append(dt, dt[-1])
 
-    return rate2mag_vectorized(dt, r, m, b_value, seed)
+    # Set random seed
+    if seed is not None:
+        set_seed(seed)
+
+    return rate2mag_vectorized(dt, r, m, b_value)

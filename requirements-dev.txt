@@ -1,6 +1,9 @@
 black
+build
 docformatter
 invoke
 isort
+pandas
 pytest
 pytest-cov
+twine
