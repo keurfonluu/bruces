@@ -12,6 +12,14 @@ if not os.environ.get("DISPLAY", ""):
 cat = helpers.comcat()
 
 
+@pytest.mark.parametrize("use_utm", [True, False])
+def test_init(use_utm):
+    cat = helpers.comcat(use_utm)
+
+    assert np.allclose(cat.eastings.sum(), 386596.80830963)
+    assert np.allclose(cat.northings.sum(), 2564332.51801626)
+
+
 def test_iter():
     easting = 0.0
     northing = 0.0
