@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 
 import matplotlib.pyplot as plt
 import numpy as np
+import utm
 from scipy.optimize import curve_fit
 from scipy.stats import gaussian_kde
 
@@ -17,17 +18,26 @@ __all__ = [
 
 
 Earthquake = namedtuple(
-    "Earthquake", ["date", "easting", "northing", "depth", "magnitude"]
+    "Earthquake", ["date", "latitude", "longitude", "easting", "northing", "depth", "magnitude"]
 )
 
 
 def is_arraylike(arr, size):
     """Check input array."""
-    return isinstance(arr, (list, tuple, np.ndarray)) and np.size(arr) == size
+    return np.ndim(arr) == 1 and np.size(arr) == size
 
 
 class Catalog:
-    def __init__(self, origin_times, eastings, northings, depths, magnitudes):
+    def __init__(
+        self,
+        origin_times,
+        latitudes=None,
+        longitudes=None,
+        eastings=None,
+        northings=None,
+        depths=None,
+        magnitudes=None,
+    ):
         """
         Earthquake catalog.
 
@@ -35,17 +45,21 @@ class Catalog:
         ----------
         origin_times : sequence of datetime_like
             Origin times.
-        eastings : array_like
+        latitudes : array_like or None, optional, default None
+            Latitudes (in degree).
+        longitudes : array_like or None, optional, default None
+            Longitudes (in degree).
+        eastings : array_like or None, optional, default None
             Easting coordinates (in km).
-        northings : array_like
+        northings : array_like or None, optional, default None
             Northing coordinates (in km).
-        depths : array_like
+        depths : array_like or None, optional, default None
             Depths (in km).
-        magnitudes : array_like
+        magnitudes : array_like or None, optional, default None
             Magnitudes.
 
         """
-        if not isinstance(origin_times, (list, tuple, np.ndarray)):
+        if np.ndim(origin_times) != 1:
             raise TypeError()
         if any(
             not isinstance(time, (datetime, np.datetime64)) for time in origin_times
@@ -53,13 +67,35 @@ class Catalog:
             raise TypeError()
         nev = len(origin_times)
 
-        for arr in (eastings, northings, depths, magnitudes):
-            if not is_arraylike(arr, nev):
+        for arr in (latitudes, longitudes, eastings, northings, depths, magnitudes):
+            if not (arr is None or is_arraylike(arr, nev)):
                 raise TypeError()
-            if len(arr) != nev:
-                raise ValueError()
+
+        if not (latitudes is None and longitudes is None):
+            try:
+                eastings, northings, _, _ = utm.from_latlon(latitudes, longitudes)
+                eastings *= 1.0e-3
+                northings *= 1.0e-3
+
+            except utm.OutOfRangeError:
+                eastings = np.full(nev, np.nan, dtype=np.float64)
+                northings = np.full(nev, np.nan, dtype=np.float64)
+
+        elif not (eastings is None and northings is None):
+            latitudes = np.full(nev, np.nan, dtype=np.float64)
+            longitudes = np.full(nev, np.nan, dtype=np.float64)
+
+        else:
+            raise ValueError(
+                "Initializing a catalog requires latitudes/longitudes or eastings/northings."
+            )
+
+        depths = depths if depths is not None else np.full(nev, np.nan, dtype=np.float64)
+        magnitudes = magnitudes if magnitudes is not None else np.full(nev, np.nan, dtype=np.float64)
 
         self._origin_times = np.asarray(origin_times)
+        self._latitudes = np.asarray(latitudes)
+        self._longitudes = np.asarray(longitudes)
         self._eastings = np.asarray(eastings)
         self._northings = np.asarray(northings)
         self._depths = np.asarray(depths)
@@ -72,12 +108,14 @@ class Catalog:
     def __getitem__(self, islice):
         """Slice catalog."""
         t = self.origin_times[islice]
+        lat = self.latitudes[islice]
+        lon = self.longitudes[islice]
         x = self.eastings[islice]
         y = self.northings[islice]
         z = self.depths[islice]
         m = self.magnitudes[islice]
 
-        return Catalog(t, x, y, z, m) if np.ndim(t) > 0 else Earthquake(t, x, y, z, m)
+        return Catalog(t, lat, lon, x, y, z, m) if np.ndim(t) > 0 else Earthquake(t, lat, lon, x, y, z, m)
 
     def __iter__(self):
         """Iterate over earthquake in catalog as namedtuples."""
@@ -90,6 +128,8 @@ class Catalog:
         if self._it < len(self):
             eq = Earthquake(
                 self.origin_times[self._it],
+                self.latitudes[self._it],
+                self.longitudes[self._it],
                 self.eastings[self._it],
                 self.northings[self._it],
                 self.depths[self._it],
@@ -547,6 +587,16 @@ class Catalog:
     def origin_times(self):
         """Return origin times."""
         return self._origin_times
+
+    @property
+    def latitudes(self):
+        """Return latitudes."""
+        return self._latitudes
+
+    @property
+    def longitudes(self):
+        """Return longitudes."""
+        return self._longitudes
 
     @property
     def eastings(self):

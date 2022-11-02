@@ -39,4 +39,10 @@ def comcat():
     depths = df["Depth"].to_numpy()
     magnitudes = df["Magnitude"].to_numpy()
 
-    return bruces.Catalog(origin_times, eastings, northings, depths, magnitudes)
+    return bruces.Catalog(
+        origin_times=origin_times,
+        eastings=eastings,
+        northings=northings,
+        depths=depths,
+        magnitudes=magnitudes,
+    )

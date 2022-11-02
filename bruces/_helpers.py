@@ -26,21 +26,15 @@ def from_csep(catalog):
         Output catalog.
 
     """
-    import utm
-
     from ._catalog import Catalog
 
-    dates = catalog.get_datetimes()
-    latitudes = catalog.get_latitudes()
-    longitudes = catalog.get_longitudes()
-    depths = catalog.get_depths()
-    magnitudes = catalog.get_magnitudes()
-
-    eastings, northings, _, _ = utm.from_latlon(latitudes, longitudes)
-    eastings *= 1.0e-3
-    northings *= 1.0e-3
-
-    return Catalog(dates, eastings, northings, depths, magnitudes)
+    return Catalog(
+        origin_times=catalog.get_datetimes(),
+        latitudes=catalog.get_latitudes(),
+        longitudes=catalog.get_longitudes(),
+        depths=catalog.get_depths(),
+        magnitudes=catalog.get_magnitudes(),
+    )
 
 
 def to_decimal_year(dates):
