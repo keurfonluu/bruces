@@ -11,7 +11,7 @@ def register(algorithm, decluster):
     _decluster_map[algorithm] = decluster
 
 
-def decluster(catalog, algorithm="nearest-neighbor", **kwargs):
+def decluster(catalog, algorithm="nearest-neighbor", return_indices=False, **kwargs):
     """
     Decluster earthquake catalog.
 
@@ -25,6 +25,9 @@ def decluster(catalog, algorithm="nearest-neighbor", **kwargs):
          - 'gardner-knopoff': Gardner-Knopoff's method (after Gardner and Knopoff, 1974)
          - 'nearest-neighbor': nearest-neighbor algorithm (after Zaliapin and Ben-Zion, 2020)
          - 'reasenberg': Reasenberg's method (after Reasenberg, 1985)
+
+    return_indices : bool, optional, default False
+        If `True`, return indices of background events instead of declustered catalog.
 
     Other Parameters
     ----------------
@@ -57,8 +60,8 @@ def decluster(catalog, algorithm="nearest-neighbor", **kwargs):
 
     Returns
     -------
-    :class:`bruces.Catalog`
-        Declustered earthquake catalog.
+    :class:`bruces.Catalog` or array_like
+        Declustered earthquake catalog or indices of background events.
 
     """
     return _decluster_map[algorithm](catalog, **kwargs)

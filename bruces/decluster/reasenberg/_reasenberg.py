@@ -4,7 +4,16 @@ from ..._common import dist3d, jitted
 from .._helpers import register
 
 
-def decluster(catalog, rfact=10, xmeff=None, xk=0.5, taumin=1.0, taumax=10.0, p=0.95):
+def decluster(
+    catalog,
+    return_indices=False,
+    rfact=10,
+    xmeff=None,
+    xk=0.5,
+    taumin=1.0,
+    taumax=10.0,
+    p=0.95,
+):
     """
     Decluster earthquake catalog using Reasenberg's method.
 
@@ -12,6 +21,8 @@ def decluster(catalog, rfact=10, xmeff=None, xk=0.5, taumin=1.0, taumax=10.0, p=
     ----------
     catalog : :class:`bruces.Catalog`
         Earthquake catalog.
+    return_indices : bool, optional, default False
+        If `True`, return indices of background events instead of declustered catalog.
     rfact : int, optional, default 10
         Number of crack radii surrounding each earthquake within which to consider linking a new event into a cluster.
     xmeff : scalar or None, optional, default None
@@ -27,8 +38,8 @@ def decluster(catalog, rfact=10, xmeff=None, xk=0.5, taumin=1.0, taumax=10.0, p=
 
     Returns
     -------
-    :class:`bruces.Catalog`
-        Declustered earthquake catalog.
+    :class:`bruces.Catalog` or array_like
+        Declustered earthquake catalog or indices of background events.
 
     """
     t = catalog.years * 365.25  # Days
@@ -45,7 +56,8 @@ def decluster(catalog, rfact=10, xmeff=None, xk=0.5, taumin=1.0, taumax=10.0, p=
     xmeff = xmeff if xmeff is not None else m.min()
 
     bg = _decluster(t, x, y, z, m, rfact, xmeff, xk, taumin, taumax, p)
-    return catalog[bg]
+
+    return np.arange(len(catalog))[bg] if return_indices else catalog[bg]
 
 
 @jitted

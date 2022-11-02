@@ -5,7 +5,7 @@ import pandas as pd
 import bruces
 
 
-def comcat():
+def comcat(use_utm=False):
     """
     Catalog downloaded using :mod:`pycsep`.
 
@@ -33,10 +33,18 @@ def comcat():
     filename = this_dir / "support_files" / "comcat.csv"
 
     df = pd.read_csv(filename)
-    origin_times = pd.to_datetime(df["Origin time"], utc=False).to_numpy()
-    eastings = df["Easting"].to_numpy()
-    northings = df["Northing"].to_numpy()
-    depths = df["Depth"].to_numpy()
-    magnitudes = df["Magnitude"].to_numpy()
+    kwargs = {
+        "origin_times": pd.to_datetime(df["Origin time"], utc=False).to_numpy(),
+        "depths": df["Depth"].to_numpy(),
+        "magnitudes": df["Magnitude"].to_numpy(),
+    }
 
-    return bruces.Catalog(origin_times, eastings, northings, depths, magnitudes)
+    if use_utm:
+        kwargs["eastings"] = df["Easting"].to_numpy()
+        kwargs["northings"] = df["Northing"].to_numpy()
+
+    else:
+        kwargs["latitudes"] = df["Latitude"].to_numpy()
+        kwargs["longitudes"] = df["Longitude"].to_numpy()
+
+    return bruces.Catalog(**kwargs)

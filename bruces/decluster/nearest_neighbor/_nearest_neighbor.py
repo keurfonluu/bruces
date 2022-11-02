@@ -8,7 +8,15 @@ from .._helpers import register
 
 
 def decluster(
-    catalog, d=1.6, w=1.0, eta_0=None, alpha_0=1.5, use_depth=False, M=100, seed=None
+    catalog,
+    return_indices=False,
+    d=1.6,
+    w=1.0,
+    eta_0=None,
+    alpha_0=1.5,
+    use_depth=False,
+    M=100,
+    seed=None,
 ):
     """
     Decluster earthquake catalog (after Zaliapin and Ben-Zion, 2020).
@@ -17,6 +25,8 @@ def decluster(
     ----------
     catalog : :class:`bruces.Catalog`
         Earthquake catalog.
+    return_indices : bool, optional, default False
+        If `True`, return indices of background events instead of declustered catalog.
     d : scalar, optional, default 1.6
         Fractal dimension of epicenter/hypocenter.
     w : scalar, optional, default 1.0
@@ -34,8 +44,8 @@ def decluster(
 
     Returns
     -------
-    :class:`bruces.Catalog`
-        Declustered earthquake catalog.
+    :class:`bruces.Catalog` or array_like
+        Declustered earthquake catalog or indices of background events.
 
     """
     if seed is not None:
@@ -69,7 +79,7 @@ def decluster(
     U = alpha + alpha_0 > np.log10(np.random.rand(len(catalog)))
     bg = np.nonzero(U)[0]
 
-    return catalog[bg]
+    return bg if return_indices else catalog[bg]
 
 
 @jitted
