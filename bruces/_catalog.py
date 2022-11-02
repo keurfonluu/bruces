@@ -18,7 +18,8 @@ __all__ = [
 
 
 Earthquake = namedtuple(
-    "Earthquake", ["date", "latitude", "longitude", "easting", "northing", "depth", "magnitude"]
+    "Earthquake",
+    ["date", "latitude", "longitude", "easting", "northing", "depth", "magnitude"],
 )
 
 
@@ -90,8 +91,14 @@ class Catalog:
                 "Initializing a catalog requires latitudes/longitudes or eastings/northings."
             )
 
-        depths = depths if depths is not None else np.full(nev, np.nan, dtype=np.float64)
-        magnitudes = magnitudes if magnitudes is not None else np.full(nev, np.nan, dtype=np.float64)
+        depths = (
+            depths if depths is not None else np.full(nev, np.nan, dtype=np.float64)
+        )
+        magnitudes = (
+            magnitudes
+            if magnitudes is not None
+            else np.full(nev, np.nan, dtype=np.float64)
+        )
 
         self._origin_times = np.asarray(origin_times)
         self._latitudes = np.asarray(latitudes)
@@ -115,7 +122,11 @@ class Catalog:
         z = self.depths[islice]
         m = self.magnitudes[islice]
 
-        return Catalog(t, lat, lon, x, y, z, m) if np.ndim(t) > 0 else Earthquake(t, lat, lon, x, y, z, m)
+        return (
+            Catalog(t, lat, lon, x, y, z, m)
+            if np.ndim(t) > 0
+            else Earthquake(t, lat, lon, x, y, z, m)
+        )
 
     def __iter__(self):
         """Iterate over earthquake in catalog as namedtuples."""
@@ -154,7 +165,7 @@ class Catalog:
              - 'gardner-knopoff': Gardner-Knopoff's method (after Gardner and Knopoff, 1974)
              - 'nearest-neighbor': nearest-neighbor algorithm (after Zaliapin and Ben-Zion, 2020)
              - 'reasenberg': Reasenberg's method (after Reasenberg, 1985)
-        
+
         return_indices : bool, optional, default False
             If `True`, return indices of background events instead of declustered catalog.
 

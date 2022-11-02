@@ -29,11 +29,7 @@ def decluster(catalog, return_indices=False):
 
     bg = _decluster(t, x, y, z, m)
 
-    return (
-        np.arange(len(catalog))[bg]
-        if return_indices
-        else catalog[bg]
-    )
+    return np.arange(len(catalog))[bg] if return_indices else catalog[bg]
 
 
 @jitted

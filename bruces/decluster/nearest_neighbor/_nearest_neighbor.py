@@ -8,7 +8,15 @@ from .._helpers import register
 
 
 def decluster(
-    catalog, return_indices=False, d=1.6, w=1.0, eta_0=None, alpha_0=1.5, use_depth=False, M=100, seed=None
+    catalog,
+    return_indices=False,
+    d=1.6,
+    w=1.0,
+    eta_0=None,
+    alpha_0=1.5,
+    use_depth=False,
+    M=100,
+    seed=None,
 ):
     """
     Decluster earthquake catalog (after Zaliapin and Ben-Zion, 2020).

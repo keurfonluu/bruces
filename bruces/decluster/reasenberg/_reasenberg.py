@@ -4,7 +4,16 @@ from ..._common import dist3d, jitted
 from .._helpers import register
 
 
-def decluster(catalog, return_indices=False, rfact=10, xmeff=None, xk=0.5, taumin=1.0, taumax=10.0, p=0.95):
+def decluster(
+    catalog,
+    return_indices=False,
+    rfact=10,
+    xmeff=None,
+    xk=0.5,
+    taumin=1.0,
+    taumax=10.0,
+    p=0.95,
+):
     """
     Decluster earthquake catalog using Reasenberg's method.
 
@@ -48,11 +57,7 @@ def decluster(catalog, return_indices=False, rfact=10, xmeff=None, xk=0.5, taumi
 
     bg = _decluster(t, x, y, z, m, rfact, xmeff, xk, taumin, taumax, p)
 
-    return (
-        np.arange(len(catalog))[bg]
-        if return_indices
-        else catalog[bg]
-    )
+    return np.arange(len(catalog))[bg] if return_indices else catalog[bg]
 
 
 @jitted
