@@ -4,7 +4,7 @@ from ..._common import dist3d, jitted
 from .._helpers import register
 
 
-def decluster(catalog):
+def decluster(catalog, return_indices=False):
     """
     Decluster earthquake catalog using Gardner-Knopoff's method.
 
@@ -12,11 +12,13 @@ def decluster(catalog):
     ----------
     catalog : :class:`bruces.Catalog`
         Earthquake catalog.
+    return_indices : bool, optional, default False
+        If `True`, return indices of background events instead of declustered catalog.
 
     Returns
     -------
-    :class:`bruces.Catalog`
-        Declustered earthquake catalog.
+    :class:`bruces.Catalog` or array_like
+        Declustered earthquake catalog or indices of background events.
 
     """
     t = catalog.years * 365.25  # Days
@@ -26,7 +28,12 @@ def decluster(catalog):
     m = catalog.magnitudes
 
     bg = _decluster(t, x, y, z, m)
-    return catalog[bg]
+
+    return (
+        np.arange(len(catalog))[bg]
+        if return_indices
+        else catalog[bg]
+    )
 
 
 @jitted

@@ -102,7 +102,7 @@ class Catalog:
         else:
             raise StopIteration
 
-    def decluster(self, algorithm="nearest-neighbor", **kwargs):
+    def decluster(self, algorithm="nearest-neighbor", return_indices=False, **kwargs):
         """
         Decluster earthquake catalog.
 
@@ -114,6 +114,9 @@ class Catalog:
              - 'gardner-knopoff': Gardner-Knopoff's method (after Gardner and Knopoff, 1974)
              - 'nearest-neighbor': nearest-neighbor algorithm (after Zaliapin and Ben-Zion, 2020)
              - 'reasenberg': Reasenberg's method (after Reasenberg, 1985)
+        
+        return_indices : bool, optional, default False
+            If `True`, return indices of background events instead of declustered catalog.
 
         Other Parameters
         ----------------
@@ -146,11 +149,11 @@ class Catalog:
 
         Returns
         -------
-        :class:`bruces.Catalog`
-            Declustered earthquake catalog.
+        :class:`bruces.Catalog` or array_like
+            Declustered earthquake catalog or indices of background events.
 
         """
-        return decluster(self, algorithm, **kwargs)
+        return decluster(self, algorithm, return_indices, **kwargs)
 
     def time_space_distances(
         self, d=1.6, w=1.0, use_depth=False, returns_log=True, prune_nans=False
