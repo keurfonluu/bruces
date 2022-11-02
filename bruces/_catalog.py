@@ -50,9 +50,9 @@ class Catalog:
         longitudes : array_like or None, optional, default None
             Longitudes (in degree).
         eastings : array_like or None, optional, default None
-            Easting coordinates (in km).
+            Easting coordinates (in km). Ignored if latitudes and longitudes are set.
         northings : array_like or None, optional, default None
-            Northing coordinates (in km).
+            Northing coordinates (in km). Ignored if latitudes and longitudes are set.
         depths : array_like or None, optional, default None
             Depths (in km).
         magnitudes : array_like or None, optional, default None
