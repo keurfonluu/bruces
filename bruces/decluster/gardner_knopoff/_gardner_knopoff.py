@@ -59,9 +59,9 @@ def _decluster(t, x, y, z, m, window):
             )
 
         elif window == "gruenthal":
-            dr = np.exp(1.77 + (0.037 + 1.02 * mag)**0.5)
+            dr = np.exp(1.77 + (0.037 + 1.02 * mag) ** 0.5)
             dt = (
-                np.exp(-3.95 + (0.62 + 17.32 * mag)**0.5)
+                np.exp(-3.95 + (0.62 + 17.32 * mag) ** 0.5)
                 if mag < 6.5
                 else np.power(10.0, 2.8 + 0.024 * mag)
             )
