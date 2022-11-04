@@ -5,3 +5,4 @@ sphinx-gallery
 pydata-sphinx-theme
 sphinxcontrib-bibtex
 pybtex-apa-style
+pycsep

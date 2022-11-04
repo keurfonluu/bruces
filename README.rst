@@ -38,10 +38,10 @@ Alternatively, the documentation can be built using `Sphinx <https://www.sphinx-
    pip install -r doc/requirements.txt
    sphinx-build -b html doc/source doc/build
 
-Usage
------
+Example
+-------
 
-The following code snippet will decluster a catalog downloaded using `pycsep <https://github.com/SCECcode/pycsep>`__ using the nearest-neighbor method:
+The following code snippet will decluster a catalog downloaded with `pycsep <https://github.com/SCECcode/pycsep>`__ using the nearest-neighbor method:
 
 .. code-block:: python
 

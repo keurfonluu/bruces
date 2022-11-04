@@ -14,6 +14,11 @@ def build(c):
 
 
 @task
+def html(c):
+    c.run("sphinx-build -b html doc/source doc/build")
+
+
+@task
 def tag(c):
     c.run("git tag v{}".format(bruces.__version__))
     c.run("git push --tags")
@@ -30,6 +35,8 @@ def clean(c, bytecode=False):
         "build",
         "dist",
         "bruces.egg-info",
+        "doc/build",
+        "doc/source/examples",
     ]
 
     if bytecode:

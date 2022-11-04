@@ -31,6 +31,13 @@ def decluster(catalog, algorithm="nearest-neighbor", return_indices=False, **kwa
 
     Other Parameters
     ----------------
+    window : str {'default', 'gruenthal', 'uhrhammer'}, optional, default 'default'
+        Only if ``algorithm = "gardner-knopoff"``. Distance and time windows:
+
+         - 'default': Gardner and Knopoff (1974)
+         - 'gruenthal': personnal communication (see van Stiphout et al., 2012)
+         - 'uhrhammer': Uhrhammer (1986)
+
     d : scalar, optional, default 1.6
         Only if ``algorithm = "nearest-neighbor"``. Fractal dimension of epicenter/hypocenter.
     w : scalar, optional, default 1.0

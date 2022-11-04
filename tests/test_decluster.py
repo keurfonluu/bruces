@@ -7,7 +7,21 @@ cat = helpers.comcat()
 @pytest.mark.parametrize(
     "algorithm, decluster_kws, nev",
     [
-        ("gardner-knopoff", {}, 154),
+        (
+            "gardner-knopoff",
+            {"window": "default"},
+            154,
+        ),
+        (
+            "gardner-knopoff",
+            {"window": "gruenthal"},
+            52,
+        ),
+        (
+            "gardner-knopoff",
+            {"window": "uhrhammer"},
+            430,
+        ),
         (
             "nearest-neighbor",
             {
