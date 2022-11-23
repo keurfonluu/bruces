@@ -58,7 +58,7 @@ def decluster(
         if eta_0 is None:
             logging.warn("Skipping nearest-neighbor declustering.")
 
-            return catalog
+            return np.arange(len(catalog)) if return_indices else catalog
 
     t = catalog.years
     x = catalog.eastings
