@@ -71,4 +71,4 @@ def decluster(catalog, algorithm="nearest-neighbor", return_indices=False, **kwa
         Declustered earthquake catalog or indices of background events.
 
     """
-    return _decluster_map[algorithm](catalog, **kwargs)
+    return _decluster_map[algorithm](catalog, return_indices, **kwargs)
