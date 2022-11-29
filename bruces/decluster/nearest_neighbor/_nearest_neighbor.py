@@ -77,7 +77,7 @@ def decluster(
 
     # Calculate retention probabilities and identify background events
     U = alpha + alpha_0 > np.log10(np.random.rand(len(catalog)))
-    bg = np.nonzero(U)[0]
+    bg = np.flatnonzero(U)
 
     return bg if return_indices else catalog[bg]
 
