@@ -1,10 +1,11 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import numpy as np
 
 __all__ = [
     "from_csep",
     "to_decimal_year",
+    "to_datetime",
 ]
 
 
@@ -85,4 +86,37 @@ def to_decimal_year(dates):
         decimal_year(dates)
         if ndim == 0
         else np.array([decimal_year(date) for date in dates])
+    )
+
+
+def to_datetime(dates):
+    """
+    Convert decimal year to datetime.
+
+    Parameters
+    ----------
+    dates : scalar or array_like
+        Decimal year or list of decimal years.
+
+    Returns
+    -------
+    datetime or sequence of datetime
+        Date time or list of date times.
+    
+    """
+    from calendar import isleap
+
+    def datetime_(d):
+        """Convert a decimal year to datetime_like."""
+        year = np.floor(d)
+        days = (d - year) * (366.0 if isleap(year) else 365.0)
+
+        return datetime(int(year), 1, 1) + timedelta(days=days)
+
+    ndim = np.ndim(dates)
+    
+    return (
+        datetime_(dates)
+        if ndim == 0
+        else np.array([datetime_(date) for date in dates])
     )
