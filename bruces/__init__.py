@@ -1,6 +1,6 @@
 import pathlib
 
-from . import decluster, modeling, utils
+from . import decluster, modeling, stats
 from ._catalog import Catalog
 from ._helpers import from_csep, to_decimal_year, to_datetime
 
@@ -12,7 +12,7 @@ __all__ = [
     "Catalog",
     "decluster",
     "modeling",
-    "utils",
+    "stats",
     "from_csep",
     "to_decimal_year",
     "to_datetime",
