@@ -43,15 +43,10 @@ def decluster(
 
     """
     t = catalog.years * 365.25  # Days
-
-    # Make sure that events in catalog are sorted
-    idx = np.argsort(t)
-
-    t = t[idx]
-    x = catalog.eastings[idx]
-    y = catalog.northings[idx]
-    z = catalog.depths[idx]
-    m = catalog.magnitudes[idx]
+    x = catalog.eastings
+    y = catalog.northings
+    z = catalog.depths
+    m = catalog.magnitudes
 
     xmeff = xmeff if xmeff is not None else m.min()
 

@@ -98,13 +98,14 @@ class Catalog:
             else np.full(nev, np.nan, dtype=np.float64)
         )
 
-        self._origin_times = np.asarray(origin_times)
-        self._latitudes = np.asarray(latitudes)
-        self._longitudes = np.asarray(longitudes)
-        self._eastings = np.asarray(eastings)
-        self._northings = np.asarray(northings)
-        self._depths = np.asarray(depths)
-        self._magnitudes = np.asarray(magnitudes)
+        idx = np.argsort(origin_times)
+        self._origin_times = np.asarray(origin_times)[idx]
+        self._latitudes = np.asarray(latitudes)[idx]
+        self._longitudes = np.asarray(longitudes)[idx]
+        self._eastings = np.asarray(eastings)[idx]
+        self._northings = np.asarray(northings)[idx]
+        self._depths = np.asarray(depths)[idx]
+        self._magnitudes = np.asarray(magnitudes)[idx]
 
     def __len__(self):
         """Return number of earthquakes in catalog."""
