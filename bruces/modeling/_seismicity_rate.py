@@ -1,10 +1,10 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 import numpy as np
 from numba import prange
 
 from .._common import jitted
-from .._helpers import to_decimal_year
+from ..utils import to_decimal_year
 
 __all__ = [
     "seismicity_rate",
@@ -191,11 +191,7 @@ def seismicity_rate(
     asig = check_parameter(asigma, ndim, npts)
 
     # Convert datetimes to decimal years
-    t = (
-        to_decimal_year(times)
-        if isinstance(times, (datetime, np.datetime64))
-        else times
-    )
+    t = to_decimal_year(times)
 
     # Set time stepping parameters
     tcrit = to_decimal_year(t_crit) if t_crit is not None else t[0]

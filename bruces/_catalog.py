@@ -9,8 +9,8 @@ from scipy.optimize import curve_fit
 from scipy.stats import gaussian_kde
 
 from ._common import time_space_distances
-from ._helpers import to_decimal_year
 from .decluster import decluster
+from .utils import to_datetime, to_decimal_year
 
 __all__ = [
     "Catalog",
@@ -62,10 +62,8 @@ class Catalog:
         """
         if np.ndim(origin_times) != 1:
             raise TypeError()
-        if any(
-            not isinstance(time, (datetime, np.datetime64)) for time in origin_times
-        ):
-            raise TypeError()
+
+        origin_times = to_datetime(origin_times)
         nev = len(origin_times)
 
         for arr in (latitudes, longitudes, eastings, northings, depths, magnitudes):

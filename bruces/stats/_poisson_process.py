@@ -1,8 +1,6 @@
-from datetime import datetime
-
 import numpy as np
 
-from .._helpers import to_datetime, to_decimal_year
+from ..utils import to_datetime, to_decimal_year
 
 __all__ = [
     "poisson_process",
@@ -17,8 +15,7 @@ def poisson_process(times, rates):
     if np.ndim(times) != 1:
         raise TypeError()
 
-    if isinstance(times[0], (datetime, np.datetime64)):
-        times = to_decimal_year(times)
+    times = to_decimal_year(times)
 
     ndim = np.ndim(rates)
     if ndim == 0 and len(times) != 2:
