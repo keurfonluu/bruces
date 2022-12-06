@@ -1,5 +1,4 @@
 import logging
-from collections import namedtuple
 from datetime import datetime, timedelta
 
 import matplotlib.pyplot as plt
@@ -9,18 +8,13 @@ from scipy.optimize import curve_fit
 from scipy.stats import gaussian_kde
 
 from ._common import time_space_distances
+from ._earthquake import Earthquake
 from .decluster import decluster
 from .utils import to_datetime, to_decimal_year
 
 __all__ = [
     "Catalog",
 ]
-
-
-Earthquake = namedtuple(
-    "Earthquake",
-    ["date", "latitude", "longitude", "easting", "northing", "depth", "magnitude"],
-)
 
 
 def is_arraylike(arr, size):
