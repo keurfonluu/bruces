@@ -8,7 +8,6 @@ __all__ = [
 ]
 
 
-_datetime_like = (datetime, np.datetime64)
 _scalar_like = (int, np.int32, np.int64, float, np.float32, np.float64)
 
 

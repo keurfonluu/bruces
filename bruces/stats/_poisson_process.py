@@ -12,6 +12,22 @@ __all__ = [
 def poisson_process(times, rates):
     """
     Simulate a (non)-stationary Poisson process.
+
+    Parameters
+    ----------
+    times : sequence of scalar or sequence of datetime_like
+        Simulation time period of the Poisson process (in years if scalar):
+
+         - If `rates` is a scalar: (start_time, end_time) corresponding to first and maximum time
+         - If `rates` is an array_like: time associated to each rate value
+
+    rates : scalar or array_like
+        Constant or time-dependent rate (in 1/year).
+
+    Returns
+    -------
+    sequence of scalar or sequence of datetime_like
+        Simulated times.
     
     """
     if np.ndim(times) != 1:

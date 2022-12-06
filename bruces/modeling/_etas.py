@@ -114,6 +114,38 @@ def etas(
 ):
     """
     Epidemic-Type Aftershock Sequence.
+
+    Parameters
+    ----------
+    catalog : :class:`bruces.Catalog`
+        Earthquake catalog of background events.
+    end_time : scalar, datetime_like or None, optional, default None
+        Maximum simulation time. Default is origin time of last earthquake in input catalog.
+    mag_min : scalar, optional, default 0.0
+        Magnitude of completeness.
+    theta : scalar, optional, default 0.2
+        Omori's exponent (> 0.0).
+    alpha : scalar, optional, default 0.5
+        Aftershock productivity constant.
+    c : scalar, optional, default 0.001
+        Aftershock productivity constant (in days).
+    K : scalar, optional, default 0.1
+        Aftershock productivity constant.
+    b : scalar, optional, default 1.0
+        b-value.
+    d : scalar, optional, default 1.0
+        Characteristic length (in km).
+
+    Returns
+    -------
+    :class:`bruces.Catalog`
+        Simulated catalog (background and aftershock events).
+
+    Note
+    ----
+     - Origin times are generated following Helmstetter and Sornette (2002)
+     - Locations are implemented following Ogata (1998)
+     - Magnitudes are distributed following Gutenberg-Richter law
     
     """
     if not isinstance(catalog, Catalog):

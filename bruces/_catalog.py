@@ -38,8 +38,8 @@ class Catalog:
 
         Parameters
         ----------
-        origin_times : sequence of datetime_like
-            Origin times.
+        origin_times : sequence of scalar or sequence of datetime_like
+            Origin times (in years if scalar).
         latitudes : array_like or None, optional, default None
             Latitudes (in degree).
         longitudes : array_like or None, optional, default None
