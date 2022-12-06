@@ -104,7 +104,7 @@ def aftershocks(m, tmax, mmin, theta, alpha, c, K, b, d):
 def etas(
     catalog,
     end_time=None,
-    mag_min=0.0,
+    mc=0.0,
     theta=0.2,
     alpha=0.5,
     c=0.001,
@@ -121,7 +121,7 @@ def etas(
         Earthquake catalog of background events.
     end_time : scalar, datetime_like or None, optional, default None
         Maximum simulation time. Default is origin time of last earthquake in input catalog.
-    mag_min : scalar, optional, default 0.0
+    mc : scalar, optional, default 0.0
         Magnitude of completeness.
     theta : scalar, optional, default 0.2
         Omori's exponent (> 0.0).
@@ -164,7 +164,7 @@ def etas(
 
     t, x, y, m = [], [], [], []
     for eq in catalog:
-        dt, dx, dy, ma = aftershocks(eq.magnitude, end_time, mag_min, theta, alpha, c, K, b, d)
+        dt, dx, dy, ma = aftershocks(eq.magnitude, end_time, mc, theta, alpha, c, K, b, d)
 
         t.append(eq.year + dt)
         x.append(eq.easting + dx)
