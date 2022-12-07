@@ -148,9 +148,6 @@ def etas(
      - Magnitudes are distributed following Gutenberg-Richter law
     
     """
-    if not isinstance(catalog, Catalog):
-        raise TypeError()
-
     end_time = (
         to_decimal_year(end_time)
         if end_time is not None
