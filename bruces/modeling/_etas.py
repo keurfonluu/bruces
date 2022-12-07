@@ -48,7 +48,7 @@ def aftershock_times(m, tmax, mmin, theta, alpha, c, K, b):
 
         Li = intensity(ti, ta, ma, mmin, theta, alpha, c, K)
         if np.random.rand() * Lc < Li:
-            mi = grmag(mmin, b=b)[0]
+            mi = grmag(mmin, m, b)[0]
             pi = aftershock_rate(ti, mi, mmin, theta, alpha, c, K)
 
             ta.append(ti)
