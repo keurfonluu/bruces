@@ -2,7 +2,7 @@ import numpy as np
 from numba.typed import List
 
 from .._catalog import Catalog
-from .._common import jitted
+from .._common import jitted, timedelta_to_day
 from ..stats._sample_magnitude import grmag
 from ..utils import to_decimal_year
 
@@ -127,8 +127,8 @@ def etas(
         Omori's exponent (> 0.0).
     alpha : scalar, optional, default 0.5
         Aftershock productivity constant.
-    c : scalar, optional, default 0.001
-        Aftershock productivity constant (in days).
+    c : scalar, timedelta_like or None, optional, default None
+        Aftershock productivity constant (in days if scalar). Default is 0.001 days.
     K : scalar, optional, default 0.1
         Aftershock productivity constant.
     b : scalar, optional, default 1.0
@@ -160,6 +160,7 @@ def etas(
     
     # Convert c to decimal years
     # c is usually defined in days in literature
+    c = timedelta_to_day(c) if c is not None else 1.0e-3
     c /= 365.25
 
     t, x, y, m = [], [], [], []

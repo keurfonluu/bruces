@@ -1,5 +1,11 @@
+from datetime import timedelta
+
 import numpy as np
 from numba import jit
+
+
+_timedelta_like = (timedelta, np.timedelta64)
+_scalar_like = (int, np.int32, np.int64, float, np.float32, np.float64)
 
 
 def jitted(*args, **kwargs):
@@ -71,3 +77,42 @@ def time_space_distances(t, x, y, z, m, ti, xi, yi, zi, d=1.6, w=1.0, use_depth=
                     R_i = R_ij
 
     return T_i, R_i
+
+
+def timedelta_to_second(dt):
+    """Convert timedelta_like to second."""
+    if isinstance(dt, _timedelta_like):
+        if isinstance(dt, np.timedelta64):
+            dt = dt.astype("timedelta64[ms]").tolist()
+
+        return dt.total_seconds()
+
+    elif isinstance(dt, _scalar_like):
+        return dt
+
+    else:
+        raise TypeError()
+
+
+def timedelta_to_day(dt):
+    """Convert timedelta_like to day."""
+    if isinstance(dt, _timedelta_like):
+        return timedelta_to_second(dt) / 86400.0
+
+    elif isinstance(dt, _scalar_like):
+        return dt
+
+    else:
+        raise TypeError()
+
+
+def timedelta_to_year(dt):
+    """Convert timedelta_like to year."""
+    if isinstance(dt, _timedelta_like):
+        return timedelta_to_second(dt) / 31557600.0
+
+    elif isinstance(dt, _scalar_like):
+        return dt
+
+    else:
+        raise TypeError()

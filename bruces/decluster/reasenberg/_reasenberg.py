@@ -1,6 +1,6 @@
 import numpy as np
 
-from ..._common import dist3d, jitted
+from ..._common import dist3d, jitted, timedelta_to_day
 from .._helpers import register
 
 
@@ -29,10 +29,10 @@ def decluster(
         "Effective" lower magnitude cutoff for catalog. If `None`, use minimum magnitude in catalog.
     xk : scalar, optional, default 0.5
         Factor by which ``xmeff`` is raised during clusters.
-    tau_min : scalar, optional, default 1.0
-        Look ahead time for non-clustered events (in days).
-    tau_max : scalar, optional, default 10.0
-        Maximum look ahead time for clustered events (in days).
+    tau_min : scalar, timedelta_like or None, optional, default None
+        Look ahead time for non-clustered events (in days if scalar). Default is 1 day.
+    tau_max : scalar, timedelta_like or None, optional, default None
+        Maximum look ahead time for clustered events (in days if scalar). Default is 10 days.
     p : scalar, optional, default 0.95
         Confidence of observing the next event in the sequence.
 
@@ -42,6 +42,9 @@ def decluster(
         Declustered earthquake catalog or indices of background events.
 
     """
+    tau_min = timedelta_to_day(tau_min) if tau_min is not None else 1.0
+    tau_max = timedelta_to_day(tau_max) if tau_max is not None else 10.0
+
     t = catalog.years * 365.25  # Days
     x = catalog.eastings
     y = catalog.northings
