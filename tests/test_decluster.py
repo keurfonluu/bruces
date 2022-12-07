@@ -30,10 +30,10 @@ cat = helpers.comcat()
                 "eta_0": -5.1,
                 "alpha_0": 2.0,
                 "use_depth": True,
-                "M": 100,
+                "M": 16,
                 "seed": 42,
             },
-            477,
+            473,
         ),
         (
             "reasenberg",

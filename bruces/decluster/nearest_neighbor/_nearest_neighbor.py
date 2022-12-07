@@ -16,7 +16,7 @@ def decluster(
     eta_0=None,
     alpha_0=1.5,
     use_depth=False,
-    M=100,
+    M=16,
     seed=None,
 ):
     """
@@ -38,7 +38,7 @@ def decluster(
         Cluster threshold.
     use_depth : bool, optional, default False
         If `True`, consider depth in interevent distance calculation.
-    M : int, optional, default 100
+    M : int, optional, default 16
         Number of reshufflings.
     seed : int or None, optional, default None
         Seed for random number generator.

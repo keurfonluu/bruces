@@ -48,7 +48,7 @@ def decluster(catalog, algorithm="nearest-neighbor", return_indices=False, **kwa
         Only if ``algorithm = "nearest-neighbor"``. Cluster threshold.
     use_depth : bool, optional, default False
         Only if ``algorithm = "nearest-neighbor"``. If `True`, consider depth in interevent distance calculation.
-    M : int, optional, default 100
+    M : int, optional, default 16
         Only if ``algorithm = "nearest-neighbor"``. Number of reshufflings.
     seed : int or None, optional, default None
         Only if ``algorithm = "nearest-neighbor"``. Seed for random number generator.
