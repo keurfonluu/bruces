@@ -5,6 +5,33 @@ import numpy as np
 import bruces
 
 
+def test_etas():
+    bruces.set_seed(42)
+
+    origin_times = bruces.stats.poisson_process((1970.0, 1971.0), 10.0)
+    n = len(origin_times)
+
+    cat = bruces.Catalog(
+        origin_times=origin_times,
+        eastings=np.random.uniform(-1.0, 1.0, n),
+        northings=np.random.uniform(-1.0, 1.0, n),
+        magnitudes=bruces.stats.sample_magnitude(0.0, 4.2, 1.4, n),
+    )
+    cat = bruces.modeling.etas(
+        cat,
+        end_time=1970.5,
+        mc=0.0,
+        theta=0.2,
+        alpha=0.5,
+        c=0.001,
+        K=0.5,
+        b=1.4,
+        d=0.1,
+    )
+
+    assert len(cat) == 18
+
+
 def test_seismicity_rate():
     n = 101
     t = np.linspace(0.0, 10.0, n)
