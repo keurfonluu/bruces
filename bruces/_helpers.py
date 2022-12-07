@@ -1,5 +1,10 @@
+import numpy as np
+
+from ._common import set_seed as set_seed_numba
+
 __all__ = [
     "from_csep",
+    "set_seed",
 ]
 
 
@@ -27,3 +32,17 @@ def from_csep(catalog):
         depths=catalog.get_depths(),
         magnitudes=catalog.get_magnitudes(),
     )
+
+
+def set_seed(seed):
+    """
+    Set random number generator seed.
+
+    Parameters
+    ----------
+    seed : int
+        Random number generator seed.
+
+    """
+    np.random.seed(seed)
+    set_seed_numba(seed)

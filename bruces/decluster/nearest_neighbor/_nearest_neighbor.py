@@ -3,7 +3,8 @@ import logging
 import numpy as np
 from numba import prange
 
-from ..._common import jitted, set_seed, time_space_distances
+from ..._common import jitted, time_space_distances
+from ..._helpers import set_seed
 from .._helpers import register
 
 
@@ -49,7 +50,6 @@ def decluster(
 
     """
     if seed is not None:
-        np.random.seed(seed)
         set_seed(seed)
 
     if eta_0 is None:

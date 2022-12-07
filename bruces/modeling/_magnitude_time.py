@@ -1,6 +1,7 @@
 import numpy as np
 
-from .._common import jitted, set_seed
+from .._common import jitted
+from .._helpers import set_seed
 from ..utils import to_decimal_year
 
 __all__ = [

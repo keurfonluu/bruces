@@ -3,6 +3,7 @@ from numba.typed import List
 
 from .._catalog import Catalog
 from .._common import jitted, timedelta_to_day
+from .._helpers import set_seed
 from ..stats._sample_magnitude import grmag
 from ..utils import to_decimal_year
 
@@ -111,6 +112,7 @@ def etas(
     K=0.1,
     b=1.0,
     d=1.0,
+    seed=None,
 ):
     """
     Epidemic-Type Aftershock Sequence.
@@ -135,6 +137,8 @@ def etas(
         b-value.
     d : scalar, optional, default 1.0
         Characteristic length (in km).
+    seed : int or None, optional, default None
+        Seed for random number generator.
 
     Returns
     -------
@@ -159,6 +163,10 @@ def etas(
     # c is usually defined in days in literature
     c = timedelta_to_day(c) if c is not None else 1.0e-3
     c /= 365.25
+
+    # Set random seed
+    if seed is not None:
+        set_seed(seed)
 
     t, x, y, m = [], [], [], []
     for eq in catalog:
