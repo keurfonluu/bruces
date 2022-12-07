@@ -9,7 +9,7 @@ __all__ = [
 
 @jitted
 def grmag(low=0.0, high=None, b=1.0, size=1):
-    beta = np.log(10.0 ** b)
+    beta = np.log(10.0**b)
     u = np.random.rand(size)
     u *= 1.0 - np.exp(-beta * (high - low)) if high is not None else 1.0
 
@@ -35,7 +35,7 @@ def sample_magnitude(low=0.0, high=None, b=1.0, size=1):
     -------
     scalar or array_like
         Sampled magnitudes.
-    
+
     """
     m = grmag(low, high, b, size)
 

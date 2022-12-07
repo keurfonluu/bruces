@@ -54,7 +54,7 @@ def aftershock_times(m, tmax, mmin, theta, alpha, c, K, b):
             ta.append(ti)
             ma.append(mi)
             pa.append(pi)
-        
+
         Lc = Li
 
     return ta, ma, pa
@@ -68,7 +68,9 @@ def aftershock_locations(ip, ma, mmin, alpha, d):
     y = np.zeros(n, dtype=np.float64)
 
     for ia, i in enumerate(ip):
-        r = np.sqrt(-2.0 * np.log(np.random.rand()) * d * np.exp(-alpha * (ma[i] - mmin)))
+        r = np.sqrt(
+            -2.0 * np.log(np.random.rand()) * d * np.exp(-alpha * (ma[i] - mmin))
+        )
         phi = 2.0 * np.pi * np.random.rand()
         x[ia + 1] = x[i] + r * np.cos(phi)
         y[ia + 1] = y[i] + r * np.sin(phi)
@@ -86,10 +88,7 @@ def aftershocks(m, tmax, mmin, theta, alpha, c, K, b, d):
 
     # Randomly select parents of aftershocks
     # numba does not support yet option p of np.random.choice
-    ip = [
-        np.random.choice(i, p=pa[:i] / pa[:i].sum())
-        for i in range(1, len(pa))
-    ]
+    ip = [np.random.choice(i, p=pa[:i] / pa[:i].sum()) for i in range(1, len(pa))]
     ip = np.array(ip)
 
     # Generate locations of aftershocks
@@ -150,15 +149,11 @@ def etas(
      - Origin times are generated following Helmstetter and Sornette (2002)
      - Locations are implemented following Ogata (1998)
      - Magnitudes are distributed following Gutenberg-Richter law
-    
+
     """
-    end_time = (
-        to_decimal_year(end_time)
-        if end_time is not None
-        else catalog[-1].year
-    )
+    end_time = to_decimal_year(end_time) if end_time is not None else catalog[-1].year
     end_time -= catalog[0].year
-    
+
     # Convert c to decimal years
     # c is usually defined in days in literature
     c = timedelta_to_day(c) if c is not None else 1.0e-3
@@ -170,7 +165,9 @@ def etas(
 
     t, x, y, m = [], [], [], []
     for eq in catalog:
-        dt, dx, dy, ma = aftershocks(eq.magnitude, end_time, mc, theta, alpha, c, K, b, d)
+        dt, dx, dy, ma = aftershocks(
+            eq.magnitude, end_time, mc, theta, alpha, c, K, b, d
+        )
 
         t.append(eq.year + dt)
         x.append(eq.easting + dx)

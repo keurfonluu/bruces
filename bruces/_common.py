@@ -3,7 +3,6 @@ from datetime import timedelta
 import numpy as np
 from numba import jit
 
-
 _timedelta_like = (timedelta, np.timedelta64)
 _scalar_like = (int, np.int32, np.int64, float, np.float32, np.float64)
 

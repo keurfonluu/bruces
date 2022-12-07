@@ -28,7 +28,7 @@ def poisson_process(times, rates):
     -------
     sequence of scalar or sequence of datetime_like
         Simulated times.
-    
+
     """
     if np.ndim(times) != 1:
         raise TypeError()

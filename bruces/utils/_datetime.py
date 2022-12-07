@@ -24,7 +24,7 @@ def to_datetime(dates):
     -------
     datetime or sequence of datetime
         Date time or list of date times.
-    
+
     """
     from calendar import isleap
 
@@ -45,12 +45,8 @@ def to_datetime(dates):
         return datetime(int(year), 1, 1) + timedelta(days=days)
 
     ndim = np.ndim(dates)
-    
-    return (
-        datetime_(dates)
-        if ndim == 0
-        else [datetime_(date) for date in dates]
-    )
+
+    return datetime_(dates) if ndim == 0 else [datetime_(date) for date in dates]
 
 
 def to_decimal_year(dates):

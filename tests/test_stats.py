@@ -12,7 +12,7 @@ import bruces
         ((datetime(1991, 1, 1), datetime(1992, 1, 1)), 10.0, 1991.49976736),
         ((1991.0, 1992.0), 10.0, 1991.49976736),
         ((1991.0, 1992.0), (10.0, 10.0), 1991.35864531),
-    ]
+    ],
 )
 def test_poisson_process(times, rates, mean_ref):
     bruces.set_seed(42)

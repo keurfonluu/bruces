@@ -12,10 +12,7 @@ class Earthquake:
         depth=None,
         magnitude=None,
     ):
-        """
-        Earthquake object.
-
-        """
+        """Earthquake object."""
         self._origin_time = to_datetime(origin_time)
         self._latitude = latitude
         self._longitude = longitude
