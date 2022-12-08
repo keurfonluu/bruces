@@ -4,12 +4,27 @@ from numba.typed import List
 from .._catalog import Catalog
 from .._common import jitted, timedelta_to_day
 from .._helpers import set_seed
-from ..stats._sample_magnitude import grmag
 from ..utils import to_decimal_year
 
 __all__ = [
     "etas",
 ]
+
+
+@jitted
+def random_choice(p):
+    """
+    Draw a random sample from an array with probability.
+
+    Note
+    ----
+    This is a custom jitted version of :func:`numpy.random.choice`.
+    :mod:`numba` currently does not support its argument `p`.
+
+    """
+    probs = np.cumsum(p)
+
+    return np.argmax(np.random.rand() * probs[-1] < probs)
 
 
 @jitted
@@ -34,6 +49,7 @@ def intensity(t, ta, ma, mmin, theta, alpha, c, K):
 @jitted
 def aftershock_times(m, tmax, mmin, theta, alpha, c, K, b):
     """Generate aftershock times."""
+    beta = 2.30258509 * b
     ti = 0.0
     ta = List([ti])
     ma = List([m])
@@ -48,7 +64,9 @@ def aftershock_times(m, tmax, mmin, theta, alpha, c, K, b):
 
         Li = intensity(ti, ta, ma, mmin, theta, alpha, c, K)
         if np.random.rand() * Lc < Li:
-            mi = grmag(mmin, m, b)[0]
+            u = np.random.rand()
+            u *= 1.0 - np.exp(-beta * (m - mmin))
+            mi = mmin - np.log(1.0 - u) / beta
             pi = aftershock_rate(ti, mi, mmin, theta, alpha, c, K)
 
             ta.append(ti)
@@ -61,19 +79,22 @@ def aftershock_times(m, tmax, mmin, theta, alpha, c, K, b):
 
 
 @jitted
-def aftershock_locations(ip, ma, mmin, alpha, d):
+def aftershock_locations(pa, ma, mmin, alpha, d):
     """Generate aftershock locations."""
-    n = len(ma)
+    n = len(pa)
     x = np.zeros(n, dtype=np.float64)
     y = np.zeros(n, dtype=np.float64)
 
-    for ia, i in enumerate(ip):
+    for ia in range(1, n):
+        # Randomly select parent of aftershock
+        i = random_choice(pa[:ia])
+
         r = np.sqrt(
             -2.0 * np.log(np.random.rand()) * d * np.exp(-alpha * (ma[i] - mmin))
         )
         phi = 2.0 * np.pi * np.random.rand()
-        x[ia + 1] = x[i] + r * np.cos(phi)
-        y[ia + 1] = y[i] + r * np.sin(phi)
+        x[ia] = x[i] + r * np.cos(phi)
+        y[ia] = y[i] + r * np.sin(phi)
 
     return x, y
 
@@ -82,21 +103,12 @@ def aftershocks(m, tmax, mmin, theta, alpha, c, K, b, d):
     """Generate a sequence of aftershocks."""
     # Generate origin times of aftershocks
     ta, ma, pa = aftershock_times(m, tmax, mmin, theta, alpha, c, K, b)
-    ta = np.asarray(ta)
-    ma = np.asarray(ma)
-    pa = np.asarray(pa)
-
-    # Randomly select parents of aftershocks
-    # numba does not support yet option p of np.random.choice
-    ip = [np.random.choice(i, p=pa[:i] / pa[:i].sum()) for i in range(1, len(pa))]
-    ip = np.array(ip)
+    ta = np.array(ta, dtype=np.float64)
+    ma = np.array(ma, dtype=np.float64)
+    pa = np.array(pa, dtype=np.float64)
 
     # Generate locations of aftershocks
-    if len(ip) > 0:
-        x, y = aftershock_locations(ip, ma, mmin, alpha, d)
-
-    else:
-        x, y = np.zeros(1, dtype=np.float64), np.zeros(1, dtype=np.float64)
+    x, y = aftershock_locations(pa, ma, mmin, alpha, d)
 
     return ta, x, y, ma
 
@@ -174,10 +186,10 @@ def etas(
         y.append(eq.northing + dy)
         m.append(ma)
 
-    t = np.concatenate(t)
-    x = np.concatenate(x)
-    y = np.concatenate(y)
-    m = np.concatenate(m)
+    t = np.concatenate(t, dtype=np.float64)
+    x = np.concatenate(x, dtype=np.float64)
+    y = np.concatenate(y, dtype=np.float64)
+    m = np.concatenate(m, dtype=np.float64)
 
     return Catalog(
         origin_times=t,
