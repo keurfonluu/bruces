@@ -1,14 +1,11 @@
-from datetime import datetime
-
 import numpy as np
+
+from ._common import set_seed as set_seed_numba
 
 __all__ = [
     "from_csep",
-    "to_decimal_year",
+    "set_seed",
 ]
-
-
-_datetime_like = (datetime, np.datetime64)
 
 
 def from_csep(catalog):
@@ -37,52 +34,15 @@ def from_csep(catalog):
     )
 
 
-def to_decimal_year(dates):
+def set_seed(seed):
     """
-    Convert datetime_like to decimal year.
+    Set random number generator seed.
 
     Parameters
     ----------
-    dates : datetime_like or sequence of datetime_like
-        Date time or list of date times.
-
-    Returns
-    -------
-    scalar or list
-        Decimal year or list of decimal years.
+    seed : int
+        Random number generator seed.
 
     """
-
-    def decimal_year(d):
-        """Convert a datetime_like to decimal year."""
-        if isinstance(d, datetime):
-            year = d.year
-        elif isinstance(d, np.datetime64):
-            d = d.astype("M8[ms]").tolist()
-            year = d.year
-        else:
-            raise TypeError()
-
-        d1 = datetime(year, 1, 1)
-        d2 = datetime(year + 1, 1, 1)
-
-        return (
-            year
-            + (d.replace(tzinfo=None) - d1).total_seconds() / (d2 - d1).total_seconds()
-        )
-
-    ndim = np.ndim(dates)
-    if ndim == 0:
-        if not isinstance(dates, _datetime_like):
-            raise TypeError()
-    elif ndim == 1:
-        if any(not isinstance(date, _datetime_like) for date in dates):
-            raise TypeError()
-    else:
-        raise TypeError()
-
-    return (
-        decimal_year(dates)
-        if ndim == 0
-        else np.array([decimal_year(date) for date in dates])
-    )
+    np.random.seed(seed)
+    set_seed_numba(seed)

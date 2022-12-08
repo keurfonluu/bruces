@@ -1,9 +1,8 @@
-from datetime import datetime
-
 import numpy as np
 
-from .._common import jitted, set_seed
-from .._helpers import to_decimal_year
+from .._common import jitted
+from .._helpers import set_seed
+from ..utils import to_decimal_year
 
 __all__ = [
     "magnitude_time",
@@ -94,11 +93,7 @@ def magnitude_time(times, rates, m_bounds, n=50, b_value=1.0, seed=None):
     m = np.linspace(m_bounds[0], m_bounds[1], n)
 
     # Convert datetimes to decimal years
-    t = (
-        to_decimal_year(times)
-        if isinstance(times, (datetime, np.datetime64))
-        else times
-    )
+    t = to_decimal_year(times)
 
     # Convert times to time increments for integration
     dt = np.diff(t)

@@ -1,10 +1,8 @@
-from datetime import datetime, timedelta
-
 import numpy as np
 from numba import prange
 
-from .._common import jitted
-from .._helpers import to_decimal_year
+from .._common import jitted, timedelta_to_year
+from ..utils import to_decimal_year
 
 __all__ = [
     "seismicity_rate",
@@ -191,28 +189,14 @@ def seismicity_rate(
     asig = check_parameter(asigma, ndim, npts)
 
     # Convert datetimes to decimal years
-    t = (
-        to_decimal_year(times)
-        if isinstance(times, (datetime, np.datetime64))
-        else times
-    )
+    t = to_decimal_year(times)
 
     # Set time stepping parameters
     tcrit = to_decimal_year(t_crit) if t_crit is not None else t[0]
     tmax = to_decimal_year(t_bound) if t_bound is not None else t[-1]
-    dt = first_step if first_step is not None else 1.0 / 365.25
-    dtmax = max_step if max_step is not None else 1.0 / 12.0
+    dt = timedelta_to_year(first_step) if first_step is not None else 1.0 / 365.25
+    dtmax = timedelta_to_year(max_step) if max_step is not None else 1.0 / 12.0
     dtfac = reduce_step_factor
-
-    if isinstance(dt, np.timedelta64):
-        dt = dt.astype("timedelta64[ms]").tolist()
-    if isinstance(dt, timedelta):
-        dt = dt.total_seconds() / 3600.0 / 24.0 / 365.25
-
-    if isinstance(dtmax, np.timedelta64):
-        dtmax = dtmax.astype("timedelta64[ms]").tolist()
-    if isinstance(dtmax, timedelta):
-        dtmax = dtmax.total_seconds() / 3600.0 / 24.0 / 365.25
 
     # Use inverse to avoid repeated zero division check
     tci = s0 / asig

@@ -8,6 +8,8 @@ API Reference
    catalog
    decluster
    modeling
+   stats
+   utils
 
 
 * :ref:`genindex`

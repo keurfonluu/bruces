@@ -3,7 +3,8 @@ import logging
 import numpy as np
 from numba import prange
 
-from ..._common import jitted, set_seed, time_space_distances
+from ..._common import jitted, time_space_distances
+from ..._helpers import set_seed
 from .._helpers import register
 
 
@@ -15,7 +16,7 @@ def decluster(
     eta_0=None,
     alpha_0=1.5,
     use_depth=False,
-    M=100,
+    M=16,
     seed=None,
 ):
     """
@@ -37,7 +38,7 @@ def decluster(
         Cluster threshold.
     use_depth : bool, optional, default False
         If `True`, consider depth in interevent distance calculation.
-    M : int, optional, default 100
+    M : int, optional, default 16
         Number of reshufflings.
     seed : int or None, optional, default None
         Seed for random number generator.
@@ -49,7 +50,6 @@ def decluster(
 
     """
     if seed is not None:
-        np.random.seed(seed)
         set_seed(seed)
 
     if eta_0 is None:
@@ -77,7 +77,7 @@ def decluster(
 
     # Calculate retention probabilities and identify background events
     U = alpha + alpha_0 > np.log10(np.random.rand(len(catalog)))
-    bg = np.nonzero(U)[0]
+    bg = np.flatnonzero(U)
 
     return bg if return_indices else catalog[bg]
 

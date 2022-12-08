@@ -1,5 +1,10 @@
+from datetime import timedelta
+
 import numpy as np
 from numba import jit
+
+_timedelta_like = (timedelta, np.timedelta64)
+_scalar_like = (int, np.int32, np.int64, float, np.float32, np.float64)
 
 
 def jitted(*args, **kwargs):
@@ -49,25 +54,69 @@ def time_space_distances(t, x, y, z, m, ti, xi, yi, zi, d=1.6, w=1.0, use_depth=
 
         # For each event, we are looking for its parent which corresponds
         # to the earliest event with the smallest proximity value
-        if t_ij < 0.0:
-            r_ij = (
-                dist2d(xi, yi, x[j], y[j])
-                if not use_depth
-                else dist3d(xi, yi, zi, x[j], y[j], z[j])
-            )
+        # Inputs are not necessarily sorted w.r.t. time (e.g., step 2 of NND), thus we can't break here
+        if t_ij >= 0.0:
+            continue
 
-            # Skip events with the same epicenter
-            if r_ij > 0.0:
-                # Rewrite equations as log10 to avoid using power exponents
-                # Computing log10 is much faster than power
-                fac = -0.5 * w * m[j]
-                T_ij = np.log10(-t_ij) + fac
-                R_ij = d * np.log10(r_ij) + fac
-                eta_ij = T_ij + R_ij
+        r_ij = (
+            dist2d(xi, yi, x[j], y[j])
+            if not use_depth
+            else dist3d(xi, yi, zi, x[j], y[j], z[j])
+        )
 
-                if eta_ij < eta_i:
-                    eta_i = eta_ij
-                    T_i = T_ij
-                    R_i = R_ij
+        # Skip events with the same epicenter
+        if r_ij == 0.0:
+            continue
+
+        # Rewrite equations as log10 to avoid using power exponents
+        # Computing log10 is much faster than power
+        fac = -0.5 * w * m[j]
+        T_ij = np.log10(-t_ij) + fac
+        R_ij = d * np.log10(r_ij) + fac
+        eta_ij = T_ij + R_ij
+
+        if eta_ij < eta_i:
+            eta_i = eta_ij
+            T_i = T_ij
+            R_i = R_ij
 
     return T_i, R_i
+
+
+def timedelta_to_second(dt):
+    """Convert timedelta_like to second."""
+    if isinstance(dt, _timedelta_like):
+        if isinstance(dt, np.timedelta64):
+            dt = dt.astype("timedelta64[ms]").tolist()
+
+        return dt.total_seconds()
+
+    elif isinstance(dt, _scalar_like):
+        return dt
+
+    else:
+        raise TypeError()
+
+
+def timedelta_to_day(dt):
+    """Convert timedelta_like to day."""
+    if isinstance(dt, _timedelta_like):
+        return timedelta_to_second(dt) / 86400.0
+
+    elif isinstance(dt, _scalar_like):
+        return dt
+
+    else:
+        raise TypeError()
+
+
+def timedelta_to_year(dt):
+    """Convert timedelta_like to year."""
+    if isinstance(dt, _timedelta_like):
+        return timedelta_to_second(dt) / 31557600.0
+
+    elif isinstance(dt, _scalar_like):
+        return dt
+
+    else:
+        raise TypeError()

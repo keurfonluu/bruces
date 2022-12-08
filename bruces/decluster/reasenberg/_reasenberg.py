@@ -1,6 +1,6 @@
 import numpy as np
 
-from ..._common import dist3d, jitted
+from ..._common import dist3d, jitted, timedelta_to_day
 from .._helpers import register
 
 
@@ -10,8 +10,8 @@ def decluster(
     rfact=10,
     xmeff=None,
     xk=0.5,
-    taumin=1.0,
-    taumax=10.0,
+    tau_min=1.0,
+    tau_max=10.0,
     p=0.95,
 ):
     """
@@ -29,10 +29,10 @@ def decluster(
         "Effective" lower magnitude cutoff for catalog. If `None`, use minimum magnitude in catalog.
     xk : scalar, optional, default 0.5
         Factor by which ``xmeff`` is raised during clusters.
-    taumin : scalar, optional, default 1.0
-        Look ahead time for non-clustered events (in days).
-    taumax : scalar, optional, default 10.0
-        Maximum look ahead time for clustered events (in days).
+    tau_min : scalar, timedelta_like or None, optional, default None
+        Look ahead time for non-clustered events (in days if scalar). Default is 1 day.
+    tau_max : scalar, timedelta_like or None, optional, default None
+        Maximum look ahead time for clustered events (in days if scalar). Default is 10 days.
     p : scalar, optional, default 0.95
         Confidence of observing the next event in the sequence.
 
@@ -42,26 +42,24 @@ def decluster(
         Declustered earthquake catalog or indices of background events.
 
     """
+    tau_min = timedelta_to_day(tau_min) if tau_min is not None else 1.0
+    tau_max = timedelta_to_day(tau_max) if tau_max is not None else 10.0
+
     t = catalog.years * 365.25  # Days
-
-    # Make sure that events in catalog are sorted
-    idx = np.argsort(t)
-
-    t = t[idx]
-    x = catalog.eastings[idx]
-    y = catalog.northings[idx]
-    z = catalog.depths[idx]
-    m = catalog.magnitudes[idx]
+    x = catalog.eastings
+    y = catalog.northings
+    z = catalog.depths
+    m = catalog.magnitudes
 
     xmeff = xmeff if xmeff is not None else m.min()
 
-    bg = _decluster(t, x, y, z, m, rfact, xmeff, xk, taumin, taumax, p)
+    bg = _decluster(t, x, y, z, m, rfact, xmeff, xk, tau_min, tau_max, p)
 
-    return np.arange(len(catalog))[bg] if return_indices else catalog[bg]
+    return np.flatnonzero(bg) if return_indices else catalog[bg]
 
 
 @jitted
-def _decluster(t, x, y, z, m, rfact, xmeff, xk, taumin, taumax, p):
+def _decluster(t, x, y, z, m, rfact, xmeff, xk, tau_min, tau_max, p):
     """Reasenberg's method."""
     N = len(t)
 
@@ -81,7 +79,7 @@ def _decluster(t, x, y, z, m, rfact, xmeff, xk, taumin, taumax, p):
     for i in range(N - 1):
         # If event is not yet clustered
         if clusters[i] < 0:
-            tau = taumin
+            tau = tau_min
 
         # If event is already in a cluster
         else:
@@ -92,14 +90,14 @@ def _decluster(t, x, y, z, m, rfact, xmeff, xk, taumin, taumax, p):
             if m[i] > cmag:
                 cmag = m[i]
                 clusters_main[clusters[i]] = i
-                tau = taumin
+                tau = tau_min
 
             else:
                 tdif = t[i] - t[mid]
                 deltam = (1.0 - xk) * cmag - xmeff
                 denom = 10.0 ** ((max(deltam, 0.0) - 1.0) * 2.0 / 3.0)
                 tau = -np.log(1.0 - p) * tdif / denom
-                tau = min(max(tau, taumin), taumax)
+                tau = min(max(tau, tau_min), tau_max)
 
         # Process events that are within interaction time window
         j = i + 1
@@ -117,7 +115,7 @@ def _decluster(t, x, y, z, m, rfact, xmeff, xk, taumin, taumax, p):
 
             # Check if event j is within interaction distance of largest event
             cond2 = False
-            if not cond1 and tau > taumin:
+            if not cond1 and tau > tau_min:
                 r2 = rmain[mid]
                 d2 = dist3d(x[mid], y[mid], z[mid], x[j], y[j], z[j])
                 cond2 = d2 < r2

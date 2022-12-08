@@ -1,5 +1,4 @@
 import logging
-from collections import namedtuple
 from datetime import datetime, timedelta
 
 import matplotlib.pyplot as plt
@@ -9,18 +8,13 @@ from scipy.optimize import curve_fit
 from scipy.stats import gaussian_kde
 
 from ._common import time_space_distances
-from ._helpers import to_decimal_year
+from ._earthquake import Earthquake
 from .decluster import decluster
+from .utils import to_datetime, to_decimal_year
 
 __all__ = [
     "Catalog",
 ]
-
-
-Earthquake = namedtuple(
-    "Earthquake",
-    ["date", "latitude", "longitude", "easting", "northing", "depth", "magnitude"],
-)
 
 
 def is_arraylike(arr, size):
@@ -44,8 +38,8 @@ class Catalog:
 
         Parameters
         ----------
-        origin_times : sequence of datetime_like
-            Origin times.
+        origin_times : sequence of scalar or sequence of datetime_like
+            Origin times (in years if scalar).
         latitudes : array_like or None, optional, default None
             Latitudes (in degree).
         longitudes : array_like or None, optional, default None
@@ -62,10 +56,8 @@ class Catalog:
         """
         if np.ndim(origin_times) != 1:
             raise TypeError()
-        if any(
-            not isinstance(time, (datetime, np.datetime64)) for time in origin_times
-        ):
-            raise TypeError()
+
+        origin_times = to_datetime(origin_times)
         nev = len(origin_times)
 
         for arr in (latitudes, longitudes, eastings, northings, depths, magnitudes):
@@ -100,13 +92,14 @@ class Catalog:
             else np.full(nev, np.nan, dtype=np.float64)
         )
 
-        self._origin_times = np.asarray(origin_times)
-        self._latitudes = np.asarray(latitudes)
-        self._longitudes = np.asarray(longitudes)
-        self._eastings = np.asarray(eastings)
-        self._northings = np.asarray(northings)
-        self._depths = np.asarray(depths)
-        self._magnitudes = np.asarray(magnitudes)
+        idx = np.argsort(origin_times)
+        self._origin_times = np.asarray(origin_times)[idx]
+        self._latitudes = np.asarray(latitudes)[idx]
+        self._longitudes = np.asarray(longitudes)[idx]
+        self._eastings = np.asarray(eastings)[idx]
+        self._northings = np.asarray(northings)[idx]
+        self._depths = np.asarray(depths)[idx]
+        self._magnitudes = np.asarray(magnitudes)[idx]
 
     def __len__(self):
         """Return number of earthquakes in catalog."""
@@ -122,11 +115,21 @@ class Catalog:
         z = self.depths[islice]
         m = self.magnitudes[islice]
 
-        return (
-            Catalog(t, lat, lon, x, y, z, m)
-            if np.ndim(t) > 0
-            else Earthquake(t, lat, lon, x, y, z, m)
-        )
+        if np.ndim(t) > 0:
+            lat = None if np.isnan(lat).any() else lat
+            lon = None if np.isnan(lon).any() else lon
+            x = None if np.isnan(x).any() else x
+            y = None if np.isnan(y).any() else y
+
+            return Catalog(t, lat, lon, x, y, z, m)
+
+        else:
+            lat = None if np.isnan(lat) else lat
+            lon = None if np.isnan(lon) else lon
+            x = None if np.isnan(x) else x
+            y = None if np.isnan(y) else y
+
+            return Earthquake(t, lat, lon, x, y, z, m)
 
     def __iter__(self):
         """Iterate over earthquake in catalog as namedtuples."""
@@ -188,7 +191,7 @@ class Catalog:
             Only if ``algorithm = "nearest-neighbor"``. Cluster threshold.
         use_depth : bool, optional, default False
             Only if ``algorithm = "nearest-neighbor"``. If `True`, consider depth in interevent distance calculation.
-        M : int, optional, default 100
+        M : int, optional, default 16
             Only if ``algorithm = "nearest-neighbor"``. Number of reshufflings.
         seed : int or None, optional, default None
             Only if ``algorithm = "nearest-neighbor"``. Seed for random number generator.
@@ -198,10 +201,10 @@ class Catalog:
             Only if ``algorithm = "reasenberg"``. "Effective" lower magnitude cutoff for catalog. If `None`, use minimum magnitude in catalog.
         xk : scalar, optional, default 0.5
             Only if ``algorithm = "reasenberg"``. Factor by which ``xmeff`` is raised during clusters.
-        taumin : scalar, optional, default 1.0
-            Only if ``algorithm = "reasenberg"``. Look ahead time for non-clustered events (in days).
-        taumax : scalar, optional, default 10.0
-            Only if ``algorithm = "reasenberg"``. Maximum look ahead time for clustered events (in days).
+        tau_min : scalar, timedelta_like or None, optional, default None
+            Only if ``algorithm = "reasenberg"``. Look ahead time for non-clustered events (in days if scalar). Default is 1 day.
+        tau_max : scalar, timedelta_like or None, optional, default None
+            Only if ``algorithm = "reasenberg"``. Maximum look ahead time for clustered events (in days if scalar). Default is 10 days.
         p : scalar, optional, default 0.95
             Only if ``algorithm = "reasenberg"``. Confidence of observing the next event in the sequence.
 
