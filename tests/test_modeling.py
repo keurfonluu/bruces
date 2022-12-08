@@ -27,9 +27,10 @@ def test_etas():
         K=0.5,
         b=1.4,
         d=0.1,
+        seed=42,
     )
 
-    assert len(cat) == 18
+    assert len(cat) == 23
 
 
 def test_seismicity_rate():

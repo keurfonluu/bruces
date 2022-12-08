@@ -1,20 +1,8 @@
 import numpy as np
 
-from .._common import jitted
-
 __all__ = [
     "sample_magnitude",
 ]
-
-
-@jitted
-def grmag(low=0.0, high=None, b=1.0, size=1):
-    """Draw magnitude samples."""
-    beta = 2.30258509 * b  # np.log(10**b)
-    u = np.random.rand(size)
-    u *= 1.0 - np.exp(-beta * (high - low)) if high is not None else 1.0
-
-    return low - np.log(1.0 - u) / beta
 
 
 def sample_magnitude(low=0.0, high=None, b=1.0, size=1):
@@ -38,6 +26,8 @@ def sample_magnitude(low=0.0, high=None, b=1.0, size=1):
         Sampled magnitudes.
 
     """
-    m = grmag(low, high, b, size)
+    beta = 2.30258509 * b  # np.log(10**b)
+    u = np.random.rand(size) if size > 1 else np.random.rand()
+    u *= 1.0 - np.exp(-beta * (high - low)) if high is not None else 1.0
 
-    return m[0] if size == 1 else m
+    return low - np.log(1.0 - u) / beta
