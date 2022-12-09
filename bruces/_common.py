@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 from datetime import timedelta
 
 import numpy as np
@@ -5,6 +6,23 @@ from numba import jit
 
 _timedelta_like = (timedelta, np.timedelta64)
 _scalar_like = (int, np.int32, np.int64, float, np.float32, np.float64)
+
+
+@contextmanager
+def open_file(path_or_buffer, mode):
+    """Open file or buffer."""
+
+    def is_buffer(obj, mode):
+        return ("r" in mode and hasattr(obj, "read")) or (
+            "w" in mode and hasattr(obj, "write")
+        )
+
+    if is_buffer(path_or_buffer, mode):
+        yield path_or_buffer
+
+    else:
+        with open(path_or_buffer, mode) as f:
+            yield f
 
 
 def jitted(*args, **kwargs):

@@ -70,7 +70,8 @@ class Catalog:
                 eastings *= 1.0e-3
                 northings *= 1.0e-3
 
-            except utm.OutOfRangeError:
+            except utm.OutOfRangeError as e:
+                logging.warning(e)
                 eastings = np.full(nev, np.nan, dtype=np.float64)
                 northings = np.full(nev, np.nan, dtype=np.float64)
 
@@ -603,6 +604,22 @@ class Catalog:
         t = np.array(tbins[:-1]) + 0.5 * np.diff(tbins)
 
         return out, t.tolist()
+
+    def write(self, filename, file_format=None, **kwargs):
+        """
+        Write catalog to CSV file.
+
+        Parameters
+        ----------
+        filename : str, pathlike or buffer
+            Output file name or buffer.
+        file_format : str ('csv') or None, optional, default None
+            Output file format.
+        
+        """
+        from ._io import write
+
+        write(filename, self, file_format, **kwargs)
 
     @property
     def origin_times(self):
