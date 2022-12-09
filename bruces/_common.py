@@ -2,7 +2,7 @@ from contextlib import contextmanager
 from datetime import timedelta
 
 import numpy as np
-from numba import jit
+from numba import jit, prange
 
 _timedelta_like = (timedelta, np.timedelta64)
 _scalar_like = (int, np.int32, np.int64, float, np.float32, np.float64)
@@ -99,6 +99,19 @@ def time_space_distances(t, x, y, z, m, ti, xi, yi, zi, d=1.6, w=1.0, use_depth=
             R_i = R_ij
 
     return T_i, R_i
+
+
+@jitted(parallel=True)
+def time_space_distances_catalog(t, x, y, z, m, d=1.6, w=1.0, use_depth=False):
+    """Calculate rescaled time and space distances for whole catalog."""
+    N = len(t)
+
+    T = np.empty(N, dtype=np.float64)
+    R = np.empty(N, dtype=np.float64)
+    for i in prange(N):
+        T[i], R[i] = time_space_distances(t, x, y, z, m, t[i], x[i], y[i], z[i], d, w, use_depth)
+
+    return T, R
 
 
 def timedelta_to_second(dt):

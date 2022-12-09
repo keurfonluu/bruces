@@ -7,7 +7,7 @@ import utm
 from scipy.optimize import curve_fit
 from scipy.stats import gaussian_kde
 
-from ._common import time_space_distances
+from ._common import time_space_distances_catalog
 from ._earthquake import Earthquake
 from .decluster import decluster
 from .utils import to_datetime, to_decimal_year
@@ -250,14 +250,7 @@ class Catalog:
         z = self.depths
         m = self.magnitudes
 
-        T, R = np.transpose(
-            [
-                time_space_distances(
-                    t, x, y, z, m, t[i], x[i], y[i], z[i], d, w, use_depth
-                )
-                for i in range(len(self))
-            ]
-        )
+        T, R = time_space_distances_catalog(t, x, y, z, m, d, w, use_depth)
 
         if prune_nans:
             idx = ~np.isnan(T)

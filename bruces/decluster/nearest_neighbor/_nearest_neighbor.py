@@ -67,13 +67,14 @@ def decluster(
     m = catalog.magnitudes
 
     # Calculate nearest-neighbor proximities
-    eta = _step1(t, x, y, z, m, d, w, use_depth)
+    eta = np.empty(len(t), dtype=np.float64)
+    proximity_catalog(t, x, y, z, m, t, x, y, z, d, w, use_depth, eta)
 
     # Calculate proximity vectors
-    kappa = _step2(t, x, y, z, m, eta, d, w, eta_0, M, use_depth)
+    kappa = proximity_vector(t, x, y, z, m, eta, d, w, eta_0, M, use_depth)
 
     # Calculate normalized nearest-neighbor proximities
-    alpha = _step3(eta, kappa)
+    alpha = normalize_proximity(eta, kappa)
 
     # Calculate retention probabilities and identify background events
     U = alpha + alpha_0 > np.log10(np.random.rand(len(catalog)))
@@ -91,19 +92,14 @@ def proximity(t, x, y, z, m, ti, xi, yi, zi, d, w, use_depth):
 
 
 @jitted(parallel=True)
-def _step1(t, x, y, z, m, d, w, use_depth):
-    """Calculate nearest-neighbor proximity for each event."""
-    N = len(t)
-
-    eta = np.empty(N, dtype=np.float64)
-    for i in prange(N):
-        eta[i] = proximity(t, x, y, z, m, t[i], x[i], y[i], z[i], d, w, use_depth)
-
-    return eta
+def proximity_catalog(tc, xc, yc, zc, mc, t, x, y, z, d, w, use_depth, eta):
+    """Calculate nearest-neighbor proximity for each eventin catalog."""
+    for i in prange(len(eta)):
+        eta[i] = proximity(tc, xc, yc, zc, mc, t[i], x[i], y[i], z[i], d, w, use_depth)
 
 
 @jitted
-def _step2(t, x, y, z, m, eta, d, w, eta_0, M, use_depth):
+def proximity_vector(t, x, y, z, m, eta, d, w, eta_0, M, use_depth):
     """Calculate proximity vector for each event."""
     N = len(t)
 
@@ -130,22 +126,13 @@ def _step2(t, x, y, z, m, eta, d, w, eta_0, M, use_depth):
         # Calculate proximity vectors with respect to randomized catalog
         # Generating random numbers is not thread safe
         # See <https://stackoverflow.com/questions/71351836/random-seeds-and-multithreading-in-numba>
-        _step2_kappa(tm, xm, ym, zm, mm, t, x, y, z, d, w, use_depth, kappa[:, k])
+        proximity_catalog(tm, xm, ym, zm, mm, t, x, y, z, d, w, use_depth, kappa[:, k])
 
     return kappa
 
 
 @jitted(parallel=True)
-def _step2_kappa(tm, xm, ym, zm, mm, t, x, y, z, d, w, use_depth, kappa):
-    """Calculate kappa in parallel."""
-    for i in prange(len(kappa)):
-        kappa[i] = proximity(
-            tm, xm, ym, zm, mm, t[i], x[i], y[i], z[i], d, w, use_depth
-        )
-
-
-@jitted(parallel=True)
-def _step3(eta, kappa):
+def normalize_proximity(eta, kappa):
     """Calculate normalized nearest-neighbor proximity for each event."""
     N = len(kappa)
     M = len(kappa[0, :])
