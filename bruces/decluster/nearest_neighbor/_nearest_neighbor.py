@@ -67,7 +67,7 @@ def decluster(
             raise ModuleNotFoundError(f"Method '{method}' requires scikit-learn to be installed.")
 
         # Calculate rescaled time and space distances (as log10)
-        T, R = catalog.time_space_distances(w, d, use_depth=use_depth, returns_log=True, prune_nans=False)
+        T, R = catalog.time_space_distances(w, d, use_depth=use_depth, return_logs=True, prune_nans=False)
 
         # Set nans to max values (force events as background)
         idx = np.isnan(T)

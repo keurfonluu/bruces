@@ -224,7 +224,7 @@ class Catalog:
         return decluster(self, algorithm, return_indices, **kwargs)
 
     def time_space_distances(
-        self, d=1.6, w=1.0, use_depth=False, returns_log=True, prune_nans=False
+        self, d=1.6, w=1.0, use_depth=False, return_logs=True, prune_nans=False
     ):
         """
         Get rescaled time and space distances for each earthquake in the catalog.
@@ -237,7 +237,7 @@ class Catalog:
             Magnitude weighting factor (usually b-value).
         use_depth : bool, optional, default False
             If `True`, consider depth in interevent distance calculation.
-        returns_log : bool, optional, default True
+        return_logs : bool, optional, default True
             If `True`, return distance as log10.
         prune_nans : bool, optional, default False
             If `True`, remove NaN values from output.
@@ -263,7 +263,7 @@ class Catalog:
             T = T[idx]
             R = R[idx]
 
-        if not returns_log:
+        if not return_logs:
             T = np.power(10.0, T)
             R = np.power(10.0, R)
 
@@ -293,7 +293,7 @@ class Catalog:
 
         """
         T, R = self.time_space_distances(
-            d, w, use_depth, returns_log=True, prune_nans=True
+            d, w, use_depth, return_logs=True, prune_nans=True
         )
 
         return self.__fit_cutoff_threshold(T, R)
@@ -471,7 +471,7 @@ class Catalog:
 
         # Calculate rescaled time and space distances
         T, R = self.time_space_distances(
-            d, w, use_depth, returns_log=True, prune_nans=True
+            d, w, use_depth, return_logs=True, prune_nans=True
         )
 
         # Fit cutoff threshold
