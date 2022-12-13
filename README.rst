@@ -66,7 +66,7 @@ The following code snippet will decluster a catalog downloaded with `pycsep <htt
    # Decluster pycsep catalog
    cat = bruces.from_csep(catalog)
    eta_0 = cat.fit_cutoff_threshold()
-   catd = cat.decluster(eta_0=eta_0)
+   catd = cat.decluster(method="thinning", eta_0=eta_0)
 
    # Display declustering result
    fig, ax = plt.subplots(1, 2, figsize=(12, 6))
