@@ -75,10 +75,14 @@ def decluster(
         R[idx] = R[~idx].max()
 
         # Fit a mixture of two 2D Gaussian distributions
-        gm = GaussianMixture(n_components=2)
+        gm = GaussianMixture(
+            n_components=2,
+            means_init=[[T.max(), R.max()], [T.min(), R.min()]],
+        )
         y_pred = gm.fit_predict(np.column_stack((T, R)))
 
-        # Identify background events as those classified in class with largest mean
+        # Identify background events as those classified in class with largest mean nearest-neighbor
+        # Given initial means, class 0 should be background events but better make sure
         sig0, sig1 = gm.means_.sum(axis=-1)
         bg = np.flatnonzero(y_pred == int(sig0 < sig1))
 
