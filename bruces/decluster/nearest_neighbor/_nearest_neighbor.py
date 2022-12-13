@@ -31,7 +31,7 @@ def decluster(
         If `True`, return indices of background events instead of declustered catalog.
     method : str, optional, default 'gaussian-mixture'
         Declustering method:
-        
+
          - 'gaussian-mixture': use a 2D Gaussian Mixture classifier
          - 'thinning': random thinning (after Zaliapin and Ben-Zion, 2020)
 
@@ -64,10 +64,14 @@ def decluster(
             from sklearn.mixture import GaussianMixture
 
         except ModuleNotFoundError:
-            raise ModuleNotFoundError(f"Method '{method}' requires scikit-learn to be installed.")
+            raise ModuleNotFoundError(
+                f"Method '{method}' requires scikit-learn to be installed."
+            )
 
         # Calculate rescaled time and space distances (as log10)
-        T, R = catalog.time_space_distances(w, d, use_depth=use_depth, return_logs=True, prune_nans=False)
+        T, R = catalog.time_space_distances(
+            w, d, use_depth=use_depth, return_logs=True, prune_nans=False
+        )
 
         # Set nans to max values (force events as background)
         idx = np.isnan(T)

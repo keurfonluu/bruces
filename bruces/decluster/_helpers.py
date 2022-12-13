@@ -40,7 +40,7 @@ def decluster(catalog, algorithm="nearest-neighbor", return_indices=False, **kwa
 
     method : str, optional, default 'gaussian-mixture'
         Only if ``algorithm = "nearest-neighbor"``. Declustering method:
-        
+
          - 'gaussian-mixture': use a 2D Gaussian Mixture classifier
          - 'thinning': random thinning (after Zaliapin and Ben-Zion, 2020)
 

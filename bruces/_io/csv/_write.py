@@ -14,7 +14,7 @@ def write(filename, catalog):
         Output file name or buffer.
     catalog : :class:`bruces.Catalog`
         Earthquake catalog to export.
-    
+
     """
     buffer = write_buffer(catalog)
 
@@ -25,7 +25,9 @@ def write(filename, catalog):
 
 def write_buffer(catalog):
     """Write CSV catalog."""
-    out = ["year,month,day,hour,minute,second,latitude,longitude,easting,northing,depth,magnitude"]
+    out = [
+        "year,month,day,hour,minute,second,latitude,longitude,easting,northing,depth,magnitude"
+    ]
 
     for eq in catalog:
         date = to_datetime(eq.origin_time)

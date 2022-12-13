@@ -39,14 +39,14 @@ def read(filename, file_format=None, **kwargs):
     -------
     :class:`bruces.Catalog`
         Earthquake catalog.
-    
+
     """
     if file_format is None:
         file_format = get_file_format(filename)
 
     if file_format not in _reader_map:
         raise ValueError()
-        
+
     return _reader_map[file_format](filename, **kwargs)
 
 
@@ -62,7 +62,7 @@ def write(filename, catalog, file_format=None, **kwargs):
         Earthquake catalog to export.
     file_format : str ('csv') or None, optional, default None
         Output file format.
-    
+
     """
     if file_format is None:
         file_format = get_file_format(filename)
@@ -77,8 +77,4 @@ def get_file_format(filename):
     """Get file format."""
     ext = os.path.splitext(filename)[-1]
 
-    return (
-        _extension_to_filetype[ext]
-        if ext in _extension_to_filetype
-        else None
-    )
+    return _extension_to_filetype[ext] if ext in _extension_to_filetype else None

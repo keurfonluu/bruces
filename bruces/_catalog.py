@@ -184,7 +184,7 @@ class Catalog:
 
         method : str, optional, default 'gaussian-mixture'
             Only if ``algorithm = "nearest-neighbor"``. Declustering method:
-            
+
              - 'gaussian-mixture': use a 2D Gaussian Mixture classifier
              - 'thinning': random thinning (after Zaliapin and Ben-Zion, 2020)
 
@@ -617,7 +617,7 @@ class Catalog:
             Output file name or buffer.
         file_format : str ('csv') or None, optional, default None
             Output file format.
-        
+
         """
         from ._io import write
 

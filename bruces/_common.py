@@ -109,7 +109,9 @@ def time_space_distances_catalog(t, x, y, z, m, d=1.6, w=1.0, use_depth=False):
     T = np.empty(N, dtype=np.float64)
     R = np.empty(N, dtype=np.float64)
     for i in prange(N):
-        T[i], R[i] = time_space_distances(t, x, y, z, m, t[i], x[i], y[i], z[i], d, w, use_depth)
+        T[i], R[i] = time_space_distances(
+            t, x, y, z, m, t[i], x[i], y[i], z[i], d, w, use_depth
+        )
 
     return T, R
 

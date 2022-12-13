@@ -5,7 +5,6 @@ import numpy as np
 from ..._catalog import Catalog
 from ..._common import open_file
 
-
 _required_columns = ["year", "month", "day", "hour", "minute", "second"]
 
 
@@ -38,9 +37,7 @@ def read_buffer(f):
         raise ValueError()
 
     # Read tabular data
-    data = [
-        [to_float(x) for x in line.strip().split(",")] for line in f
-    ]
+    data = [[to_float(x) for x in line.strip().split(",")] for line in f]
     data = {k: v for k, v in zip(columns, np.transpose(data))}
 
     # Origin times
@@ -51,7 +48,8 @@ def read_buffer(f):
             day=int(D),
             hour=int(h),
             minute=int(m),
-        ) + timedelta(seconds=s)
+        )
+        + timedelta(seconds=s)
         for Y, M, D, h, m, s in zip(*[data[k] for k in _required_columns])
     ]
 
