@@ -11,6 +11,7 @@ from .._helpers import register
 def decluster(
     catalog,
     return_indices=False,
+    method="gaussian-mixture",
     d=1.6,
     w=1.0,
     eta_0=None,
@@ -20,7 +21,7 @@ def decluster(
     seed=None,
 ):
     """
-    Decluster earthquake catalog (after Zaliapin and Ben-Zion, 2020).
+    Decluster earthquake catalog.
 
     Parameters
     ----------
@@ -28,18 +29,24 @@ def decluster(
         Earthquake catalog.
     return_indices : bool, optional, default False
         If `True`, return indices of background events instead of declustered catalog.
+    method : str, optional, default 'gaussian-mixture'
+        Declustering method:
+        
+         - 'gaussian-mixture': use a 2D Gaussian Mixture classifier
+         - 'thinning': random thinning (after Zaliapin and Ben-Zion, 2020)
+
     d : scalar, optional, default 1.6
         Fractal dimension of epicenter/hypocenter.
     w : scalar, optional, default 1.0
         Magnitude weighting factor (usually b-value).
-    eta_0 : scalar or None, optional, default None
-        Initial cutoff threshold. If `None`, invoke :meth:`bruces.Catalog.fit_cutoff_threshold`.
-    alpha_0 : scalar, optional, default 1.5
-        Cluster threshold.
     use_depth : bool, optional, default False
         If `True`, consider depth in interevent distance calculation.
+    eta_0 : scalar or None, optional, default None
+        Only if ``method = "thinning"`. Initial cutoff threshold. If `None`, invoke :meth:`bruces.Catalog.fit_cutoff_threshold`.
+    alpha_0 : scalar, optional, default 1.5
+        Only if ``method = "thinning"`. Cluster threshold.
     M : int, optional, default 16
-        Number of reshufflings.
+        Only if ``method = "thinning"`. Number of reshufflings.
     seed : int or None, optional, default None
         Seed for random number generator.
 
@@ -52,33 +59,60 @@ def decluster(
     if seed is not None:
         set_seed(seed)
 
-    if eta_0 is None:
-        eta_0 = catalog.fit_cutoff_threshold(d, w)
+    if method == "gaussian-mixture":
+        try:
+            from sklearn.mixture import GaussianMixture
 
+        except ModuleNotFoundError:
+            raise ModuleNotFoundError(f"Method '{method}' requires scikit-learn to be installed.")
+
+        # Calculate rescaled time and space distances (as log10)
+        T, R = catalog.time_space_distances(w, d, use_depth=use_depth, returns_log=True, prune_nans=False)
+
+        # Set nans to max values (force events as background)
+        idx = np.isnan(T)
+        T[idx] = T[~idx].max()
+        R[idx] = R[~idx].max()
+
+        # Fit a mixture of two 2D Gaussian distributions
+        gm = GaussianMixture(n_components=2)
+        y_pred = gm.fit_predict(np.column_stack((T, R)))
+
+        # Identify background events as those classified in class with largest mean
+        sig0, sig1 = gm.means_.sum(axis=-1)
+        bg = np.flatnonzero(y_pred == int(sig0 < sig1))
+
+    elif method == "thinning":
         if eta_0 is None:
-            logging.warn("Skipping nearest-neighbor declustering.")
+            eta_0 = catalog.fit_cutoff_threshold(d, w)
 
-            return np.arange(len(catalog)) if return_indices else catalog
+            if eta_0 is None:
+                logging.warn("Skipping nearest-neighbor declustering.")
 
-    t = catalog.years
-    x = catalog.eastings
-    y = catalog.northings
-    z = catalog.depths
-    m = catalog.magnitudes
+                return np.arange(len(catalog)) if return_indices else catalog
 
-    # Calculate nearest-neighbor proximities
-    eta = np.empty(len(t), dtype=np.float64)
-    proximity_catalog(t, x, y, z, m, t, x, y, z, d, w, use_depth, eta)
+        t = catalog.years
+        x = catalog.eastings
+        y = catalog.northings
+        z = catalog.depths
+        m = catalog.magnitudes
 
-    # Calculate proximity vectors
-    kappa = proximity_vector(t, x, y, z, m, eta, d, w, eta_0, M, use_depth)
+        # Calculate nearest-neighbor proximities
+        eta = np.empty(len(t), dtype=np.float64)
+        proximity_catalog(t, x, y, z, m, t, x, y, z, d, w, use_depth, eta)
 
-    # Calculate normalized nearest-neighbor proximities
-    alpha = normalize_proximity(eta, kappa)
+        # Calculate proximity vectors
+        kappa = proximity_vector(t, x, y, z, m, eta, d, w, eta_0, M, use_depth)
 
-    # Calculate retention probabilities and identify background events
-    U = alpha + alpha_0 > np.log10(np.random.rand(len(catalog)))
-    bg = np.flatnonzero(U)
+        # Calculate normalized nearest-neighbor proximities
+        alpha = normalize_proximity(eta, kappa)
+
+        # Calculate retention probabilities and identify background events
+        U = alpha + alpha_0 > np.log10(np.random.rand(len(catalog)))
+        bg = np.flatnonzero(U)
+
+    else:
+        raise ValueError(f"Unknown method '{method}'.")
 
     return bg if return_indices else catalog[bg]
 

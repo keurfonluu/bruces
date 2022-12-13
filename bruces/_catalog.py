@@ -178,22 +178,28 @@ class Catalog:
         window : str {'default', 'gruenthal', 'uhrhammer'}, optional, default 'default'
             Only if ``algorithm = "gardner-knopoff"``. Distance and time windows:
 
-            - 'default': Gardner and Knopoff (1974)
-            - 'gruenthal': personnal communication (see van Stiphout et al., 2012)
-            - 'uhrhammer': Uhrhammer (1986)
+             - 'default': Gardner and Knopoff (1974)
+             - 'gruenthal': personnal communication (see van Stiphout et al., 2012)
+             - 'uhrhammer': Uhrhammer (1986)
+
+        method : str, optional, default 'gaussian-mixture'
+            Only if ``algorithm = "nearest-neighbor"``. Declustering method:
+            
+             - 'gaussian-mixture': use a 2D Gaussian Mixture classifier
+             - 'thinning': random thinning (after Zaliapin and Ben-Zion, 2020)
 
         d : scalar, optional, default 1.6
             Only if ``algorithm = "nearest-neighbor"``. Fractal dimension of epicenter/hypocenter.
         w : scalar, optional, default 1.0
             Only if ``algorithm = "nearest-neighbor"``. Magnitude weighting factor (usually b-value).
-        eta_0 : scalar or None, optional, default None
-            Only if ``algorithm = "nearest-neighbor"``. Initial cutoff threshold. If `None`, invoke :meth:`bruces.Catalog.fit_cutoff_threshold`.
-        alpha_0 : scalar, optional, default 1.5
-            Only if ``algorithm = "nearest-neighbor"``. Cluster threshold.
         use_depth : bool, optional, default False
-            Only if ``algorithm = "nearest-neighbor"``. If `True`, consider depth in interevent distance calculation.
+            Only if ``algorithm = "nearest-neighbor"`` and ``method = "thinning"`. If `True`, consider depth in interevent distance calculation.
+        eta_0 : scalar or None, optional, default None
+            Only if ``algorithm = "nearest-neighbor"`` and ``method = "thinning"`. Initial cutoff threshold. If `None`, invoke :meth:`bruces.Catalog.fit_cutoff_threshold`.
+        alpha_0 : scalar, optional, default 1.5
+            Only if ``algorithm = "nearest-neighbor"`` and ``method = "thinning"`. Cluster threshold.
         M : int, optional, default 16
-            Only if ``algorithm = "nearest-neighbor"``. Number of reshufflings.
+            Only if ``algorithm = "nearest-neighbor"`` and ``method = "thinning"`. Number of reshufflings.
         seed : int or None, optional, default None
             Only if ``algorithm = "nearest-neighbor"``. Seed for random number generator.
         rfact : int, optional, default 10
@@ -330,16 +336,19 @@ class Catalog:
 
         try:
             params, _ = curve_fit(bimodal, xedges, hist, p0)
-            _, mu1, sig1, _, mu2, sig2 = params
+            A1, mu1, sig1, A2, mu2, sig2 = params
             sig1 = abs(sig1)
             sig2 = abs(sig2)
+
+            if mu1 < mu2:
+                A1, mu1, sig1, A2, mu2, sig2 = A2, mu2, sig2, A1, mu1, sig1
 
             # Check unimodality and estimate optimal eta_0
             if mu1 - sig1 < mu2 < mu1 + sig1 or mu2 - sig2 < mu1 < mu2 + sig2:
                 eta_0 = None
 
             else:
-                eta_0 = mu1 - 2.0 * sig1 if mu1 > mu2 else mu2 - 2.0 * sig2
+                eta_0 = mu1 - 2.0 * sig1
 
             success = True
 
