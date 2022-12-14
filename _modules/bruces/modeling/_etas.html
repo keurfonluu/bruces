@@ -1,0 +1,552 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>bruces.modeling._etas &#8212; bruces 0.5.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../../../_static/styles/bootstrap.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+
+  
+  <link href="../../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94">
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94">
+
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/bruces/modeling/_etas';</script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="docsearch:language" content="en">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__primary" id="__primary">
+  <label class="overlay overlay-primary" for="__primary"></label>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__secondary" id="__secondary">
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+      
+<form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+    </div>
+  </div>
+
+  
+  <nav class="bd-header navbar navbar-expand-lg bd-navbar" id="navbar-main"><div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+      <span class="fa-solid fa-bars"></span>
+  </label>
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../../../index.html">
+
+  
+  
+  
+  
+  
+  
+  
+
+  
+  
+    <p class="title logo__title">bruces 0.5.0 documentation</p>
+  
+</a>
+    
+  </div>
+
+  
+  <div class="col-lg-9 navbar-header-items">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../examples/index.html">
+                        Examples
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../api/index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+        <div class="navbar-end-item navbar-persistent--container">
+          
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+        </div>
+      
+      
+      <div class="navbar-end-item">
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+
+
+  
+  
+    <div class="navbar-persistent--mobile">
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+    </div>
+  
+
+  
+  <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+  </label>
+  
+
+</div>
+  </nav>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../examples/index.html">
+                        Examples
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../api/index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+      </div>
+    
+
+    
+    
+    <div class="sidebar-header-items__end">
+      
+      <div class="navbar-end-item">
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+      </ul>
+      </div>
+      
+    </div>
+    
+  </div>
+
+  
+
+  
+  <div class="sidebar-end-items sidebar-primary__section">
+    <div class="sidebar-end-items__item">
+    </div>
+  </div>
+
+  
+  <div id="rtd-footer-container"></div>
+
+      </div>
+      <main id="main-content" class="bd-main">
+        
+        
+        <div class="bd-content">
+          <div class="bd-article-container">
+            
+            <div class="bd-header-article">
+                
+            </div>
+            
+            
+            <article class="bd-article" role="main">
+              
+  <h1>Source code for bruces.modeling._etas</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">numba.typed</span> <span class="kn">import</span> <span class="n">List</span>
+
+<span class="kn">from</span> <span class="nn">.._catalog</span> <span class="kn">import</span> <span class="n">Catalog</span>
+<span class="kn">from</span> <span class="nn">.._common</span> <span class="kn">import</span> <span class="n">jitted</span><span class="p">,</span> <span class="n">timedelta_to_day</span>
+<span class="kn">from</span> <span class="nn">.._helpers</span> <span class="kn">import</span> <span class="n">set_seed</span>
+<span class="kn">from</span> <span class="nn">..utils</span> <span class="kn">import</span> <span class="n">to_decimal_year</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;etas&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+
+
+<span class="nd">@jitted</span>
+<span class="k">def</span> <span class="nf">random_choice</span><span class="p">(</span><span class="n">p</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Draw a random sample from an array with probability.</span>
+
+<span class="sd">    Note</span>
+<span class="sd">    ----</span>
+<span class="sd">    This is a custom jitted version of :func:`numpy.random.choice`.</span>
+<span class="sd">    :mod:`numba` currently does not support its argument `p`.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">probs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">()</span> <span class="o">*</span> <span class="n">probs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">probs</span><span class="p">)</span>
+
+
+<span class="nd">@jitted</span>
+<span class="k">def</span> <span class="nf">aftershock_rate</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">mmin</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">K</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Rate of aftershocks.&quot;&quot;&quot;</span>
+    <span class="n">rho</span> <span class="o">=</span> <span class="n">K</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">alpha</span> <span class="o">*</span> <span class="p">(</span><span class="n">m</span> <span class="o">-</span> <span class="n">mmin</span><span class="p">))</span>
+    <span class="n">psi</span> <span class="o">=</span> <span class="n">theta</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">theta</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">t</span> <span class="o">+</span> <span class="n">c</span><span class="p">,</span> <span class="mf">1.0</span> <span class="o">+</span> <span class="n">theta</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">rho</span> <span class="o">*</span> <span class="n">psi</span>
+
+
+<span class="nd">@jitted</span>
+<span class="k">def</span> <span class="nf">intensity</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">ta</span><span class="p">,</span> <span class="n">ma</span><span class="p">,</span> <span class="n">mmin</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">K</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Conditional intensity.&quot;&quot;&quot;</span>
+    <span class="n">l</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="k">for</span> <span class="n">ti</span><span class="p">,</span> <span class="n">mi</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">ta</span><span class="p">,</span> <span class="n">ma</span><span class="p">):</span>
+        <span class="n">l</span> <span class="o">+=</span> <span class="n">aftershock_rate</span><span class="p">(</span><span class="n">t</span> <span class="o">-</span> <span class="n">ti</span><span class="p">,</span> <span class="n">mi</span><span class="p">,</span> <span class="n">mmin</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">K</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">l</span>
+
+
+<span class="nd">@jitted</span>
+<span class="k">def</span> <span class="nf">aftershock_times</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">tmax</span><span class="p">,</span> <span class="n">mmin</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">K</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generate aftershock times.&quot;&quot;&quot;</span>
+    <span class="n">beta</span> <span class="o">=</span> <span class="mf">2.30258509</span> <span class="o">*</span> <span class="n">b</span>
+    <span class="n">ti</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">ta</span> <span class="o">=</span> <span class="n">List</span><span class="p">([</span><span class="n">ti</span><span class="p">])</span>
+    <span class="n">ma</span> <span class="o">=</span> <span class="n">List</span><span class="p">([</span><span class="n">m</span><span class="p">])</span>
+    <span class="n">pa</span> <span class="o">=</span> <span class="n">List</span><span class="p">([</span><span class="n">aftershock_rate</span><span class="p">(</span><span class="n">ti</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">mmin</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">K</span><span class="p">)])</span>
+    <span class="n">Lc</span> <span class="o">=</span> <span class="n">intensity</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">ta</span><span class="p">,</span> <span class="n">ma</span><span class="p">,</span> <span class="n">mmin</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">K</span><span class="p">)</span>
+
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">ti</span> <span class="o">-=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">())</span> <span class="o">/</span> <span class="n">Lc</span>
+
+        <span class="k">if</span> <span class="n">ti</span> <span class="o">&gt;</span> <span class="n">tmax</span><span class="p">:</span>
+            <span class="k">break</span>
+
+        <span class="n">Li</span> <span class="o">=</span> <span class="n">intensity</span><span class="p">(</span><span class="n">ti</span><span class="p">,</span> <span class="n">ta</span><span class="p">,</span> <span class="n">ma</span><span class="p">,</span> <span class="n">mmin</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">K</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">()</span> <span class="o">*</span> <span class="n">Lc</span> <span class="o">&lt;</span> <span class="n">Li</span><span class="p">:</span>
+            <span class="n">u</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">()</span>
+            <span class="n">u</span> <span class="o">*=</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">beta</span> <span class="o">*</span> <span class="p">(</span><span class="n">m</span> <span class="o">-</span> <span class="n">mmin</span><span class="p">))</span>
+            <span class="n">mi</span> <span class="o">=</span> <span class="n">mmin</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">u</span><span class="p">)</span> <span class="o">/</span> <span class="n">beta</span>
+            <span class="n">pi</span> <span class="o">=</span> <span class="n">aftershock_rate</span><span class="p">(</span><span class="n">ti</span><span class="p">,</span> <span class="n">mi</span><span class="p">,</span> <span class="n">mmin</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">K</span><span class="p">)</span>
+
+            <span class="n">ta</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ti</span><span class="p">)</span>
+            <span class="n">ma</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mi</span><span class="p">)</span>
+            <span class="n">pa</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pi</span><span class="p">)</span>
+
+        <span class="n">Lc</span> <span class="o">=</span> <span class="n">Li</span>
+
+    <span class="k">return</span> <span class="n">ta</span><span class="p">,</span> <span class="n">ma</span><span class="p">,</span> <span class="n">pa</span>
+
+
+<span class="nd">@jitted</span>
+<span class="k">def</span> <span class="nf">aftershock_locations</span><span class="p">(</span><span class="n">pa</span><span class="p">,</span> <span class="n">ma</span><span class="p">,</span> <span class="n">mmin</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generate aftershock locations.&quot;&quot;&quot;</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">pa</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">ia</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+        <span class="c1"># Randomly select parent of aftershock</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="n">random_choice</span><span class="p">(</span><span class="n">pa</span><span class="p">[:</span><span class="n">ia</span><span class="p">])</span>
+
+        <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
+            <span class="o">-</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">())</span> <span class="o">*</span> <span class="n">d</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">alpha</span> <span class="o">*</span> <span class="p">(</span><span class="n">ma</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">mmin</span><span class="p">))</span>
+        <span class="p">)</span>
+        <span class="n">phi</span> <span class="o">=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">()</span>
+        <span class="n">x</span><span class="p">[</span><span class="n">ia</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">r</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi</span><span class="p">)</span>
+        <span class="n">y</span><span class="p">[</span><span class="n">ia</span><span class="p">]</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">r</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span>
+
+
+<span class="k">def</span> <span class="nf">aftershocks</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">tmax</span><span class="p">,</span> <span class="n">mmin</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">K</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generate a sequence of aftershocks.&quot;&quot;&quot;</span>
+    <span class="c1"># Generate origin times of aftershocks</span>
+    <span class="n">ta</span><span class="p">,</span> <span class="n">ma</span><span class="p">,</span> <span class="n">pa</span> <span class="o">=</span> <span class="n">aftershock_times</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">tmax</span><span class="p">,</span> <span class="n">mmin</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">K</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+    <span class="n">ta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ta</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+    <span class="n">ma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ma</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+    <span class="n">pa</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">pa</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+    <span class="c1"># Generate locations of aftershocks</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">aftershock_locations</span><span class="p">(</span><span class="n">pa</span><span class="p">,</span> <span class="n">ma</span><span class="p">,</span> <span class="n">mmin</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ta</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">ma</span>
+
+
+<div class="viewcode-block" id="etas"><a class="viewcode-back" href="../../../api/modeling.html#bruces.modeling.etas">[docs]</a><span class="k">def</span> <span class="nf">etas</span><span class="p">(</span>
+    <span class="n">catalog</span><span class="p">,</span>
+    <span class="n">end_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">mc</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">theta</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+    <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+    <span class="n">c</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span>
+    <span class="n">K</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+    <span class="n">b</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">d</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Epidemic-Type Aftershock Sequence.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    catalog : :class:`bruces.Catalog`</span>
+<span class="sd">        Earthquake catalog of background events.</span>
+<span class="sd">    end_time : scalar, datetime_like or None, optional, default None</span>
+<span class="sd">        Maximum simulation time. Default is origin time of last earthquake in input catalog.</span>
+<span class="sd">    mc : scalar, optional, default 0.0</span>
+<span class="sd">        Magnitude of completeness.</span>
+<span class="sd">    theta : scalar, optional, default 0.2</span>
+<span class="sd">        Omori&#39;s exponent (&gt; 0.0).</span>
+<span class="sd">    alpha : scalar, optional, default 0.5</span>
+<span class="sd">        Aftershock productivity constant.</span>
+<span class="sd">    c : scalar, timedelta_like or None, optional, default None</span>
+<span class="sd">        Aftershock productivity constant (in days if scalar). Default is 0.001 days.</span>
+<span class="sd">    K : scalar, optional, default 0.1</span>
+<span class="sd">        Aftershock productivity constant.</span>
+<span class="sd">    b : scalar, optional, default 1.0</span>
+<span class="sd">        b-value.</span>
+<span class="sd">    d : scalar, optional, default 1.0</span>
+<span class="sd">        Characteristic length (in km).</span>
+<span class="sd">    seed : int or None, optional, default None</span>
+<span class="sd">        Seed for random number generator.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    :class:`bruces.Catalog`</span>
+<span class="sd">        Simulated catalog (background and aftershock events).</span>
+
+<span class="sd">    Note</span>
+<span class="sd">    ----</span>
+<span class="sd">     - Origin times are generated following Helmstetter and Sornette (2002)</span>
+<span class="sd">     - Locations are implemented following Ogata (1998)</span>
+<span class="sd">     - Magnitudes are distributed following Gutenberg-Richter law</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">end_time</span> <span class="o">=</span> <span class="n">to_decimal_year</span><span class="p">(</span><span class="n">end_time</span><span class="p">)</span> <span class="k">if</span> <span class="n">end_time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">catalog</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">year</span>
+    <span class="n">end_time</span> <span class="o">-=</span> <span class="n">catalog</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">year</span>
+
+    <span class="c1"># Convert c to decimal years</span>
+    <span class="c1"># c is usually defined in days in literature</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">timedelta_to_day</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mf">1.0e-3</span>
+    <span class="n">c</span> <span class="o">/=</span> <span class="mf">365.25</span>
+
+    <span class="c1"># Set random seed</span>
+    <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">set_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+
+    <span class="n">t</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">m</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">eq</span> <span class="ow">in</span> <span class="n">catalog</span><span class="p">:</span>
+        <span class="n">dt</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span> <span class="n">ma</span> <span class="o">=</span> <span class="n">aftershocks</span><span class="p">(</span>
+            <span class="n">eq</span><span class="o">.</span><span class="n">magnitude</span><span class="p">,</span> <span class="n">end_time</span><span class="p">,</span> <span class="n">mc</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">K</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">d</span>
+        <span class="p">)</span>
+
+        <span class="n">t</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eq</span><span class="o">.</span><span class="n">year</span> <span class="o">+</span> <span class="n">dt</span><span class="p">)</span>
+        <span class="n">x</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eq</span><span class="o">.</span><span class="n">easting</span> <span class="o">+</span> <span class="n">dx</span><span class="p">)</span>
+        <span class="n">y</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eq</span><span class="o">.</span><span class="n">northing</span> <span class="o">+</span> <span class="n">dy</span><span class="p">)</span>
+        <span class="n">m</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ma</span><span class="p">)</span>
+
+    <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">Catalog</span><span class="p">(</span>
+        <span class="n">origin_times</span><span class="o">=</span><span class="n">t</span><span class="p">,</span>
+        <span class="n">eastings</span><span class="o">=</span><span class="n">x</span><span class="p">,</span>
+        <span class="n">northings</span><span class="o">=</span><span class="n">y</span><span class="p">,</span>
+        <span class="n">magnitudes</span><span class="o">=</span><span class="n">m</span><span class="p">,</span>
+    <span class="p">)</span></div>
+</pre></div>
+
+            </article>
+            
+            
+            
+            <footer class="bd-footer-article">
+                <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+</div>
+            </footer>
+            
+          </div>
+          
+          
+          
+            <div class="bd-sidebar-secondary bd-toc">
+              
+<div class="toc-item">
+  
+<div id="searchbox"></div>
+</div>
+
+<div class="toc-item">
+  
+</div>
+
+<div class="toc-item">
+  
+</div>
+
+            </div>
+          
+          
+        </div>
+        <footer class="bd-footer-content">
+          <div class="bd-footer-content__inner">
+            
+          </div>
+        </footer>
+        
+      </main>
+    </div>
+  </div>
+
+  
+    
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94"></script>
+<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94"></script>
+
+  <footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    
+<p class="copyright">
+
+    &copy; Copyright 2022, Keurfon Luu.<br>
+
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="theme-version">
+    Built with the
+    <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">
+        PyData Sphinx Theme
+    </a>
+    0.12.0.
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+<p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br>
+</p>
+
+  </div>
+  
+</div>
+  </footer>
+  </body>
+</html>

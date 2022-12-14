@@ -1,0 +1,14 @@
+
+:orphan:
+
+.. _sphx_glr_examples_sg_execution_times:
+
+Computation times
+=================
+**00:16.389** total execution time for **examples** files:
+
++----------------------------------------------------------------------+-----------+--------+
+| :ref:`sphx_glr_examples_declustering.py` (``declustering.py``)       | 00:10.211 | 0.0 MB |
++----------------------------------------------------------------------+-----------+--------+
+| :ref:`sphx_glr_examples_seismicity_rate.py` (``seismicity_rate.py``) | 00:06.178 | 0.0 MB |
++----------------------------------------------------------------------+-----------+--------+
