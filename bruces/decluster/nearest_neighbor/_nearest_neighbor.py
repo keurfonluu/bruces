@@ -97,7 +97,10 @@ def decluster(
         # Identify background events as those classified in class with largest mean nearest-neighbor
         # Given initial means, class 0 should be background events but better make sure
         sig0, sig1 = gm.means_.sum(axis=-1)
-        idx = np.random.rand(len(X)) * (y_prob * [1.0, 1.0]).sum(axis=1) < y_prob[:, int(sig0 < sig1)]
+        idx = (
+            np.random.rand(len(X)) * (y_prob * [1.0, 1.0]).sum(axis=1)
+            < y_prob[:, int(sig0 < sig1)]
+        )
         bg = np.flatnonzero(idx)
 
     elif method == "thinning":
