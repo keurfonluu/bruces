@@ -42,11 +42,11 @@ def decluster(
     use_depth : bool, optional, default False
         If `True`, consider depth in interevent distance calculation.
     eta_0 : scalar or None, optional, default None
-        Only if ``method = "thinning"`. Initial cutoff threshold. If `None`, invoke :meth:`bruces.Catalog.fit_cutoff_threshold`.
+        Only if ``method = "thinning"``. Initial cutoff threshold. If `None`, invoke :meth:`bruces.Catalog.fit_cutoff_threshold`.
     alpha_0 : scalar, optional, default 1.5
-        Only if ``method = "thinning"`. Cluster threshold.
+        Only if ``method = "thinning"``. Cluster threshold.
     M : int, optional, default 16
-        Only if ``method = "thinning"`. Number of reshufflings.
+        Only if ``method = "thinning"``. Number of reshufflings.
     seed : int or None, optional, default None
         Seed for random number generator.
 
