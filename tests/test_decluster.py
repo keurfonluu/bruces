@@ -31,7 +31,7 @@ cat = helpers.comcat()
                 "use_depth": True,
                 "seed": 42,
             },
-            356,
+            369,
         ),
         (
             "nearest-neighbor",

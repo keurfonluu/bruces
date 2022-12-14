@@ -38,9 +38,9 @@ plt.bar(dates, rates / 12.0, width=dt, label="full")
 
 # Decluster and plot declustered catalogs' seismicity rates
 algorithms = {
-    "nearest-neighbor": {"use_depth": True, "seed": 0},
     "reasenberg": {},
     "gardner-knopoff": {"window": "uhrhammer"},
+    "nearest-neighbor": {"use_depth": True, "seed": 0},
 }
 for algorithm, kwargs in algorithms.items():
     catd = cat.decluster(algorithm=algorithm, **kwargs)

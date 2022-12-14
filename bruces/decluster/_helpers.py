@@ -23,7 +23,7 @@ def decluster(catalog, algorithm="nearest-neighbor", return_indices=False, **kwa
         Declustering algorithm:
 
          - 'gardner-knopoff': Gardner-Knopoff's method (after Gardner and Knopoff, 1974)
-         - 'nearest-neighbor': nearest-neighbor algorithm (after Zaliapin and Ben-Zion, 2020)
+         - 'nearest-neighbor': nearest-neighbor algorithm (after Zaliapin and Ben-Zion, 2008)
          - 'reasenberg': Reasenberg's method (after Reasenberg, 1985)
 
     return_indices : bool, optional, default False
@@ -41,7 +41,7 @@ def decluster(catalog, algorithm="nearest-neighbor", return_indices=False, **kwa
     method : str, optional, default 'gaussian-mixture'
         Only if ``algorithm = "nearest-neighbor"``. Declustering method:
 
-         - 'gaussian-mixture': use a 2D Gaussian Mixture classifier
+         - 'gaussian-mixture': use a Gaussian Mixture classifier
          - 'thinning': random thinning (after Zaliapin and Ben-Zion, 2020)
 
     d : scalar, optional, default 1.6

@@ -21,7 +21,7 @@ def decluster(
     seed=None,
 ):
     """
-    Decluster earthquake catalog.
+    Decluster earthquake catalog (after Zaliapin and Ben-Zion, 2008).
 
     Parameters
     ----------
@@ -32,7 +32,7 @@ def decluster(
     method : str, optional, default 'gaussian-mixture'
         Declustering method:
 
-         - 'gaussian-mixture': use a 2D Gaussian Mixture classifier
+         - 'gaussian-mixture': use a Gaussian Mixture classifier
          - 'thinning': random thinning (after Zaliapin and Ben-Zion, 2020)
 
     d : scalar, optional, default 1.6
@@ -77,18 +77,28 @@ def decluster(
         idx = np.isnan(T)
         T[idx] = T[~idx].max()
         R[idx] = R[~idx].max()
+        eta = T + R
 
-        # Fit a mixture of two 2D Gaussian distributions
+        # Initial means
+        mu = eta.mean()
+        means_init = [[mu + 1.0], [mu - 1.0]]
+        # means_init = [[T.max(), R.max()], [T.min(), R.min()]]
+
+        # Fit a mixture of two Gaussian distributions
+        X = eta[:, np.newaxis]
+        # X = np.column_stack((T, R))
+
         gm = GaussianMixture(
             n_components=2,
-            means_init=[[T.max(), R.max()], [T.min(), R.min()]],
-        )
-        y_pred = gm.fit_predict(np.column_stack((T, R)))
+            means_init=means_init,
+        ).fit(X)
+        y_prob = gm.predict_proba(X)
 
         # Identify background events as those classified in class with largest mean nearest-neighbor
         # Given initial means, class 0 should be background events but better make sure
         sig0, sig1 = gm.means_.sum(axis=-1)
-        bg = np.flatnonzero(y_pred == int(sig0 < sig1))
+        idx = np.random.rand(len(X)) * (y_prob * [1.0, 1.0]).sum(axis=1) < y_prob[:, int(sig0 < sig1)]
+        bg = np.flatnonzero(idx)
 
     elif method == "thinning":
         if eta_0 is None:
