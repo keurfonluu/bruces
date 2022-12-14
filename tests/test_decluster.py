@@ -27,9 +27,21 @@ cat = helpers.comcat()
             {
                 "d": 1.6,
                 "w": 1.0,
+                "method": "gaussian-mixture",
+                "use_depth": True,
+                "seed": 42,
+            },
+            369,
+        ),
+        (
+            "nearest-neighbor",
+            {
+                "d": 1.6,
+                "w": 1.0,
+                "method": "thinning",
+                "use_depth": True,
                 "eta_0": -5.1,
                 "alpha_0": 2.0,
-                "use_depth": True,
                 "M": 16,
                 "seed": 42,
             },

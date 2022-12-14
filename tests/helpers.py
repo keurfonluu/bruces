@@ -1,4 +1,5 @@
 import pathlib
+import tempfile
 
 import pandas as pd
 
@@ -48,3 +49,23 @@ def comcat(use_utm=False):
         kwargs["longitudes"] = df["Longitude"].to_numpy()
 
     return bruces.Catalog(**kwargs)
+
+
+def tempdir(filename=""):
+    temp_dir = pathlib.Path(tempfile.mkdtemp())
+
+    return temp_dir / filename
+
+
+def write_read(filename, obj, writer, reader, writer_kws=None, reader_kws=None):
+    writer_kws = writer_kws if writer_kws else {}
+    reader_kws = reader_kws if reader_kws else {}
+
+    filepath = tempdir(filename)
+    if obj is not None:
+        writer(filepath, obj, **writer_kws)
+
+    else:
+        writer(filepath, **writer_kws)
+
+    return reader(filepath, **reader_kws)

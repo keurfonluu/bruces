@@ -7,7 +7,7 @@ import utm
 from scipy.optimize import curve_fit
 from scipy.stats import gaussian_kde
 
-from ._common import time_space_distances
+from ._common import time_space_distances_catalog
 from ._earthquake import Earthquake
 from .decluster import decluster
 from .utils import to_datetime, to_decimal_year
@@ -70,7 +70,8 @@ class Catalog:
                 eastings *= 1.0e-3
                 northings *= 1.0e-3
 
-            except utm.OutOfRangeError:
+            except utm.OutOfRangeError as e:
+                logging.warning(e)
                 eastings = np.full(nev, np.nan, dtype=np.float64)
                 northings = np.full(nev, np.nan, dtype=np.float64)
 
@@ -166,7 +167,7 @@ class Catalog:
             Declustering algorithm:
 
              - 'gardner-knopoff': Gardner-Knopoff's method (after Gardner and Knopoff, 1974)
-             - 'nearest-neighbor': nearest-neighbor algorithm (after Zaliapin and Ben-Zion, 2020)
+             - 'nearest-neighbor': nearest-neighbor algorithm (after Zaliapin and Ben-Zion, 2008)
              - 'reasenberg': Reasenberg's method (after Reasenberg, 1985)
 
         return_indices : bool, optional, default False
@@ -177,22 +178,28 @@ class Catalog:
         window : str {'default', 'gruenthal', 'uhrhammer'}, optional, default 'default'
             Only if ``algorithm = "gardner-knopoff"``. Distance and time windows:
 
-            - 'default': Gardner and Knopoff (1974)
-            - 'gruenthal': personnal communication (see van Stiphout et al., 2012)
-            - 'uhrhammer': Uhrhammer (1986)
+             - 'default': Gardner and Knopoff (1974)
+             - 'gruenthal': personnal communication (see van Stiphout et al., 2012)
+             - 'uhrhammer': Uhrhammer (1986)
+
+        method : str, optional, default 'gaussian-mixture'
+            Only if ``algorithm = "nearest-neighbor"``. Declustering method:
+
+             - 'gaussian-mixture': use a Gaussian Mixture classifier
+             - 'thinning': random thinning (after Zaliapin and Ben-Zion, 2020)
 
         d : scalar, optional, default 1.6
             Only if ``algorithm = "nearest-neighbor"``. Fractal dimension of epicenter/hypocenter.
         w : scalar, optional, default 1.0
             Only if ``algorithm = "nearest-neighbor"``. Magnitude weighting factor (usually b-value).
-        eta_0 : scalar or None, optional, default None
-            Only if ``algorithm = "nearest-neighbor"``. Initial cutoff threshold. If `None`, invoke :meth:`bruces.Catalog.fit_cutoff_threshold`.
-        alpha_0 : scalar, optional, default 1.5
-            Only if ``algorithm = "nearest-neighbor"``. Cluster threshold.
         use_depth : bool, optional, default False
-            Only if ``algorithm = "nearest-neighbor"``. If `True`, consider depth in interevent distance calculation.
+            Only if ``algorithm = "nearest-neighbor"`` and ``method = "thinning"`. If `True`, consider depth in interevent distance calculation.
+        eta_0 : scalar or None, optional, default None
+            Only if ``algorithm = "nearest-neighbor"`` and ``method = "thinning"`. Initial cutoff threshold. If `None`, invoke :meth:`bruces.Catalog.fit_cutoff_threshold`.
+        alpha_0 : scalar, optional, default 1.5
+            Only if ``algorithm = "nearest-neighbor"`` and ``method = "thinning"`. Cluster threshold.
         M : int, optional, default 16
-            Only if ``algorithm = "nearest-neighbor"``. Number of reshufflings.
+            Only if ``algorithm = "nearest-neighbor"`` and ``method = "thinning"`. Number of reshufflings.
         seed : int or None, optional, default None
             Only if ``algorithm = "nearest-neighbor"``. Seed for random number generator.
         rfact : int, optional, default 10
@@ -217,7 +224,7 @@ class Catalog:
         return decluster(self, algorithm, return_indices, **kwargs)
 
     def time_space_distances(
-        self, d=1.6, w=1.0, use_depth=False, returns_log=True, prune_nans=False
+        self, d=1.6, w=1.0, use_depth=False, return_logs=True, prune_nans=False
     ):
         """
         Get rescaled time and space distances for each earthquake in the catalog.
@@ -230,7 +237,7 @@ class Catalog:
             Magnitude weighting factor (usually b-value).
         use_depth : bool, optional, default False
             If `True`, consider depth in interevent distance calculation.
-        returns_log : bool, optional, default True
+        return_logs : bool, optional, default True
             If `True`, return distance as log10.
         prune_nans : bool, optional, default False
             If `True`, remove NaN values from output.
@@ -249,21 +256,14 @@ class Catalog:
         z = self.depths
         m = self.magnitudes
 
-        T, R = np.transpose(
-            [
-                time_space_distances(
-                    t, x, y, z, m, t[i], x[i], y[i], z[i], d, w, use_depth
-                )
-                for i in range(len(self))
-            ]
-        )
+        T, R = time_space_distances_catalog(t, x, y, z, m, d, w, use_depth)
 
         if prune_nans:
             idx = ~np.isnan(T)
             T = T[idx]
             R = R[idx]
 
-        if not returns_log:
+        if not return_logs:
             T = np.power(10.0, T)
             R = np.power(10.0, R)
 
@@ -293,7 +293,7 @@ class Catalog:
 
         """
         T, R = self.time_space_distances(
-            d, w, use_depth, returns_log=True, prune_nans=True
+            d, w, use_depth, return_logs=True, prune_nans=True
         )
 
         return self.__fit_cutoff_threshold(T, R)
@@ -336,16 +336,19 @@ class Catalog:
 
         try:
             params, _ = curve_fit(bimodal, xedges, hist, p0)
-            _, mu1, sig1, _, mu2, sig2 = params
+            A1, mu1, sig1, A2, mu2, sig2 = params
             sig1 = abs(sig1)
             sig2 = abs(sig2)
+
+            if mu1 < mu2:
+                A1, mu1, sig1, A2, mu2, sig2 = A2, mu2, sig2, A1, mu1, sig1
 
             # Check unimodality and estimate optimal eta_0
             if mu1 - sig1 < mu2 < mu1 + sig1 or mu2 - sig2 < mu1 < mu2 + sig2:
                 eta_0 = None
 
             else:
-                eta_0 = mu1 - 2.0 * sig1 if mu1 > mu2 else mu2 - 2.0 * sig2
+                eta_0 = mu1 - 2.0 * sig1
 
             success = True
 
@@ -468,7 +471,7 @@ class Catalog:
 
         # Calculate rescaled time and space distances
         T, R = self.time_space_distances(
-            d, w, use_depth, returns_log=True, prune_nans=True
+            d, w, use_depth, return_logs=True, prune_nans=True
         )
 
         # Fit cutoff threshold
@@ -603,6 +606,22 @@ class Catalog:
         t = np.array(tbins[:-1]) + 0.5 * np.diff(tbins)
 
         return out, t.tolist()
+
+    def write(self, filename, file_format=None, **kwargs):
+        """
+        Write catalog to CSV file.
+
+        Parameters
+        ----------
+        filename : str, pathlike or buffer
+            Output file name or buffer.
+        file_format : str ('csv') or None, optional, default None
+            Output file format.
+
+        """
+        from ._io import write
+
+        write(filename, self, file_format, **kwargs)
 
     @property
     def origin_times(self):

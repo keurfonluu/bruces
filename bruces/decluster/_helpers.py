@@ -23,7 +23,7 @@ def decluster(catalog, algorithm="nearest-neighbor", return_indices=False, **kwa
         Declustering algorithm:
 
          - 'gardner-knopoff': Gardner-Knopoff's method (after Gardner and Knopoff, 1974)
-         - 'nearest-neighbor': nearest-neighbor algorithm (after Zaliapin and Ben-Zion, 2020)
+         - 'nearest-neighbor': nearest-neighbor algorithm (after Zaliapin and Ben-Zion, 2008)
          - 'reasenberg': Reasenberg's method (after Reasenberg, 1985)
 
     return_indices : bool, optional, default False
@@ -38,18 +38,24 @@ def decluster(catalog, algorithm="nearest-neighbor", return_indices=False, **kwa
          - 'gruenthal': personnal communication (see van Stiphout et al., 2012)
          - 'uhrhammer': Uhrhammer (1986)
 
+    method : str, optional, default 'gaussian-mixture'
+        Only if ``algorithm = "nearest-neighbor"``. Declustering method:
+
+         - 'gaussian-mixture': use a Gaussian Mixture classifier
+         - 'thinning': random thinning (after Zaliapin and Ben-Zion, 2020)
+
     d : scalar, optional, default 1.6
         Only if ``algorithm = "nearest-neighbor"``. Fractal dimension of epicenter/hypocenter.
     w : scalar, optional, default 1.0
         Only if ``algorithm = "nearest-neighbor"``. Magnitude weighting factor (usually b-value).
-    eta_0 : scalar or None, optional, default None
-        Only if ``algorithm = "nearest-neighbor"``. Initial cutoff threshold. If `None`, invoke :meth:`bruces.Catalog.fit_cutoff_threshold`.
-    alpha_0 : scalar, optional, default 1.5
-        Only if ``algorithm = "nearest-neighbor"``. Cluster threshold.
     use_depth : bool, optional, default False
-        Only if ``algorithm = "nearest-neighbor"``. If `True`, consider depth in interevent distance calculation.
+        Only if ``algorithm = "nearest-neighbor"`` and ``method = "thinning"`. If `True`, consider depth in interevent distance calculation.
+    eta_0 : scalar or None, optional, default None
+        Only if ``algorithm = "nearest-neighbor"`` and ``method = "thinning"`. Initial cutoff threshold. If `None`, invoke :meth:`bruces.Catalog.fit_cutoff_threshold`.
+    alpha_0 : scalar, optional, default 1.5
+        Only if ``algorithm = "nearest-neighbor"`` and ``method = "thinning"`. Cluster threshold.
     M : int, optional, default 16
-        Only if ``algorithm = "nearest-neighbor"``. Number of reshufflings.
+        Only if ``algorithm = "nearest-neighbor"`` and ``method = "thinning"`. Number of reshufflings.
     seed : int or None, optional, default None
         Only if ``algorithm = "nearest-neighbor"``. Seed for random number generator.
     rfact : int, optional, default 10
