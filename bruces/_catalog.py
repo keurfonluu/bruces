@@ -193,13 +193,13 @@ class Catalog:
         w : scalar, optional, default 1.0
             Only if ``algorithm = "nearest-neighbor"``. Magnitude weighting factor (usually b-value).
         use_depth : bool, optional, default False
-            Only if ``algorithm = "nearest-neighbor"`` and ``method = "thinning"`. If `True`, consider depth in interevent distance calculation.
+            Only if ``algorithm = "nearest-neighbor"``. If `True`, consider depth in interevent distance calculation.
         eta_0 : scalar or None, optional, default None
-            Only if ``algorithm = "nearest-neighbor"`` and ``method = "thinning"`. Initial cutoff threshold. If `None`, invoke :meth:`bruces.Catalog.fit_cutoff_threshold`.
+            Only if ``algorithm = "nearest-neighbor"`` and ``method = "thinning"``. Initial cutoff threshold. If `None`, invoke :meth:`bruces.Catalog.fit_cutoff_threshold`.
         alpha_0 : scalar, optional, default 1.5
-            Only if ``algorithm = "nearest-neighbor"`` and ``method = "thinning"`. Cluster threshold.
+            Only if ``algorithm = "nearest-neighbor"`` and ``method = "thinning"``. Cluster threshold.
         M : int, optional, default 16
-            Only if ``algorithm = "nearest-neighbor"`` and ``method = "thinning"`. Number of reshufflings.
+            Only if ``algorithm = "nearest-neighbor"`` and ``method = "thinning"``. Number of reshufflings.
         seed : int or None, optional, default None
             Only if ``algorithm = "nearest-neighbor"``. Seed for random number generator.
         rfact : int, optional, default 10
